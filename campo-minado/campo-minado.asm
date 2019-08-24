@@ -67,12 +67,25 @@ LoadPalettesLoop:
 
 LoadSprites:
   LDX #$00              ; start at 0
-LoadSpritesLoop:
-  LDA sprites, x        ; load data from address (sprites +  x)
-  STA $0200, x          ; store into RAM address ($0200 + x)
-  INX                   ; X = X + 1
-  CPX #$20              ; Compare X to hex $20, decimal 32
-  BNE LoadSpritesLoop   ; Branch to LoadSpritesLoop if compare was Not Equal to zero
+; LoadSpritesLoop:
+  ; select tile
+  LDA #$10
+  STA $0201        ; tile number = 0
+  ; select attr
+  LDA #$00
+  STA $0202        ; tile number = 0
+  ; select position
+  LDA #$80
+  STA $0200        ; put sprite 0 in center ($80) of screen vert
+  LDA #$40
+  STA $0203        ; put sprite 0 in center ($80) of screen horiz
+
+
+  ; LDA sprites, x        ; load data from address (sprites +  x)
+  ; STA $0200, x          ; store into RAM address ($0200 + x)
+  ; INX                   ; X = X + 1
+  ; CPX #$20              ; Compare X to hex $20, decimal 32
+  ; BNE LoadSpritesLoop   ; Branch to LoadSpritesLoop if compare was Not Equal to zero
                         ; if compare was equal to 32, keep going down
               
               
@@ -136,19 +149,12 @@ ReadBDone:        ; handling this button is done
   .bank 1
   .org $E000
 palette:
-  .db $0F,$31,$32,$33,$34,$35,$36,$37,$38,$39,$3A,$3B,$3C,$3D,$3E,$0F
-  .db $0F,$1C,$15,$14,$31,$02,$38,$3C,$0F,$1C,$15,$14,$31,$02,$38,$3C
+  .db $06,$0F,$2A,$30,$30,$35,$36,$37,$38,$39,$3A,$3B,$3C,$3D,$3E,$0F
+  .db $0F,$2A,$2D,$30,$31,$02,$38,$3C,$0F,$1C,$15,$14,$31,$02,$38,$3C
 
 sprites:
      ;vert tile attr horiz
-  .db $78, $32, $00, $70   ;sprite 0
-  .db $78, $33, $00, $78   ;sprite 1
-  .db $78, $34, $00, $80   ;sprite 2
-  .db $78, $35, $00, $88   ;sprite 3
-  .db $80, $36, $00, $70   ;sprite 4
-  .db $80, $37, $00, $78   ;sprite 5
-  .db $80, $38, $00, $80   ;sprite 6
-  .db $80, $39, $00, $88   ;sprite 7
+  .db $80, $10, $00, $70   ;sprite 0
 
   .org $FFFA     ;first of the three vectors starts here
   .dw NMI        ;when an NMI happens (once per frame if enabled) the 
@@ -163,4 +169,4 @@ sprites:
   
   .bank 2
   .org $0000
-  .incbin "mario.chr"   ;includes 8KB graphics file from SMB1
+  .incbin "campo-minado.chr"   ;includes 8KB graphics file from SMB1
