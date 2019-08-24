@@ -67,18 +67,35 @@ LoadPalettesLoop:
 
 LoadSprites:
   LDX #$00              ; start at 0
+  LDY #$00
 ; LoadSpritesLoop:
+
+Label:
   ; select tile
   LDA #$10
-  STA $0201        ; tile number = 0
+  STA $0201, x        ; tile number = 0
   ; select attr
   LDA #$00
-  STA $0202        ; tile number = 0
+  STA $0202, x        ; tile number = 0
   ; select position
   LDA #$80
-  STA $0200        ; put sprite 0 in center ($80) of screen vert
-  LDA #$40
-  STA $0203        ; put sprite 0 in center ($80) of screen horiz
+  STA $0200, x        ; put sprite 0 in center ($80) of screen vert
+  
+  LDA #$80, x
+  STA $0203, x        ; put sprite 0 in center ($80) of screen horiz
+  
+  TYA
+  ADC #$8
+  TAY
+  TXA
+  ADC #$4
+  TAX
+
+  CPX #$10
+  BNE Label
+
+
+
 
 
   ; LDA sprites, x        ; load data from address (sprites +  x)
