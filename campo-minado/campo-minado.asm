@@ -81,7 +81,7 @@ Label:
   LDA #$80
   STA $0200, x        ; put sprite 0 in center ($80) of screen vert
   
-  LDA #$80, x
+  LDA #$80
   STA $0203, x        ; put sprite 0 in center ($80) of screen horiz
   
   TYA
