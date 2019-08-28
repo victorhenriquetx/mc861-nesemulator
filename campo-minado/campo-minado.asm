@@ -6,7 +6,16 @@
 
 ;;;;;;;;;;;;;;;
 
-    
+  .rsset $0000       ; put pointers in zero page
+p_tiles_Lo  .rs 1   ; pointer variables are declared in RAM
+p_tiles_Hi  .rs 1   ; low byte first, high byte immediately after
+
+p_array_Lo  .rs 1   ; pointer variables are declared in RAM
+p_array_Hi  .rs 1   ; low byte first, high byte immediately after
+
+
+
+;;;;;;;;;;;;;;;
   .bank 0
   .org $C000 
 RESET:
@@ -68,31 +77,104 @@ LoadPalettesLoop:
 LoadSprites:
   LDX #$00              ; start at 0
   LDY #$00
+  
+  LDA #$00
+  STA $0050 ; i
+  STA $0051 ; j
+
+  LDA #$40
+  STA $0052 ; horizontal
+  STA $0053 ; vertical
+
+  STA $0054 ; temp
+
+  LDA #$00
+  STA p_tiles_Lo
+  LDA #$02
+  STA p_tiles_Hi
+
+  LDA #$00
+  STA p_array_Lo
+  LDA #$01
+  STA p_array_Hi
+
+  ; escrevendo dados
+  LDA #$01
+  STA $0100
+
+  LDA #$03
+  STA $0101
+
+  LDA #$05
+  STA $0102
+
+
+
 ; LoadSpritesLoop:
 
-Label:
+
+for_i:
+  LDA #$40
+  STA $0052
+for_j:
+
+  ; select position
+  LDA $0053
+  STA $0200, x        ; put sprite 0 in center ($40) of screen vert
+  INX
+
   ; select tile
+  LDA [p_array_Lo], y
+  STA $0054
+  INY
+  AND #%00000001
+  BEQ hidden
+
+  LDA $0054
+  LSR A
+  JMP select_tile
+
+hidden:
   LDA #$10
-  STA $0201, x        ; tile number = 0
+
+select_tile:
+  STA $0200, x        ; tile number = 0
+  INX
+  
   ; select attr
   LDA #$00
-  STA $0202, x        ; tile number = 0
+  STA $0200, x        ; tile number = 0
+  INX
+  
   ; select position
-  LDA #$80
-  STA $0200, x        ; put sprite 0 in center ($80) of screen vert
-  
-  LDA #$80, x
-  STA $0203, x        ; put sprite 0 in center ($80) of screen horiz
-  
-  TYA
+  CLC
+  LDA $0052
   ADC #$8
-  TAY
-  TXA
-  ADC #$4
-  TAX
+  STA $0200, x        ; put sprite 0 in center ($80) of screen horiz
+  STA $0052
+  INX
+  
+  
+  
+  INC $0051
+  LDA $0051
+  CMP #$8
+  BNE for_j
 
-  CPX #$10
-  BNE Label
+  LDA #$00
+  STA $0051
+  
+  CLC
+  LDA $0053
+  ADC #$08
+  STA $0053
+  
+  CLC
+  INC $0050
+  LDA $0050
+  CMP #$8
+  BNE for_i
+
 
 
 
