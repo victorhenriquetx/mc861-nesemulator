@@ -104,7 +104,7 @@ NMI:
   STA $2005
   STA $2005
 
-  JSR ReadController1  ;;get the current button data for player 1
+  JSR Check_movement  ;;get the current button data for player 1
 
 
 
@@ -258,25 +258,38 @@ ReadController1Loop:
 
 
 Check_movement:
+  JSR ReadController1
 right:
   LDA buttons1
-  AND #%00000001
+  AND #%00000001            ; not selected
   BEQ left
 
-  LDX #$01
-  STX button_pressed
-
+  ; deselect tile
   CLC
+  ; get pointer
   LDA #$01
   STA p_array_Hi
-
   LDA tile_selected
   STA p_array_Lo
 
   LDX tile_selected
+
   LDY #$00
   LDA [p_array_Lo], y
-  AND #%10111111
+  AND #%00000111            ; invalid movement
+  BEQ end_movement
+
+  LDY #$00
+  LDA [p_array_Lo], y
+  AND #%10111111            ; zero -> bit 6
+  STA $0100, x
+
+  ;select tile
+  INX
+  STX p_array_Lo
+  LDY #$00
+  LDA [p_array_Lo], y
+  ORA $%01000000            ; one -> bit 6
   STA $0100, x
 
   ;;;;;;;;;;;; PAREI AQUIIII - HAYASHIDA *************************************************
@@ -299,8 +312,7 @@ down:
 
 up:
 
-
-end_movement
+end_movement:
   RTS
 
 ;;;;;;;;;;;;;;  
@@ -330,4 +342,4 @@ sprites:
   
   .bank 2
   .org $0000
-  .incbin "campo-minado.chr"   ;includes 8KB graphics file from SMB1
+  .incbin "campo-minado2.chr"   ;includes 8KB graphics file from SMB1
