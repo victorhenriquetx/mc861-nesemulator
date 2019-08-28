@@ -57,7 +57,7 @@ vblankwait2:      ; Second wait for vblank, PPU is ready after this
 
 
 LoadPalettes:
-  LDA $2002             ; read PPU status to reset the high/low latch
+  LDA $2000             ; read PPU status to reset the high/low latch
   LDA #$3F
   STA $2006             ; write the high byte of $3F00 address
   LDA #$00
@@ -201,14 +201,14 @@ for_j:
   JMP select_tile
 
 hidden:
-  LDA #$10
+  LDA #$20
 
 select_tile:
   STA $0200, x        ; tile number = 0
   INX
   
   ; select attr
-  LDA #$00
+  LDA #$0
   STA $0200, x        ; tile number = 0
   INX
   
@@ -322,8 +322,8 @@ end_movement:
   .bank 1
   .org $E000
 palette:
-  .db $06,$0F,$2A,$30,$30,$35,$36,$37,$38,$39,$3A,$3B,$3C,$3D,$3E,$0F
-  .db $0F,$2A,$2D,$30,$31,$02,$38,$3C,$0F,$1C,$15,$14,$31,$02,$38,$3C
+  .db $0F,$01,$20,$10,$0F,$19,$20,$10,$0F,$06,$20,$10,$3C,$3D,$3E,$0F
+  .db $0F,$01,$20,$10,$0F,$19,$20,$10,$0F,$06,$20,$10,$3C,$3D,$3E,$0F
 
 sprites:
      ;vert tile attr horiz
