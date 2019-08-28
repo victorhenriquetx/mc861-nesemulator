@@ -13,7 +13,10 @@ p_tiles_Hi  .rs 1   ; low byte first, high byte immediately after
 p_array_Lo  .rs 1   ; pointer variables are declared in RAM
 p_array_Hi  .rs 1   ; low byte first, high byte immediately after
 
+buttons1   .rs 1  ; player 1 gamepad buttons, one bit per button
 
+tile_selected .rs 1
+button_pressed .rs 1
 
 ;;;;;;;;;;;;;;;
   .bank 0
@@ -73,8 +76,73 @@ LoadPalettesLoop:
                         ; if compare was equal to 32, keep going down
 
 
+  LDA #%10000000   ; enable NMI, sprites from Pattern Table 1
+  STA $2000
 
-LoadSprites:
+  LDA #%00010000   ; enable sprites
+  STA $2001
+
+Forever:
+  JMP Forever     ;jump back to Forever, infinite loop
+  
+ 
+
+NMI:
+  JSR print_field
+
+  LDA #$00
+  STA $2003       ; set the low byte (00) of the RAM address
+  LDA #$02
+  STA $4014       ; set the high byte (02) of the RAM address, start the transfer
+
+
+  LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
+  STA $2000
+  LDA #%00011110   ; enable sprites, enable background, no clipping on left side
+  STA $2001
+  LDA #$00        ;;tell the ppu there is no background scrolling
+  STA $2005
+  STA $2005
+
+  JSR ReadController1  ;;get the current button data for player 1
+
+
+
+; LatchController:
+;   LDA #$01
+;   STA $4016
+;   LDA #$00
+;   STA $4016       ; tell both the controllers to latch buttons
+
+; ReadA: 
+;   LDA $4016       ; player 1 - A
+;   AND #%00000001  ; only look at bit 0
+;   BEQ ReadADone   ; branch to ReadADone if button is NOT pressed (0)
+;                   ; add instructions here to do something when button IS pressed (1)
+;   LDA $0203       ; load sprite X position
+;   CLC             ; make sure the carry flag is clear
+;   ADC #$01        ; A = A + 1
+;   STA $0203       ; save sprite X position
+; ReadADone:        ; handling this button is done
+  
+
+; ReadB: 
+;   LDA $4016       ; player 1 - B
+;   AND #%00000001  ; only look at bit 0
+;   BEQ ReadBDone   ; branch to ReadBDone if button is NOT pressed (0)
+;                   ; add instructions here to do something when button IS pressed (1)
+;   LDA $0203       ; load sprite X position
+;   SEC             ; make sure carry flag is set
+;   SBC #$01        ; A = A - 1
+;   STA $0203       ; save sprite X position
+; ReadBDone:        ; handling this button is done
+
+
+  
+  RTI             ; return from interrupt
+ 
+
+print_field:
   LDX #$00              ; start at 0
   LDY #$00
   
@@ -99,19 +167,17 @@ LoadSprites:
   STA p_array_Hi
 
   ; escrevendo dados
-  LDA #$01
+  LDA #$40
   STA $0100
 
-  LDA #$03
+  LDA #$02
   STA $0101
 
-  LDA #$05
+  LDA #$04
   STA $0102
 
-
-
-; LoadSpritesLoop:
-
+  LDA #$00
+  STA tile_selected
 
 for_i:
   LDA #$40
@@ -123,15 +189,15 @@ for_j:
   STA $0200, x        ; put sprite 0 in center ($40) of screen vert
   INX
 
-  ; select tile
+  ; select tile  - Falta colocar condição de tile selected
   LDA [p_array_Lo], y
   STA $0054
   INY
-  AND #%00000001
+  AND #%10000000
   BEQ hidden
 
   LDA $0054
-  LSR A
+  AND #%00111111
   JMP select_tile
 
 hidden:
@@ -174,73 +240,69 @@ select_tile:
   LDA $0050
   CMP #$8
   BNE for_i
+  RTS
 
-
-
-
-
-
-  ; LDA sprites, x        ; load data from address (sprites +  x)
-  ; STA $0200, x          ; store into RAM address ($0200 + x)
-  ; INX                   ; X = X + 1
-  ; CPX #$20              ; Compare X to hex $20, decimal 32
-  ; BNE LoadSpritesLoop   ; Branch to LoadSpritesLoop if compare was Not Equal to zero
-                        ; if compare was equal to 32, keep going down
-              
-              
-
-  LDA #%10000000   ; enable NMI, sprites from Pattern Table 1
-  STA $2000
-
-  LDA #%00010000   ; enable sprites
-  STA $2001
-
-Forever:
-  JMP Forever     ;jump back to Forever, infinite loop
-  
- 
-
-NMI:
-  LDA #$00
-  STA $2003       ; set the low byte (00) of the RAM address
-  LDA #$02
-  STA $4014       ; set the high byte (02) of the RAM address, start the transfer
-
-
-LatchController:
+ReadController1:
   LDA #$01
   STA $4016
   LDA #$00
-  STA $4016       ; tell both the controllers to latch buttons
+  STA $4016
+  LDX #$08
+ReadController1Loop:
+  LDA $4016
+  LSR A            ; bit0 -> Carry
+  ROL buttons1     ; bit0 <- Carry
+  DEX
+  BNE ReadController1Loop
+  RTS
 
 
-ReadA: 
-  LDA $4016       ; player 1 - A
-  AND #%00000001  ; only look at bit 0
-  BEQ ReadADone   ; branch to ReadADone if button is NOT pressed (0)
-                  ; add instructions here to do something when button IS pressed (1)
-  LDA $0203       ; load sprite X position
-  CLC             ; make sure the carry flag is clear
-  ADC #$01        ; A = A + 1
-  STA $0203       ; save sprite X position
-ReadADone:        ; handling this button is done
-  
+Check_movement:
+right:
+  LDA buttons1
+  AND #%00000001
+  BEQ left
 
-ReadB: 
-  LDA $4016       ; player 1 - B
-  AND #%00000001  ; only look at bit 0
-  BEQ ReadBDone   ; branch to ReadBDone if button is NOT pressed (0)
-                  ; add instructions here to do something when button IS pressed (1)
-  LDA $0203       ; load sprite X position
-  SEC             ; make sure carry flag is set
-  SBC #$01        ; A = A - 1
-  STA $0203       ; save sprite X position
-ReadBDone:        ; handling this button is done
+  LDX #$01
+  STX button_pressed
+
+  CLC
+  LDA #$01
+  STA p_array_Hi
+
+  LDA tile_selected
+  STA p_array_Lo
+
+  LDX tile_selected
+  LDY #$00
+  LDA [p_array_Lo], y
+  AND #%10111111
+  STA $0100, x
+
+  ;;;;;;;;;;;; PAREI AQUIIII - HAYASHIDA *************************************************
+  ;;;;;;;;;;;;
+  ;;;;;;;;;;;; PAREI AQUIIII - HAYASHIDA *************************************************
+  ;;;;;;;;;;;;
+  ;;;;;;;;;;;; PAREI AQUIIII - HAYASHIDA *************************************************
+  ;;;;;;;;;;;;
+  ;;;;;;;;;;;; PAREI AQUIIII - HAYASHIDA *************************************************
+  ;;;;;;;;;;;;
+  ;;;;;;;;;;;; PAREI AQUIIII - HAYASHIDA *************************************************
+  ;;;;;;;;;;;;
+  ;;;;;;;;;;;; PAREI AQUIIII - HAYASHIDA *************************************************
+  ;;;;;;;;;;;;
+
+  JMP end_movement
+left:
+
+down:
+
+up:
 
 
-  
-  RTI             ; return from interrupt
- 
+end_movement
+  RTS
+
 ;;;;;;;;;;;;;;  
   
   
