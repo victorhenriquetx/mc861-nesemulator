@@ -7,19 +7,8 @@
 ;;;;;;;;;;;;;;;
 
   .rsset $0000       ; put pointers in zero page
-p_tiles_Lo  .rs 1   ; pointer variables are declared in RAM
-p_tiles_Hi  .rs 1   ; low byte first, high byte immediately after
 
-p_array_Lo  .rs 1   ; pointer variables are declared in RAM
-p_array_Hi  .rs 1   ; low byte first, high byte immediately after
-
-buttons1   .rs 1  ; player 1 gamepad buttons, one bit per button
-
-tile_selected .rs 1
-button_pressed .rs 1
-
-tile_value .rs 1
-move      .rs 1
+selected_tile .rs 1
 
 ;;;;;;;;;;;;;;;
   .bank 0
@@ -85,21 +74,9 @@ LoadPalettesLoop:
   LDA #%00010000   ; enable sprites
   STA $2001
 
-  LDA #$01
-  STA tile_selected
-
-  LDA #$01
-  STA move
-
-  ; escrevendo dados
-  LDA #$00
-  STA $0100
-
-  LDA #%01000010
-  STA $0101
-
-  LDA #$04
-  STA $0102
+  ; initial application state
+  LDA #$01              ; selects initial tile (1,1)
+  STA selected_tile     ; #$05 to select (2,1) and #$21 to select (1,2)
 
   JSR printField
 
@@ -123,21 +100,82 @@ NMI:
   STA $2005
   STA $2005
 
-  JSR ReadController1
-  JSR on_click
-
-  LDA move
-  CMP #$06
-  BNE button_release
-  JSR check_movement  ;;get the current button data for player 1
-  JMP button_done
-
-button_release:
-  JSR check_release
-  
-button_done:
+  JSR readController
   JSR printField
   RTI             ; return from interrupt
+
+readController:
+  LDA #$01
+  STA $4016
+  LDA #$00
+  STA $4016       ; tell both the controllers to latch buttons
+
+ReadA: 
+  LDA $4016       ; player 1 - A
+  AND #%00000001  ; only look at bit 0
+  BEQ ReadADone   ; branch to ReadADone if button is NOT pressed (0)
+                  ; add instructions here to do something when A is pressed (1)
+ReadADone:        ; handling this button is done
+
+ReadB: 
+  LDA $4016       ; player 1 - B
+  AND #%00000001  ; only look at bit 0
+  BEQ ReadBDone   ; branch to ReadBDone if button is NOT pressed (0)
+                  ; add instructions here to do something when B is pressed (1)
+ReadBDone:        ; handling this button is done
+
+ReadSelect: 
+  LDA $4016           ; player 1 - Select
+  AND #%00000001      ; only look at bit 0
+  BEQ ReadSelectDone  ; branch to ReadSelectDone if button is NOT pressed (0)
+                      ; add instructions here to do something when SELECT is pressed (1)
+ReadSelectDone:       ; handling this button is done
+
+ReadStart: 
+  LDA $4016           ; player 1 - Start
+  AND #%00000001      ; only look at bit 0
+  BEQ ReadStartDone   ; branch to ReadStartDone if button is NOT pressed (0)
+                      ; add instructions here to do something when START is pressed (1)
+ReadStartDone:        ; handling this button is done
+
+ReadUp: 
+  LDA $4016       ; player 1 - Up
+  AND #%00000001  ; only look at bit 0
+  BEQ ReadUpDone  ; branch to ReadUpDone if button is NOT pressed (0)
+                  ; add instructions here to do something when UP is pressed (1)
+ReadUpDone:       ; handling this button is done
+
+ReadDown: 
+  LDA $4016           ; player 1 - Down
+  AND #%00000001      ; only look at bit 0
+  BEQ ReadDownDone    ; branch to ReadDownDone if button is NOT pressed (0)
+                      ; add instructions here to do something when DOWN is pressed (1)
+ReadDownDone:         ; handling this button is done
+
+ReadLeft: 
+  LDA $4016           ; player 1 - Left
+  AND #%00000001      ; only look at bit 0
+  BEQ ReadLeftDone    ; branch to ReadLeftDone if button is NOT pressed (0)
+                      ; add instructions here to do something when LEFT is pressed (1)
+  ;LDA $0203           ; load sprite X position
+  ;SEC                 ; make sure carry flag is set
+  ;SBC #$01            ; A = A - 1
+  ;STA $0203           ; save sprite X position
+ReadLeftDone:         ; handling this button is done
+
+ReadRight: 
+  LDA $4016           ; player 1 - Right
+  AND #%00000001      ; only look at bit 0
+  BEQ ReadRightDone   ; branch to ReadRightDone if button is NOT pressed (0)
+                      ; add instructions here to do something when RIGHT is pressed (1)
+  ;LDA $0203           ; load sprite X position
+  ;CLC                 ; make sure the carry flag is clear
+  ;ADC #$01            ; A = A + 1
+  ;STA $0203           ; save sprite X position
+ReadRightDone:        ; handling this button is done
+  
+  RTI             ; return from interrupt
+
 
 printField:
   LDX #$00                ; "index/iterator" for sprites
@@ -181,9 +219,8 @@ pickSprite:
 
 hiddenSprite:
   LDY #$00                  ; resets hex-sprite convertion counter
-  LDA sprites, x
-  AND #%01000000            ; checks if field is selected
-  BNE hiddenSpriteSelected
+  CPX selected_tile         ; checks if field is selected
+  BEQ hiddenSpriteSelected
   LDA #$08
   RTS
 hiddenSpriteSelected:
@@ -192,9 +229,8 @@ hiddenSpriteSelected:
 
 emptySprite:
   LDY #$00                  ; resets hex-sprite convertion counter
-  LDA sprites, x
-  AND #%01000000            ; checks if field is selected
-  BNE emptySpriteSelected
+  CPX selected_tile         ; checks if field is selected
+  BEQ emptySpriteSelected
   LDA #$0B
   RTS
 emptySpriteSelected:
@@ -203,9 +239,8 @@ emptySpriteSelected:
 
 oneSprite:
   LDY #$00                  ; resets hex-sprite convertion counter
-  LDA sprites, x
-  AND #%01000000            ; checks if field is selected
-  BNE oneSpriteSelected
+  CPX selected_tile         ; checks if field is selected
+  BEQ oneSpriteSelected
   LDA #$00
   RTS
 oneSpriteSelected:
@@ -214,9 +249,8 @@ oneSpriteSelected:
 
 twoSprite:
   LDY #$00                  ; resets hex-sprite convertion counter
-  LDA sprites, x
-  AND #%01000000            ; checks if field is selected
-  BNE twoSpriteSelected
+  CPX selected_tile         ; checks if field is selected
+  BEQ twoSpriteSelected
   LDA #$01
   RTS
 twoSpriteSelected:
@@ -225,9 +259,8 @@ twoSpriteSelected:
 
 threeSprite:
   LDY #$00                  ; resets hex-sprite convertion counter
-  LDA sprites, x
-  AND #%01000000            ; checks if field is selected
-  BNE threeSpriteSelected
+  CPX selected_tile         ; checks if field is selected
+  BEQ threeSpriteSelected
   LDA #$02
   RTS
 threeSpriteSelected:
@@ -236,9 +269,8 @@ threeSpriteSelected:
 
 fourSprite:
   LDY #$00                  ; resets hex-sprite convertion counter
-  LDA sprites, x
-  AND #%01000000            ; checks if field is selected
-  BNE fourSpriteSelected
+  CPX selected_tile         ; checks if field is selected
+  BEQ fourSpriteSelected
   LDA #$03
   RTS
 fourSpriteSelected:
@@ -247,9 +279,8 @@ fourSpriteSelected:
 
 flagSprite:
   LDY #$00                  ; resets hex-sprite convertion counter
-  LDA sprites, x
-  AND #%01000000            ; checks if field is selected
-  BNE flagSpriteSelected
+  CPX selected_tile         ; checks if field is selected
+  BEQ flagSpriteSelected
   LDA #$09
   RTS
 flagSpriteSelected:
@@ -261,173 +292,6 @@ bombSprite:
   LDA #$0A
   RTS
 
-ReadController1:
-  LDA #$01
-  STA $4016
-  LDA #$00
-  STA $4016
-  LDX #$08
-ReadController1Loop:
-  LDA $4016
-  LSR A            ; bit0 -> Carry
-  ROL buttons1     ; bit0 <- Carry
-  DEX
-  BNE ReadController1Loop
-  RTS
-
-on_click:
-
-check_release:  
-  LDA buttons1
-  AND #%00001111            ; not selected
-  BEQ end_release
-  INC move
-end_release:
-  RTS
-
-check_movement:
-right:
-  LDA buttons1
-  AND #%00000001            ; not selected
-  BEQ left
-
-  ; deselect tile
-  LDA #$01
-  STA p_array_Hi
-  LDA tile_selected
-  STA p_array_Lo
-
-  AND #%00000111            ; invalid movement
-  EOR #%00000111
-  BEQ left
-
-  LDX tile_selected
-  LDY #$00
-  LDA [p_array_Lo], y
-  AND #%10111111            ; zero -> bit 6
-  STA $0100, x
-
-  INC tile_selected
-  LDX tile_selected
-  STX p_array_Lo
-
-  LDY #$00
-  LDA [p_array_Lo], y
-  ORA #%01000000            ; one -> bit 6
-  STA $0100, x
-
-  LDA #$00
-  STA move
-
-  JMP left
-left:
-  LDA buttons1
-  AND #%00000010            ; not selected
-  BEQ down
-
-  ; deselect tile
-  LDA #$01
-  STA p_array_Hi
-  LDA tile_selected
-  STA p_array_Lo
-
-  AND #%00000111            ; invalid movement
-  BEQ down
-
-  LDX tile_selected
-  LDY #$00
-  LDA [p_array_Lo], y
-  AND #%10111111            ; zero -> bit 6
-  STA $0100, x
-
-  DEC tile_selected
-  LDX tile_selected
-  STX p_array_Lo
-
-  LDY #$00
-  LDA [p_array_Lo], y
-  ORA #%01000000            ; one -> bit 6
-  STA $0100, x
-
-  LDA #$00
-  STA move
-
-  JMP down
-down:
-  LDA buttons1
-  AND #%00000100            ; not selected
-  BEQ up
-
-  ; deselect tile
-  LDA #$01
-  STA p_array_Hi
-  LDA tile_selected
-  STA p_array_Lo
-
-  AND #%11111000            ; invalid movement
-  EOR #%00111000
-  BEQ up
-
-  LDX tile_selected
-  LDY #$00
-  LDA [p_array_Lo], y
-  AND #%10111111            ; zero -> bit 6
-  STA $0100, x
-
-  CLC
-  LDA tile_selected
-  ADC #$08
-  TAX
-  STX tile_selected
-  STX p_array_Lo
-
-  LDY #$00
-  LDA [p_array_Lo], y
-  ORA #%01000000            ; one -> bit 6
-  STA $0100, x
-
-  LDA #$00
-  STA move
-
-  JMP up
-up:
-  LDA buttons1
-  AND #%00001000            ; not selected
-  BEQ end_movement
-
-  ; deselect tile
-  LDA #$01
-  STA p_array_Hi
-  LDA tile_selected
-  STA p_array_Lo
-
-  AND #%11111000            ; invalid movement
-  BEQ end_movement
-
-  LDX tile_selected
-  LDY #$00
-  LDA [p_array_Lo], y
-  AND #%10111111            ; zero -> bit 6
-  STA $0100, x
-
-  CLC
-  LDA tile_selected
-  SBC #$07
-  TAX
-  STX tile_selected
-  STX p_array_Lo
-
-  LDY #$00
-  LDA [p_array_Lo], y
-  ORA #%01000000            ; one -> bit 6
-  STA $0100, x
-
-  LDA #$00
-  STA move
-
-  JMP end_movement
-end_movement:
-  RTS
 
 ;;;;;;;;;;;;;;
 
