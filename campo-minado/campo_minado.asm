@@ -18,6 +18,10 @@ buttons1   .rs 1  ; player 1 gamepad buttons, one bit per button
 tile_selected .rs 1
 button_pressed .rs 1
 
+tile_value .rs 1
+move      .rs 1
+key       .rs 1
+
 ;;;;;;;;;;;;;;;
   .bank 0
   .org $C000 
@@ -82,13 +86,32 @@ LoadPalettesLoop:
   LDA #%00010000   ; enable sprites
   STA $2001
 
+  LDA #$01
+  STA tile_selected
+
+  LDA #$01
+  STA move
+
+    ; escrevendo dados
+  LDA #$00
+  STA $0100
+
+  LDA #%01000010
+  STA $0101
+
+  LDA #$04
+  STA $0102
+  
+
+  
+  JSR print_field
 Forever:
   JMP Forever     ;jump back to Forever, infinite loop
   
  
 
 NMI:
-  JSR print_field
+  
 
   LDA #$00
   STA $2003       ; set the low byte (00) of the RAM address
@@ -104,43 +127,22 @@ NMI:
   STA $2005
   STA $2005
 
+  JSR ReadController1
+
+  LDA move
+  CMP #$05
+  BNE button_release
   JSR Check_movement  ;;get the current button data for player 1
+  JMP button_done
 
-
-
-; LatchController:
-;   LDA #$01
-;   STA $4016
-;   LDA #$00
-;   STA $4016       ; tell both the controllers to latch buttons
-
-; ReadA: 
-;   LDA $4016       ; player 1 - A
-;   AND #%00000001  ; only look at bit 0
-;   BEQ ReadADone   ; branch to ReadADone if button is NOT pressed (0)
-;                   ; add instructions here to do something when button IS pressed (1)
-;   LDA $0203       ; load sprite X position
-;   CLC             ; make sure the carry flag is clear
-;   ADC #$01        ; A = A + 1
-;   STA $0203       ; save sprite X position
-; ReadADone:        ; handling this button is done
+button_release:
+  JSR Check_release
   
+button_done:
+  JSR print_field
 
-; ReadB: 
-;   LDA $4016       ; player 1 - B
-;   AND #%00000001  ; only look at bit 0
-;   BEQ ReadBDone   ; branch to ReadBDone if button is NOT pressed (0)
-;                   ; add instructions here to do something when button IS pressed (1)
-;   LDA $0203       ; load sprite X position
-;   SEC             ; make sure carry flag is set
-;   SBC #$01        ; A = A - 1
-;   STA $0203       ; save sprite X position
-; ReadBDone:        ; handling this button is done
-
-
-  
   RTI             ; return from interrupt
- 
+
 
 print_field:
   LDX #$00              ; start at 0
@@ -154,8 +156,6 @@ print_field:
   STA $0052 ; horizontal
   STA $0053 ; vertical
 
-  STA $0054 ; temp
-
   LDA #$00
   STA p_tiles_Lo
   LDA #$02
@@ -165,19 +165,6 @@ print_field:
   STA p_array_Lo
   LDA #$01
   STA p_array_Hi
-
-  ; escrevendo dados
-  LDA #$40
-  STA $0100
-
-  LDA #$02
-  STA $0101
-
-  LDA #$04
-  STA $0102
-
-  LDA #$00
-  STA tile_selected
 
 for_i:
   LDA #$40
@@ -191,17 +178,29 @@ for_j:
 
   ; select tile  - Falta colocar condição de tile selected
   LDA [p_array_Lo], y
-  STA $0054
   INY
+  STA tile_value
+  AND #%01000000
+  BEQ is_not_selected
+
+  LDA tile_value
+  AND #%10001111        ; clean selected bit
+  ORA #%00010000        ; insert boarder
+  STA tile_value
+
+is_not_selected:
   AND #%10000000
   BEQ hidden
 
-  LDA $0054
-  AND #%00111111
+  LDA tile_value
+  AND #%00011111
   JMP select_tile
 
 hidden:
-  LDA #$20
+  LDA tile_value
+  AND #%00010000
+  ORA #%00001000
+
 
 select_tile:
   STA $0200, x        ; tile number = 0
@@ -219,8 +218,6 @@ select_tile:
   STA $0200, x        ; put sprite 0 in center ($80) of screen horiz
   STA $0052
   INX
-  
-  
   
   INC $0051
   LDA $0051
@@ -257,60 +254,98 @@ ReadController1Loop:
   RTS
 
 
+Check_release:  
+  LDA buttons1
+  AND #%00001111            ; not selected
+  BEQ end_release
+  INC move
+end_release:
+  RTS
+
 Check_movement:
-  JSR ReadController1
+  
 right:
   LDA buttons1
   AND #%00000001            ; not selected
   BEQ left
 
   ; deselect tile
-  CLC
-  ; get pointer
   LDA #$01
   STA p_array_Hi
   LDA tile_selected
   STA p_array_Lo
 
-  LDX tile_selected
-
-  LDY #$00
-  LDA [p_array_Lo], y
+  LDA tile_selected
   AND #%00000111            ; invalid movement
+  EOR #%00000111
   BEQ end_movement
 
+  LDX tile_selected
   LDY #$00
   LDA [p_array_Lo], y
   AND #%10111111            ; zero -> bit 6
   STA $0100, x
 
-  ;select tile
-  INX
-  STX p_array_Lo
+  INC tile_selected
+  LDA #$01
+  STA p_array_Hi
+  LDA tile_selected
+  STA p_array_Lo
+
+  
+  LDX p_array_Lo
   LDY #$00
   LDA [p_array_Lo], y
-  ORA $%01000000            ; one -> bit 6
+  ORA #%01000000            ; one -> bit 6
   STA $0100, x
 
-  ;;;;;;;;;;;; PAREI AQUIIII - HAYASHIDA *************************************************
-  ;;;;;;;;;;;;
-  ;;;;;;;;;;;; PAREI AQUIIII - HAYASHIDA *************************************************
-  ;;;;;;;;;;;;
-  ;;;;;;;;;;;; PAREI AQUIIII - HAYASHIDA *************************************************
-  ;;;;;;;;;;;;
-  ;;;;;;;;;;;; PAREI AQUIIII - HAYASHIDA *************************************************
-  ;;;;;;;;;;;;
-  ;;;;;;;;;;;; PAREI AQUIIII - HAYASHIDA *************************************************
-  ;;;;;;;;;;;;
-  ;;;;;;;;;;;; PAREI AQUIIII - HAYASHIDA *************************************************
-  ;;;;;;;;;;;;
+  LDA #$00
+  STA move
+  LDA #$01
+  STA key
 
   JMP end_movement
 left:
+  LDA buttons1
+  AND #%00000010            ; not selected
+  BEQ down
 
+  ; deselect tile
+  LDA #$01
+  STA p_array_Hi
+  LDA tile_selected
+  STA p_array_Lo
+
+  LDA tile_selected
+  AND #%00000111            ; invalid movement
+  BEQ end_movement
+
+  LDX tile_selected
+  LDY #$00
+  LDA [p_array_Lo], y
+  AND #%10111111            ; zero -> bit 6
+  STA $0100, x
+
+  DEC tile_selected
+  LDA #$01
+  STA p_array_Hi
+  LDA tile_selected
+  STA p_array_Lo
+
+  
+  LDX p_array_Lo
+  LDY #$00
+  LDA [p_array_Lo], y
+  ORA #%01000000            ; one -> bit 6
+  STA $0100, x
+
+  LDA #$00
+  STA move
+  LDA #$02
+  STA key
+
+  JMP end_movement
 down:
-
-up:
 
 end_movement:
   RTS
