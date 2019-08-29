@@ -53,7 +53,7 @@ clrmem:
   STA $0300, x
   INX
   BNE clrmem
-   
+
 vblankwait2:      ; Second wait for vblank, PPU is ready after this
   BIT $2002
   BPL vblankwait2
@@ -91,7 +91,7 @@ LoadPalettesLoop:
   LDA #$01
   STA move
 
-    ; escrevendo dados
+  ; escrevendo dados
   LDA #$00
   STA $0100
 
@@ -100,17 +100,15 @@ LoadPalettesLoop:
 
   LDA #$04
   STA $0102
-  
 
-  
-  JSR print_field
+  JSR printField
+
 Forever:
   JMP Forever     ;jump back to Forever, infinite loop
-  
- 
+
+
 
 NMI:
-
   LDA #$00
   STA $2003       ; set the low byte (00) of the RAM address
   LDA #$02
@@ -139,7 +137,6 @@ button_release:
   
 button_done:
   JSR printField
-
   RTI             ; return from interrupt
 
 printField:
@@ -187,10 +184,10 @@ hiddenSprite:
   LDA sprites, x
   AND #%01000000            ; checks if field is selected
   BNE hiddenSpriteSelected
-  LDA #$10
+  LDA #$08
   RTS
 hiddenSpriteSelected:
-  LDA #$12
+  LDA #$18
   RTS
 
 emptySprite:
@@ -198,10 +195,10 @@ emptySprite:
   LDA sprites, x
   AND #%01000000            ; checks if field is selected
   BNE emptySpriteSelected
-  LDA #$04
+  LDA #$0B
   RTS
 emptySpriteSelected:
-  LDA #$04
+  LDA #$1B
   RTS
 
 oneSprite:
@@ -212,7 +209,7 @@ oneSprite:
   LDA #$00
   RTS
 oneSpriteSelected:
-  LDA #$21
+  LDA #$10
   RTS
 
 twoSprite:
@@ -223,7 +220,7 @@ twoSprite:
   LDA #$01
   RTS
 twoSpriteSelected:
-  LDA #$22
+  LDA #$11
   RTS
 
 threeSprite:
@@ -234,7 +231,7 @@ threeSprite:
   LDA #$02
   RTS
 threeSpriteSelected:
-  LDA #$23
+  LDA #$12
   RTS
 
 fourSprite:
@@ -245,7 +242,7 @@ fourSprite:
   LDA #$03
   RTS
 fourSpriteSelected:
-  LDA #$30
+  LDA #$13
   RTS
 
 flagSprite:
@@ -253,15 +250,15 @@ flagSprite:
   LDA sprites, x
   AND #%01000000            ; checks if field is selected
   BNE flagSpriteSelected
-  LDA #$11
+  LDA #$09
   RTS
 flagSpriteSelected:
-  LDA #$20
+  LDA #$19
   RTS
 
 bombSprite:
   LDY #$00                ; resets hex-sprite convertion counter
-  LDA #$13
+  LDA #$0A
   RTS
 
 ReadController1:
@@ -412,7 +409,7 @@ up:
   LDA [p_array_Lo], y
   AND #%10111111            ; zero -> bit 6
   STA $0100, x
-  
+
   CLC
   LDA tile_selected
   SBC #$07
@@ -432,10 +429,10 @@ up:
 end_movement:
   RTS
 
-;;;;;;;;;;;;;;  
-  
-  
-  
+;;;;;;;;;;;;;;
+
+
+
   .bank 1
   .org $E000
 palette:
@@ -443,7 +440,6 @@ palette:
   .db $0F,$01,$20,$10,$0F,$19,$20,$10,$0F,$06,$20,$10,$3C,$3D,$3E,$0F
 
 sprites:
-     ;vert tile attr horiz
   .db $5C,$00,$00,$5C       ; row 1
   .db $5C,$00,$00,$64       ; y-position, hex value, attributes, x-position
   .db $5C,$01,$00,$6C       ; hex value is what we should manipulate to display the sprite
@@ -521,16 +517,24 @@ sprites:
 ;$01  2
 ;$02  3
 ;$03  4
-;$04  empty
-;$10  hidden
-;$11  flag
-;$12  selected hidden
-;$13  bomb
-;$20  selected flag
-;$21  selected 1
-;$22  selected 2
-;$23  selected 3
-;$30  selected 4
+;$04  5
+;$05  6
+;$06  7
+;$07  8
+;$08  hidden
+;$09  flag
+;$0A  bomb
+;$0B  empty
+;$10  1 selected   
+;$11  2 selected
+;$12  3 selected
+;$13  4 selected
+;$14  5 selected
+;$15  6 selected
+;$16  7 selected
+;$17  8 selected
+;$18  hidden selected
+;$19  flag selected
 
   .org $FFFA     ;first of the three vectors starts here
   .dw NMI        ;when an NMI happens (once per frame if enabled) the 
@@ -538,11 +542,11 @@ sprites:
   .dw RESET      ;when the processor first turns on or is reset, it will jump
                    ;to the label RESET:
   .dw 0          ;external interrupt IRQ is not used in this tutorial
-  
-  
+
+
 ;;;;;;;;;;;;;;  
-  
-  
+
+
   .bank 2
   .org $0000
   .incbin "campo-minado2.chr"   ;includes 8KB graphics file from SMB1
