@@ -141,7 +141,8 @@ ReadA:
                   ; add instructions here to do something when A is pressed (1)
   LDX selected_tile
   LDA sprites, x
-  ORA #%01000000
+  ORA #%11000000
+  JSR pickSprite
   STA $0200, x
 
 ReadADone:        ; handling this button is done
@@ -181,13 +182,18 @@ ReadUp:
   CMP #$20            ; checks if selected tile is at the top row of the field
   BMI ReadUpDone
 
+  LDX selected_tile
+  LDA $0200, x        ; gets sprite on selected_tile
+  AND #%00001111      ; removes selection
+  STA $0200, x
+
+  LDA selected_tile
   SBC #$20            ; if not, moves to previous position
   STA selected_tile
 
   LDX selected_tile
   LDA $0200, x        ; loads desired tile
-  ORA #%01000000      ; sets to selected
-  JSR pickSprite      ; picks sprite and saves it
+  ORA #%00010000      ; sets to selected
   STA $0200, x
 ReadUpDone:       ; handling this button is done
 
@@ -205,13 +211,18 @@ ReadDown:
   CMP #$E0            ; checks if selected tile is at the bottom row of the field
   BMI ReadDownDone
 
+  LDX selected_tile
+  LDA $0200, x        ; gets sprite on selected_tile
+  AND #%00001111      ; removes selection
+  STA $0200, x
+
+  LDA selected_tile
   ADC #$20            ; if not, moves to previous position
   STA selected_tile
 
   LDX selected_tile
   LDA $0200, x        ; loads desired tile
-  ORA #%01000000      ; sets to selected
-  JSR pickSprite      ; picks sprite and saves it
+  ORA #%00010000      ; sets to selected
   STA $0200, x
 ReadDownDone:         ; handling this button is done
 
@@ -226,16 +237,21 @@ ReadLeft:
   BEQ ReadLeftDone
 
   LDA selected_tile
-  CMP #$01            ; checks if selected tile is at the beginning of the field
+  CMP #$02            ; checks if selected tile is at the beginning of the field
   BMI ReadLeftDone
 
+  LDX selected_tile
+  LDA $0200, x        ; gets sprite on selected_tile
+  AND #%00001111      ; removes selection
+  STA $0200, x
+
+  LDA selected_tile
   SBC #$04            ; if not, moves to previous position
   STA selected_tile
 
   LDX selected_tile
   LDA $0200, x        ; loads desired tile
-  ORA #%01000000      ; sets to selected
-  JSR pickSprite      ; picks sprite and saves it
+  ORA #%00010000      ; sets to selected
   STA $0200, x
 ReadLeftDone:         ; handling this button is done
 
@@ -253,13 +269,18 @@ ReadRight:
   CMP #$FC            ; checks if selected tile is at the end of the field
   BMI ReadRightDone
 
+  LDX selected_tile
+  LDA $0200, x        ; gets sprite on selected_tile
+  AND #%00001111      ; removes selection
+  STA $0200, x
+
+  LDA selected_tile
   ADC #$04            ; if not, moves to next position
   STA selected_tile
 
   LDX selected_tile
   LDA $0200, x        ; loads desired tile
-  ORA #%01000000      ; sets to selected
-  JSR pickSprite      ; picks sprite and saves it
+  ORA #%00010000      ; sets to selected
   STA $0200, x
 ReadRightDone:        ; handling this button is done
   
@@ -380,7 +401,6 @@ bombSprite:
   LDY #$00                ; resets hex-sprite convertion counter
   LDA #$0A
   RTS
-
 
 ;;;;;;;;;;;;;;
 
