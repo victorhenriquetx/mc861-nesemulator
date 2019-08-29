@@ -13,8 +13,16 @@ p_tiles_Hi  .rs 1   ; low byte first, high byte immediately after
 p_array_Lo  .rs 1   ; pointer variables are declared in RAM
 p_array_Hi  .rs 1   ; low byte first, high byte immediately after
 
+buttons1   .rs 1  ; player 1 gamepad buttons, one bit per button
 
+tile_selected .rs 1
+button_pressed .rs 1
 
+tile_value .rs 1
+click     .rs 1
+
+temp      .rs 1
+temp_2    .rs 1
 ;;;;;;;;;;;;;;;
   .bank 0
   .org $C000 
@@ -54,7 +62,7 @@ vblankwait2:      ; Second wait for vblank, PPU is ready after this
 
 
 LoadPalettes:
-  LDA $2002             ; read PPU status to reset the high/low latch
+  LDA $2000             ; read PPU status to reset the high/low latch
   LDA #$3F
   STA $2006             ; write the high byte of $3F00 address
   LDA #$00
@@ -73,8 +81,72 @@ LoadPalettesLoop:
                         ; if compare was equal to 32, keep going down
 
 
+  LDA #%10000000   ; enable NMI, sprites from Pattern Table 1
+  STA $2000
 
-LoadSprites:
+  LDA #%00010000   ; enable sprites
+  STA $2001
+
+  LDA #$00
+  STA tile_selected
+
+  LDA #$01
+  STA click
+
+    ; escrevendo dados
+  LDA #$40
+  STA $0100
+
+  LDA #$23
+  STA $0101
+
+  LDA #$04
+  STA $0102
+  
+
+  
+  JSR print_field
+Forever:
+  JMP Forever     ;jump back to Forever, infinite loop
+  
+ 
+
+NMI:
+  
+
+  LDA #$00
+  STA $2003       ; set the low byte (00) of the RAM address
+  LDA #$02
+  STA $4014       ; set the high byte (02) of the RAM address, start the transfer
+
+
+  LDA #%10010000   ; enable NMI, sprites from Pattern Table 0, background from Pattern Table 1
+  STA $2000
+  LDA #%00011110   ; enable sprites, enable background, no clipping on left side
+  STA $2001
+  LDA #$00        ;;tell the ppu there is no background scrolling
+  STA $2005
+  STA $2005
+
+  JSR ReadController1
+
+  LDA click
+  CMP #$06
+  BNE button_release
+  JSR on_click
+  JSR check_movement  ;;get the current button data for player 1
+  JMP button_done
+
+button_release:
+  JSR check_release
+  
+button_done:
+  JSR print_field
+
+  RTI             ; return from interrupt
+
+
+print_field:
   LDX #$00              ; start at 0
   LDY #$00
   
@@ -86,8 +158,6 @@ LoadSprites:
   STA $0052 ; horizontal
   STA $0053 ; vertical
 
-  STA $0054 ; temp
-
   LDA #$00
   STA p_tiles_Lo
   LDA #$02
@@ -97,21 +167,6 @@ LoadSprites:
   STA p_array_Lo
   LDA #$01
   STA p_array_Hi
-
-  ; escrevendo dados
-  LDA #$01
-  STA $0100
-
-  LDA #$03
-  STA $0101
-
-  LDA #$05
-  STA $0102
-
-
-
-; LoadSpritesLoop:
-
 
 for_i:
   LDA #$40
@@ -125,24 +180,44 @@ for_j:
 
   ; select tile
   LDA [p_array_Lo], y
-  STA $0054
   INY
-  AND #%00000001
+  STA tile_value
+  AND #%01000000
+  BEQ is_not_selected
+
+  LDA tile_value
+  AND #%10111111        ; clean selected bit
+  ORA #%00010000        ; insert boarder
+  STA tile_value
+
+is_not_selected:
+  AND #%10000000
   BEQ hidden
 
-  LDA $0054
-  LSR A
+  LDA tile_value
+  AND #%00011111
   JMP select_tile
 
 hidden:
-  LDA #$10
+  LDA tile_value
+  AND #%00100000
+  BNE flag
+
+  LDA tile_value
+  AND #%00010000
+  ORA #%00001000
+  JMP select_tile
+flag:
+  LDA tile_value
+  AND #%00010000
+  ORA #%00001001
 
 select_tile:
   STA $0200, x        ; tile number = 0
   INX
   
   ; select attr
-  LDA #$00
+  LDA #$0
   STA $0200, x        ; tile number = 0
   INX
   
@@ -153,8 +228,6 @@ select_tile:
   STA $0200, x        ; put sprite 0 in center ($80) of screen horiz
   STA $0052
   INX
-  
-  
   
   INC $0051
   LDA $0051
@@ -174,73 +247,209 @@ select_tile:
   LDA $0050
   CMP #$8
   BNE for_i
+  RTS
 
-
-
-
-
-
-  ; LDA sprites, x        ; load data from address (sprites +  x)
-  ; STA $0200, x          ; store into RAM address ($0200 + x)
-  ; INX                   ; X = X + 1
-  ; CPX #$20              ; Compare X to hex $20, decimal 32
-  ; BNE LoadSpritesLoop   ; Branch to LoadSpritesLoop if compare was Not Equal to zero
-                        ; if compare was equal to 32, keep going down
-              
-              
-
-  LDA #%10000000   ; enable NMI, sprites from Pattern Table 1
-  STA $2000
-
-  LDA #%00010000   ; enable sprites
-  STA $2001
-
-Forever:
-  JMP Forever     ;jump back to Forever, infinite loop
-  
- 
-
-NMI:
-  LDA #$00
-  STA $2003       ; set the low byte (00) of the RAM address
-  LDA #$02
-  STA $4014       ; set the high byte (02) of the RAM address, start the transfer
-
-
-LatchController:
+ReadController1:
   LDA #$01
   STA $4016
   LDA #$00
-  STA $4016       ; tell both the controllers to latch buttons
+  STA $4016
+  LDX #$08
+ReadController1Loop:
+  LDA $4016
+  LSR A            ; bit0 -> Carry
+  ROL buttons1     ; bit0 <- Carry
+  DEX
+  BNE ReadController1Loop
+  RTS
 
+on_click:
+a_button:
+  LDA buttons1
+  AND #%10000000
+  BEQ b_button
 
-ReadA: 
-  LDA $4016       ; player 1 - A
-  AND #%00000001  ; only look at bit 0
-  BEQ ReadADone   ; branch to ReadADone if button is NOT pressed (0)
-                  ; add instructions here to do something when button IS pressed (1)
-  LDA $0203       ; load sprite X position
-  CLC             ; make sure the carry flag is clear
-  ADC #$01        ; A = A + 1
-  STA $0203       ; save sprite X position
-ReadADone:        ; handling this button is done
+  JMP end_on_click
+b_button:
+  LDA buttons1
+  AND #%01000000
+  BEQ end_on_click
+
+  LDX #$01
+  STX p_array_Hi
+  LDX tile_selected
+  STX p_array_Lo
+
+  LDY #$00
+  LDA [p_array_Lo], y
+  STA temp
+  AND #%00100000
+  ADC #%00100000
+  AND #%00100000
+  STA temp_2
+  LDA temp
+  AND #%11011111
+  ORA temp_2
+  STA $0100, X
+
+  LDA #$00
+  STA click
+
+end_on_click:
+  RTS
+
+check_release:  
+  LDA buttons1
+  AND #%11001111            ; not selected
+  BEQ end_release
+  INC click
+end_release:
+  RTS
+
+check_movement:
+right:
+  LDA buttons1
+  AND #%00000001            ; not selected
+  BEQ left
+
+  ; deselect tile
+  LDA #$01
+  STA p_array_Hi
+  LDA tile_selected
+  STA p_array_Lo
+
+  AND #%00000111            ; invalid movement
+  EOR #%00000111
+  BEQ left
+
+  LDX tile_selected
+  LDY #$00
+  LDA [p_array_Lo], y
+  AND #%10111111            ; zero -> bit 6
+  STA $0100, x
+
+  INC tile_selected
+  LDX tile_selected
+  STX p_array_Lo
+
+  LDY #$00
+  LDA [p_array_Lo], y
+  ORA #%01000000            ; one -> bit 6
+  STA $0100, x
+
+  LDA #$00
+  STA click
+
+  JMP left
+left:
+  LDA buttons1
+  AND #%00000010            ; not selected
+  BEQ down
+
+  ; deselect tile
+  LDA #$01
+  STA p_array_Hi
+  LDA tile_selected
+  STA p_array_Lo
+
+  AND #%00000111            ; invalid movement
+  BEQ down
+
+  LDX tile_selected
+  LDY #$00
+  LDA [p_array_Lo], y
+  AND #%10111111            ; zero -> bit 6
+  STA $0100, x
+
+  DEC tile_selected
+  LDX tile_selected
+  STX p_array_Lo
+
+  LDY #$00
+  LDA [p_array_Lo], y
+  ORA #%01000000            ; one -> bit 6
+  STA $0100, x
+
+  LDA #$00
+  STA click
+
+  JMP down
+down:
+  LDA buttons1
+  AND #%00000100            ; not selected
+  BEQ up
+
+  ; deselect tile
+  LDA #$01
+  STA p_array_Hi
+  LDA tile_selected
+  STA p_array_Lo
+
+  AND #%11111000            ; invalid movement
+  EOR #%00111000
+  BEQ up
+
+  LDX tile_selected
+  LDY #$00
+  LDA [p_array_Lo], y
+  AND #%10111111            ; zero -> bit 6
+  STA $0100, x
+
+  CLC
+  LDA tile_selected
+  ADC #$08
+  TAX
+  STX tile_selected
+  STX p_array_Lo
+
+  LDY #$00
+  LDA [p_array_Lo], y
+  ORA #%01000000            ; one -> bit 6
+  STA $0100, x
+
+  LDA #$00
+  STA click
+
+  JMP up
+up:
+  LDA buttons1
+  AND #%00001000            ; not selected
+  BEQ end_movement
+
+  ; deselect tile
+  LDA #$01
+  STA p_array_Hi
+  LDA tile_selected
+  STA p_array_Lo
+
+  AND #%11111000            ; invalid movement
+  BEQ end_movement
+
+  LDX tile_selected
+  LDY #$00
+  LDA [p_array_Lo], y
+  AND #%10111111            ; zero -> bit 6
+  STA $0100, x
   
+  CLC
+  LDA tile_selected
+  SBC #$07
+  TAX
+  STX tile_selected
+  STX p_array_Lo
 
-ReadB: 
-  LDA $4016       ; player 1 - B
-  AND #%00000001  ; only look at bit 0
-  BEQ ReadBDone   ; branch to ReadBDone if button is NOT pressed (0)
-                  ; add instructions here to do something when button IS pressed (1)
-  LDA $0203       ; load sprite X position
-  SEC             ; make sure carry flag is set
-  SBC #$01        ; A = A - 1
-  STA $0203       ; save sprite X position
-ReadBDone:        ; handling this button is done
+  LDY #$00
+  LDA [p_array_Lo], y
+  ORA #%01000000            ; one -> bit 6
+  STA $0100, x
 
+  LDA #$00
+  STA click
 
-  
-  RTI             ; return from interrupt
- 
+  JMP end_movement
+end_movement:
+  RTS
+
 ;;;;;;;;;;;;;;  
   
   
@@ -248,8 +457,8 @@ ReadBDone:        ; handling this button is done
   .bank 1
   .org $E000
 palette:
-  .db $06,$0F,$2A,$30,$30,$35,$36,$37,$38,$39,$3A,$3B,$3C,$3D,$3E,$0F
-  .db $0F,$2A,$2D,$30,$31,$02,$38,$3C,$0F,$1C,$15,$14,$31,$02,$38,$3C
+  .db $0F,$01,$20,$10,$0F,$19,$20,$10,$0F,$06,$20,$10,$3C,$3D,$3E,$0F
+  .db $0F,$01,$20,$10,$0F,$19,$20,$10,$0F,$06,$20,$10,$3C,$3D,$3E,$0F
 
 sprites:
      ;vert tile attr horiz
@@ -268,4 +477,4 @@ sprites:
   
   .bank 2
   .org $0000
-  .incbin "campo-minado.chr"   ;includes 8KB graphics file from SMB1
+  .incbin "campo-minado2.chr"   ;includes 8KB graphics file from SMB1
