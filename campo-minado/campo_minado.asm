@@ -9,6 +9,17 @@
   .rsset $0000       ; put pointers in zero page
 
 selected_tile .rs 1
+button_a .rs 1
+button_b .rs 1
+button_up .rs 1
+button_down .rs 1
+button_left .rs 1
+button_right .rs 1
+button_select .rs 1
+button_start .rs 1
+
+sprites_hi .rs 1
+sprites_lo .rs 1
 
 ;;;;;;;;;;;;;;;
   .bank 0
@@ -78,6 +89,20 @@ LoadPalettesLoop:
   LDA #$01              ; selects initial tile (1,1)
   STA selected_tile     ; #$05 to select (2,1) and #$21 to select (1,2)
 
+  LDA #$EE
+  STA sprites_hi
+
+  LDA #$00
+  STA sprites_lo
+  STA button_a          ; have all buttons start at previous value 0
+  STA button_b
+  STA button_up
+  STA button_down
+  STA button_left
+  STA button_right
+  STA button_select
+  STA button_start
+
   JSR printField
 
 Forever:
@@ -101,7 +126,6 @@ NMI:
   STA $2005
 
   JSR readController
-  JSR printField
   RTI             ; return from interrupt
 
 readController:
@@ -115,6 +139,11 @@ ReadA:
   AND #%00000001  ; only look at bit 0
   BEQ ReadADone   ; branch to ReadADone if button is NOT pressed (0)
                   ; add instructions here to do something when A is pressed (1)
+  LDX selected_tile
+  LDA sprites, x
+  ORA #%01000000
+  STA $0200, x
+
 ReadADone:        ; handling this button is done
 
 ReadB: 
@@ -141,37 +170,97 @@ ReadStartDone:        ; handling this button is done
 ReadUp: 
   LDA $4016       ; player 1 - Up
   AND #%00000001  ; only look at bit 0
+  CMP button_up   ; compares if it has changes from previous value (prevents button hold)
   BEQ ReadUpDone  ; branch to ReadUpDone if button is NOT pressed (0)
                   ; add instructions here to do something when UP is pressed (1)
+  STA button_up   ; if it has changed, stores new value
+  CMP #$00        ; if it has changed to 1, button has just been pressed
+  BEQ ReadUpDone
+
+  LDA selected_tile
+  CMP #$20            ; checks if selected tile is at the top row of the field
+  BMI ReadUpDone
+
+  SBC #$20            ; if not, moves to previous position
+  STA selected_tile
+
+  LDX selected_tile
+  LDA $0200, x        ; loads desired tile
+  ORA #%01000000      ; sets to selected
+  JSR pickSprite      ; picks sprite and saves it
+  STA $0200, x
 ReadUpDone:       ; handling this button is done
 
 ReadDown: 
   LDA $4016           ; player 1 - Down
   AND #%00000001      ; only look at bit 0
+  CMP button_down     ; compares if it has changes from previous value (prevents button hold)
   BEQ ReadDownDone    ; branch to ReadDownDone if button is NOT pressed (0)
                       ; add instructions here to do something when DOWN is pressed (1)
+  STA button_down     ; if it has changed, stores new value
+  CMP #$00            ; if it has changed to 1, button has just been pressed
+  BEQ ReadDownDone
+
+  LDA selected_tile
+  CMP #$E0            ; checks if selected tile is at the bottom row of the field
+  BMI ReadDownDone
+
+  ADC #$20            ; if not, moves to previous position
+  STA selected_tile
+
+  LDX selected_tile
+  LDA $0200, x        ; loads desired tile
+  ORA #%01000000      ; sets to selected
+  JSR pickSprite      ; picks sprite and saves it
+  STA $0200, x
 ReadDownDone:         ; handling this button is done
 
 ReadLeft: 
   LDA $4016           ; player 1 - Left
   AND #%00000001      ; only look at bit 0
+  CMP button_left     ; compares if it has changes from previous value (prevents button hold)
   BEQ ReadLeftDone    ; branch to ReadLeftDone if button is NOT pressed (0)
                       ; add instructions here to do something when LEFT is pressed (1)
-  ;LDA $0203           ; load sprite X position
-  ;SEC                 ; make sure carry flag is set
-  ;SBC #$01            ; A = A - 1
-  ;STA $0203           ; save sprite X position
+  STA button_left     ; if it has changed, stores new value
+  CMP #$00            ; if it has changed to 1, button has just been pressed
+  BEQ ReadLeftDone
+
+  LDA selected_tile
+  CMP #$01            ; checks if selected tile is at the beginning of the field
+  BMI ReadLeftDone
+
+  SBC #$04            ; if not, moves to previous position
+  STA selected_tile
+
+  LDX selected_tile
+  LDA $0200, x        ; loads desired tile
+  ORA #%01000000      ; sets to selected
+  JSR pickSprite      ; picks sprite and saves it
+  STA $0200, x
 ReadLeftDone:         ; handling this button is done
 
 ReadRight: 
   LDA $4016           ; player 1 - Right
   AND #%00000001      ; only look at bit 0
+  CMP button_right    ; compares if it has changes from previous value (prevents button hold)
   BEQ ReadRightDone   ; branch to ReadRightDone if button is NOT pressed (0)
                       ; add instructions here to do something when RIGHT is pressed (1)
-  ;LDA $0203           ; load sprite X position
-  ;CLC                 ; make sure the carry flag is clear
-  ;ADC #$01            ; A = A + 1
-  ;STA $0203           ; save sprite X position
+  STA button_right    ; if it has changed, stores new value
+  CMP #$00            ; if it has changed to 1, button has just been pressed
+  BEQ ReadRightDone
+
+  LDA selected_tile
+  CMP #$FC            ; checks if selected tile is at the end of the field
+  BMI ReadRightDone
+
+  ADC #$04            ; if not, moves to next position
+  STA selected_tile
+
+  LDX selected_tile
+  LDA $0200, x        ; loads desired tile
+  ORA #%01000000      ; sets to selected
+  JSR pickSprite      ; picks sprite and saves it
+  STA $0200, x
 ReadRightDone:        ; handling this button is done
   
   RTI             ; return from interrupt
