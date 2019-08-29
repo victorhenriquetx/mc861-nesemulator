@@ -88,7 +88,7 @@ Forever:
  
 
 NMI:
-  JSR print_field
+  JSR printField
 
   LDA #$00
   STA $2003       ; set the low byte (00) of the RAM address
@@ -106,140 +106,126 @@ NMI:
 
   JSR ReadController1  ;;get the current button data for player 1
 
-
-
-; LatchController:
-;   LDA #$01
-;   STA $4016
-;   LDA #$00
-;   STA $4016       ; tell both the controllers to latch buttons
-
-; ReadA: 
-;   LDA $4016       ; player 1 - A
-;   AND #%00000001  ; only look at bit 0
-;   BEQ ReadADone   ; branch to ReadADone if button is NOT pressed (0)
-;                   ; add instructions here to do something when button IS pressed (1)
-;   LDA $0203       ; load sprite X position
-;   CLC             ; make sure the carry flag is clear
-;   ADC #$01        ; A = A + 1
-;   STA $0203       ; save sprite X position
-; ReadADone:        ; handling this button is done
-  
-
-; ReadB: 
-;   LDA $4016       ; player 1 - B
-;   AND #%00000001  ; only look at bit 0
-;   BEQ ReadBDone   ; branch to ReadBDone if button is NOT pressed (0)
-;                   ; add instructions here to do something when button IS pressed (1)
-;   LDA $0203       ; load sprite X position
-;   SEC             ; make sure carry flag is set
-;   SBC #$01        ; A = A - 1
-;   STA $0203       ; save sprite X position
-; ReadBDone:        ; handling this button is done
-
-
-  
   RTI             ; return from interrupt
- 
 
-print_field:
-  LDX #$00              ; start at 0
-  LDY #$00
-  
-  LDA #$00
-  STA $0050 ; i
-  STA $0051 ; j
 
-  LDA #$40
-  STA $0052 ; horizontal
-  STA $0053 ; vertical
+printField:
+  LDX #$00                ; "index/iterator" for sprites
+  LDY #$03                ; every 4 loops, there will be a hex to convert to a sprite
+                          ; starts at 3, because the first hex to convert is at loop #2
+printFieldLoop:
+  LDA sprites, x     ; reads next from field
+  ;CPY #$04
+  ;JSR decideSprite
+  STA $0200, x
+  INY                     ; y++
+  INX                     ; x++
+  CPX #$FF                ; field has 64 tiles (4 bytes each so 256 loops)
+  BNE printFieldLoop
+  ; 255 loops, there is one more left
+  LDA sprites, x     ; reads last field
+  STA $0200, x
+  RTS                     ; TODO: should return or keep going?
 
-  STA $0054 ; temp
-
-  LDA #$00
-  STA p_tiles_Lo
-  LDA #$02
-  STA p_tiles_Hi
-
-  LDA #$00
-  STA p_array_Lo
-  LDA #$01
-  STA p_array_Hi
-
-  ; escrevendo dados
-  LDA #$40
-  STA $0100
-
-  LDA #$02
-  STA $0101
-
-  LDA #$04
-  STA $0102
-
-  LDA #$00
-  STA tile_selected
-
-for_i:
-  LDA #$40
-  STA $0052
-for_j:
-
-  ; select position
-  LDA $0053
-  STA $0200, x        ; put sprite 0 in center ($40) of screen vert
-  INX
-
-  ; select tile  - Falta colocar condição de tile selected
-  LDA [p_array_Lo], y
-  STA $0054
-  INY
-  AND #%10000000
-  BEQ hidden
-
-  LDA $0054
+decideSprite:
+  AND #%10000000          ; check if value is visible
+  BEQ hiddenSprite
+  LDA sprites, x     ; if visible, decides which sprite to use
   AND #%00111111
-  JMP select_tile
+  BEQ emptySprite
+  CMP #$01
+  BEQ oneSprite
+  CMP #$02
+  BEQ twoSprite
+  CMP #$03
+  BEQ threeSprite
+  CMP #$04
+  BEQ fourSprite
+  CMP #$0A
+  BEQ flagSprite
+  CMP #$0B
+  BEQ bombSprite
 
-hidden:
+hiddenSprite:
+  LDY #$01                  ; resets hex-sprite convertion counter
+  LDA sprites, x
+  AND #%01000000            ; checks if field is selected
+  BNE hiddenSpriteSelected
   LDA #$10
+  RTS
+hiddenSpriteSelected:
+  LDA #$12
+  RTS
 
-select_tile:
-  STA $0200, x        ; tile number = 0
-  INX
-  
-  ; select attr
-  LDA #$00
-  STA $0200, x        ; tile number = 0
-  INX
-  
-  ; select position
-  CLC
-  LDA $0052
-  ADC #$8
-  STA $0200, x        ; put sprite 0 in center ($80) of screen horiz
-  STA $0052
-  INX
-  
-  
-  
-  INC $0051
-  LDA $0051
-  CMP #$8
-  BNE for_j
+emptySprite:
+  LDY #$01                  ; resets hex-sprite convertion counter
+  LDA sprites, x
+  AND #%01000000            ; checks if field is selected
+  BNE emptySpriteSelected
+  LDA #$04
+  RTS
+emptySpriteSelected:
+  LDA #$04
+  RTS
 
+oneSprite:
+  LDY #$01                  ; resets hex-sprite convertion counter
+  LDA sprites, x
+  AND #%01000000            ; checks if field is selected
+  BNE oneSpriteSelected
   LDA #$00
-  STA $0051
-  
-  CLC
-  LDA $0053
-  ADC #$08
-  STA $0053
-  
-  CLC
-  INC $0050
-  LDA $0050
-  CMP #$8
-  BNE for_i
+  RTS
+oneSpriteSelected:
+  LDA #$21
+  RTS
+
+twoSprite:
+  LDY #$01                  ; resets hex-sprite convertion counter
+  LDA sprites, x
+  AND #%01000000            ; checks if field is selected
+  BNE twoSpriteSelected
+  LDA #$01
+  RTS
+twoSpriteSelected:
+  LDA #$22
+  RTS
+
+threeSprite:
+  LDY #$01                  ; resets hex-sprite convertion counter
+  LDA sprites, x
+  AND #%01000000            ; checks if field is selected
+  BNE threeSpriteSelected
+  LDA #$02
+  RTS
+threeSpriteSelected:
+  LDA #$23
+  RTS
+
+fourSprite:
+  LDY #$01                  ; resets hex-sprite convertion counter
+  LDA sprites, x
+  AND #%01000000            ; checks if field is selected
+  BNE fourSpriteSelected
+  LDA #$03
+  RTS
+fourSpriteSelected:
+  LDA #$30
+  RTS
+
+flagSprite:
+  LDY #$01                  ; resets hex-sprite convertion counter
+  LDA sprites, x
+  AND #%01000000            ; checks if field is selected
+  BNE flagSpriteSelected
+  LDA #$11
+  RTS
+flagSpriteSelected:
+  LDA #$20
+  RTS
+
+bombSprite:
+  LDY #$01                ; resets hex-sprite convertion counter
+  LDA #$13
   RTS
 
 ReadController1:
@@ -299,6 +285,13 @@ down:
 
 up:
 
+start:
+
+select:
+
+b_button:
+
+a_button:
 
 end_movement
   RTS
@@ -315,7 +308,93 @@ palette:
 
 sprites:
      ;vert tile attr horiz
-  .db $80, $10, $00, $70   ;sprite 0
+  .db $5C,$00,$00,$5C       ; row 1
+  .db $5C,$00,$00,$64       ; y-position, hex value, attributes, x-position
+  .db $5C,$01,$00,$6C       ; hex value is what we should manipulate to display the sprite
+  .db $5C,$02,$00,$74 
+  .db $5C,$0B,$00,$7C
+  .db $5C,$01,$00,$84
+  .db $5C,$00,$00,$8C
+  .db $5C,$00,$00,$94
+
+  .db $64,$00,$00,$5C       ; row 2
+  .db $64,$01,$00,$64
+  .db $64,$03,$00,$6C
+  .db $64,$0B,$00,$74
+  .db $64,$03,$00,$7C
+  .db $64,$01,$00,$84
+  .db $64,$01,$00,$8C
+  .db $64,$01,$00,$94
+
+  .db $6C,$01,$00,$5C       ; row 3
+  .db $6C,$02,$00,$64
+  .db $6C,$0B,$00,$6C
+  .db $6C,$0B,$00,$74
+  .db $6C,$02,$00,$7C
+  .db $6C,$01,$00,$84
+  .db $6C,$03,$00,$8C
+  .db $6C,$0B,$00,$94
+
+  .db $74,$0B,$00,$5C       ; row 4
+  .db $74,$02,$00,$64
+  .db $74,$02,$00,$6C
+  .db $74,$02,$00,$74
+  .db $74,$01,$00,$7C
+  .db $74,$01,$00,$84
+  .db $74,$0B,$00,$8C
+  .db $74,$0B,$00,$94
+
+  .db $7C,$01,$00,$5C       ; row 5
+  .db $7C,$01,$00,$64
+  .db $7C,$00,$00,$6C
+  .db $7C,$00,$00,$74
+  .db $7C,$00,$00,$7C
+  .db $7C,$02,$00,$84
+  .db $7C,$03,$00,$8C
+  .db $7C,$03,$00,$94
+
+  .db $84,$00,$00,$5C       ; row 6
+  .db $84,$00,$00,$64
+  .db $84,$00,$00,$6C
+  .db $84,$00,$00,$74
+  .db $84,$00,$00,$7C
+  .db $84,$01,$00,$84
+  .db $84,$0B,$00,$8C
+  .db $84,$01,$00,$94
+
+  .db $8C,$01,$00,$5C       ; row 7
+  .db $8C,$01,$00,$64
+  .db $8C,$00,$00,$6C
+  .db $8C,$00,$00,$74
+  .db $8C,$00,$00,$7C
+  .db $8C,$01,$00,$84
+  .db $8C,$01,$00,$8C
+  .db $8C,$01,$00,$94
+
+  .db $94,$0B,$00,$5C       ; row 8
+  .db $94,$01,$00,$64
+  .db $94,$00,$00,$6C
+  .db $94,$00,$00,$74
+  .db $94,$00,$00,$7C
+  .db $94,$00,$00,$84
+  .db $94,$00,$00,$8C
+  .db $94,$00,$00,$94
+
+;hex  sprite
+;$00  1
+;$01  2
+;$02  3
+;$03  4
+;$04  empty (could also be any other one)
+;$10  hidden
+;$11  flag
+;$12  selected hidden
+;$13  bomb
+;$20  selected flag
+;$21  selected 1
+;$22  selected 2
+;$23  selected 3
+;$30  selected 4
 
   .org $FFFA     ;first of the three vectors starts here
   .dw NMI        ;when an NMI happens (once per frame if enabled) the 
