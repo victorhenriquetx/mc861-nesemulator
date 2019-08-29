@@ -89,11 +89,7 @@ LoadPalettesLoop:
   LDA #$01              ; selects initial tile (1,1)
   STA selected_tile     ; #$05 to select (2,1) and #$21 to select (1,2)
 
-  LDA #$EE
-  STA sprites_hi
-
   LDA #$00
-  STA sprites_lo
   STA button_a          ; have all buttons start at previous value 0
   STA button_b
   STA button_up
