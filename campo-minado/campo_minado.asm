@@ -114,26 +114,29 @@ printField:
   LDY #$03                ; every 4 loops, there will be a hex to convert to a sprite
                           ; starts at 3, because the first hex to convert is at loop #2
 printFieldLoop:
-  LDA sprites, x     ; reads next from field
-  ;CPY #$04
-  ;JSR decideSprite
+  LDA sprites, x          ; reads next from field
+  JSR checkSprite         ; chooses sprite, if necessary
   STA $0200, x
   INY                     ; y++
   INX                     ; x++
   CPX #$FF                ; field has 64 tiles (4 bytes each so 256 loops)
   BNE printFieldLoop
-  ; 255 loops, there is one more left
-  LDA sprites, x     ; reads last field
+                          ; 255 loops so far, so last one is done manually
+  LDA sprites, x          ; reads last field
   STA $0200, x
-  RTS                     ; TODO: should return or keep going?
+  RTS                     ; done printing field - returns to NMI treatment
 
-decideSprite:
+checkSprite:
+  CPY #$04                ; checks if should pick a sprite
+  BEQ pickSprite
+  RTS
+pickSprite:
   AND #%10000000          ; check if value is visible
-  BEQ hiddenSprite
-  LDA sprites, x     ; if visible, decides which sprite to use
-  AND #%00111111
-  BEQ emptySprite
-  CMP #$01
+  BEQ hiddenSprite        ; if visibility bit is 0, use hidden sprite
+  LDA sprites, x          ; if visible, loads hex value again
+  AND #%00111111          ; get value only and decides which sprite to use
+  BEQ emptySprite         ; if value is zero, use empty sprite
+  CMP #$01                ; and keeps checking...
   BEQ oneSprite
   CMP #$02
   BEQ twoSprite
@@ -147,7 +150,7 @@ decideSprite:
   BEQ bombSprite
 
 hiddenSprite:
-  LDY #$01                  ; resets hex-sprite convertion counter
+  LDY #$00                  ; resets hex-sprite convertion counter
   LDA sprites, x
   AND #%01000000            ; checks if field is selected
   BNE hiddenSpriteSelected
@@ -158,7 +161,7 @@ hiddenSpriteSelected:
   RTS
 
 emptySprite:
-  LDY #$01                  ; resets hex-sprite convertion counter
+  LDY #$00                  ; resets hex-sprite convertion counter
   LDA sprites, x
   AND #%01000000            ; checks if field is selected
   BNE emptySpriteSelected
@@ -169,7 +172,7 @@ emptySpriteSelected:
   RTS
 
 oneSprite:
-  LDY #$01                  ; resets hex-sprite convertion counter
+  LDY #$00                  ; resets hex-sprite convertion counter
   LDA sprites, x
   AND #%01000000            ; checks if field is selected
   BNE oneSpriteSelected
@@ -180,7 +183,7 @@ oneSpriteSelected:
   RTS
 
 twoSprite:
-  LDY #$01                  ; resets hex-sprite convertion counter
+  LDY #$00                  ; resets hex-sprite convertion counter
   LDA sprites, x
   AND #%01000000            ; checks if field is selected
   BNE twoSpriteSelected
@@ -191,7 +194,7 @@ twoSpriteSelected:
   RTS
 
 threeSprite:
-  LDY #$01                  ; resets hex-sprite convertion counter
+  LDY #$00                  ; resets hex-sprite convertion counter
   LDA sprites, x
   AND #%01000000            ; checks if field is selected
   BNE threeSpriteSelected
@@ -202,7 +205,7 @@ threeSpriteSelected:
   RTS
 
 fourSprite:
-  LDY #$01                  ; resets hex-sprite convertion counter
+  LDY #$00                  ; resets hex-sprite convertion counter
   LDA sprites, x
   AND #%01000000            ; checks if field is selected
   BNE fourSpriteSelected
@@ -213,7 +216,7 @@ fourSpriteSelected:
   RTS
 
 flagSprite:
-  LDY #$01                  ; resets hex-sprite convertion counter
+  LDY #$00                  ; resets hex-sprite convertion counter
   LDA sprites, x
   AND #%01000000            ; checks if field is selected
   BNE flagSpriteSelected
@@ -224,7 +227,7 @@ flagSpriteSelected:
   RTS
 
 bombSprite:
-  LDY #$01                ; resets hex-sprite convertion counter
+  LDY #$00                ; resets hex-sprite convertion counter
   LDA #$13
   RTS
 
@@ -385,7 +388,7 @@ sprites:
 ;$01  2
 ;$02  3
 ;$03  4
-;$04  empty (could also be any other one)
+;$04  empty
 ;$10  hidden
 ;$11  flag
 ;$12  selected hidden
