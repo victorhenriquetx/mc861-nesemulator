@@ -20,7 +20,6 @@ button_pressed .rs 1
 
 tile_value .rs 1
 move      .rs 1
-key       .rs 1
 
 ;;;;;;;;;;;;;;;
   .bank 0
@@ -128,15 +127,16 @@ NMI:
   STA $2005
 
   JSR ReadController1
+  JSR on_click
 
   LDA move
-  CMP #$05
+  CMP #$06
   BNE button_release
-  JSR Check_movement  ;;get the current button data for player 1
+  JSR check_movement  ;;get the current button data for player 1
   JMP button_done
 
 button_release:
-  JSR Check_release
+  JSR check_release
   
 button_done:
   JSR print_field
@@ -253,8 +253,9 @@ ReadController1Loop:
   BNE ReadController1Loop
   RTS
 
+on_click:
 
-Check_release:  
+check_release:  
   LDA buttons1
   AND #%00001111            ; not selected
   BEQ end_release
@@ -262,8 +263,7 @@ Check_release:
 end_release:
   RTS
 
-Check_movement:
-  
+check_movement:
 right:
   LDA buttons1
   AND #%00000001            ; not selected
@@ -275,10 +275,9 @@ right:
   LDA tile_selected
   STA p_array_Lo
 
-  LDA tile_selected
   AND #%00000111            ; invalid movement
   EOR #%00000111
-  BEQ end_movement
+  BEQ left
 
   LDX tile_selected
   LDY #$00
@@ -287,13 +286,9 @@ right:
   STA $0100, x
 
   INC tile_selected
-  LDA #$01
-  STA p_array_Hi
-  LDA tile_selected
-  STA p_array_Lo
+  LDX tile_selected
+  STX p_array_Lo
 
-  
-  LDX p_array_Lo
   LDY #$00
   LDA [p_array_Lo], y
   ORA #%01000000            ; one -> bit 6
@@ -301,10 +296,8 @@ right:
 
   LDA #$00
   STA move
-  LDA #$01
-  STA key
 
-  JMP end_movement
+  JMP left
 left:
   LDA buttons1
   AND #%00000010            ; not selected
@@ -316,9 +309,8 @@ left:
   LDA tile_selected
   STA p_array_Lo
 
-  LDA tile_selected
   AND #%00000111            ; invalid movement
-  BEQ end_movement
+  BEQ down
 
   LDX tile_selected
   LDY #$00
@@ -327,13 +319,9 @@ left:
   STA $0100, x
 
   DEC tile_selected
-  LDA #$01
-  STA p_array_Hi
-  LDA tile_selected
-  STA p_array_Lo
+  LDX tile_selected
+  STX p_array_Lo
 
-  
-  LDX p_array_Lo
   LDY #$00
   LDA [p_array_Lo], y
   ORA #%01000000            ; one -> bit 6
@@ -341,12 +329,81 @@ left:
 
   LDA #$00
   STA move
-  LDA #$02
-  STA key
+
+  JMP down
+down:
+  LDA buttons1
+  AND #%00000100            ; not selected
+  BEQ up
+
+  ; deselect tile
+  LDA #$01
+  STA p_array_Hi
+  LDA tile_selected
+  STA p_array_Lo
+
+  AND #%11111000            ; invalid movement
+  EOR #%00111000
+  BEQ up
+
+  LDX tile_selected
+  LDY #$00
+  LDA [p_array_Lo], y
+  AND #%10111111            ; zero -> bit 6
+  STA $0100, x
+
+  CLC
+  LDA tile_selected
+  ADC #$08
+  TAX
+  STX tile_selected
+  STX p_array_Lo
+
+  LDY #$00
+  LDA [p_array_Lo], y
+  ORA #%01000000            ; one -> bit 6
+  STA $0100, x
+
+  LDA #$00
+  STA move
+
+  JMP up
+up:
+  LDA buttons1
+  AND #%00001000            ; not selected
+  BEQ end_movement
+
+  ; deselect tile
+  LDA #$01
+  STA p_array_Hi
+  LDA tile_selected
+  STA p_array_Lo
+
+  AND #%11111000            ; invalid movement
+  BEQ end_movement
+
+  LDX tile_selected
+  LDY #$00
+  LDA [p_array_Lo], y
+  AND #%10111111            ; zero -> bit 6
+  STA $0100, x
+  
+  CLC
+  LDA tile_selected
+  SBC #$07
+  TAX
+  STX tile_selected
+  STX p_array_Lo
+
+  LDY #$00
+  LDA [p_array_Lo], y
+  ORA #%01000000            ; one -> bit 6
+  STA $0100, x
+
+  LDA #$00
+  STA move
 
   JMP end_movement
-down:
-
 end_movement:
   RTS
 

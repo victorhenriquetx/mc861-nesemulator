@@ -2,12 +2,13 @@ $0004#buttons1#F0
 $0000#DEVELO#F0
 $C10E#select_tile#0
 $C03D#LoadPalettes#0
+$C227#up#0
 $0002#p_array_Lo#F0
 $C16A#end_release#0
 $C07D#Forever#0
 $C107#hidden#0
 $E000#palette#1
-$C205#down#0
+$C1E5#down#0
 $C04C#LoadPalettesLoop#0
 $C149#ReadController1#0
 $C16B#Check_movement#0
@@ -15,9 +16,9 @@ $0001#p_tiles_Hi#F0
 $0000#CDROM#F0
 $0001#MAGICKIT#F0
 $0007#tile_value#F0
-$C205#end_movement#0
+$C267#end_movement#0
 $C160#Check_release#0
-$C1B9#left#0
+$C1A9#left#0
 $C155#ReadController1Loop#0
 $C014#vblankwait1#0
 $C038#vblankwait2#0
