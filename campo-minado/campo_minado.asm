@@ -19,8 +19,10 @@ tile_selected .rs 1
 button_pressed .rs 1
 
 tile_value .rs 1
-move      .rs 1
+click     .rs 1
 
+temp      .rs 1
+temp_2    .rs 1
 ;;;;;;;;;;;;;;;
   .bank 0
   .org $C000 
@@ -85,17 +87,17 @@ LoadPalettesLoop:
   LDA #%00010000   ; enable sprites
   STA $2001
 
-  LDA #$01
+  LDA #$00
   STA tile_selected
 
   LDA #$01
-  STA move
+  STA click
 
     ; escrevendo dados
-  LDA #$00
+  LDA #$40
   STA $0100
 
-  LDA #%01000010
+  LDA #$23
   STA $0101
 
   LDA #$04
@@ -127,11 +129,11 @@ NMI:
   STA $2005
 
   JSR ReadController1
-  JSR on_click
 
-  LDA move
+  LDA click
   CMP #$06
   BNE button_release
+  JSR on_click
   JSR check_movement  ;;get the current button data for player 1
   JMP button_done
 
@@ -176,7 +178,7 @@ for_j:
   STA $0200, x        ; put sprite 0 in center ($40) of screen vert
   INX
 
-  ; select tile  - Falta colocar condição de tile selected
+  ; select tile
   LDA [p_array_Lo], y
   INY
   STA tile_value
@@ -184,7 +186,7 @@ for_j:
   BEQ is_not_selected
 
   LDA tile_value
-  AND #%10001111        ; clean selected bit
+  AND #%10111111        ; clean selected bit
   ORA #%00010000        ; insert boarder
   STA tile_value
 
@@ -198,9 +200,17 @@ is_not_selected:
 
 hidden:
   LDA tile_value
+  AND #%00100000
+  BNE flag
+
+  LDA tile_value
   AND #%00010000
   ORA #%00001000
-
+  JMP select_tile
+flag:
+  LDA tile_value
+  AND #%00010000
+  ORA #%00001001
 
 select_tile:
   STA $0200, x        ; tile number = 0
@@ -254,12 +264,45 @@ ReadController1Loop:
   RTS
 
 on_click:
+a_button:
+  LDA buttons1
+  AND #%10000000
+  BEQ b_button
+
+  JMP end_on_click
+b_button:
+  LDA buttons1
+  AND #%01000000
+  BEQ end_on_click
+
+  LDX #$01
+  STX p_array_Hi
+  LDX tile_selected
+  STX p_array_Lo
+
+  LDY #$00
+  LDA [p_array_Lo], y
+  STA temp
+  AND #%00100000
+  ADC #%00100000
+  AND #%00100000
+  STA temp_2
+  LDA temp
+  AND #%11011111
+  ORA temp_2
+  STA $0100, X
+
+  LDA #$00
+  STA click
+
+end_on_click:
+  RTS
 
 check_release:  
   LDA buttons1
-  AND #%00001111            ; not selected
+  AND #%11001111            ; not selected
   BEQ end_release
-  INC move
+  INC click
 end_release:
   RTS
 
@@ -295,7 +338,7 @@ right:
   STA $0100, x
 
   LDA #$00
-  STA move
+  STA click
 
   JMP left
 left:
@@ -328,7 +371,7 @@ left:
   STA $0100, x
 
   LDA #$00
-  STA move
+  STA click
 
   JMP down
 down:
@@ -365,7 +408,7 @@ down:
   STA $0100, x
 
   LDA #$00
-  STA move
+  STA click
 
   JMP up
 up:
@@ -401,7 +444,7 @@ up:
   STA $0100, x
 
   LDA #$00
-  STA move
+  STA click
 
   JMP end_movement
 end_movement:
