@@ -1,12 +1,13 @@
+  include "ggsound.inc"
   .inesprg 1   ; 1x 16KB PRG code
   .ineschr 1   ; 1x  8KB CHR data
   .inesmap 0   ; mapper 0 = NROM, no bank swapping
   .inesmir 1   ; background mirroring
-  
-
 ;;;;;;;;;;;;;;;
 
   .rsset $0000       ; put pointers in zero page
+  include "ggsound_zp.inc"
+
 p_tiles_Lo  .rs 1   ; pointer variables are declared in RAM
 p_tiles_Hi  .rs 1   ; low byte first, high byte immediately after
 
@@ -27,9 +28,13 @@ button_start .rs 1
 
 array .rs 64
 
+  .rsset $0200
+  include "ggsound_ram.inc"
+
 ;;;;;;;;;;;;;;;
   .bank 0
   .org $C000 
+
 RESET:
   SEI          ; disable IRQs
   CLD          ; disable decimal mode
@@ -63,6 +68,25 @@ clrmem:
 vblankwait2:      ; Second wait for vblank, PPU is ready after this
   BIT $2002
   BPL vblankwait2
+
+  lda #SOUND_REGION_NTSC ;or #SOUND_REGION_PAL, or #SOUND_REGION_DENDY
+  sta sound_param_byte_0
+  lda #LOW song_list
+  sta sound_param_word_0
+  lda #HIGH song_list 
+  sta sound_param_word_0+1
+  lda #LOW sfx_list 
+  sta sound_param_word_1
+  lda #HIGH sfx_list 
+  sta sound_param_word_1+1
+  lda #LOW envelopes_list
+  sta sound_param_word_2
+  lda #HIGH envelopes_list
+  sta sound_param_word_2+1
+
+  LDA #song_index_k466
+  STA sound_param_byte_0
+  JSR play_song
 
 
 LoadPalettes:
@@ -143,7 +167,6 @@ NMI:
   STA $2005
 
   JSR ReadController
-
   ; LDA click
   ; CMP #$06
   ; BNE button_release
@@ -270,7 +293,7 @@ end_print:
 ;   INC click
 ; end_release:
 ;   RTS
-
+; soundengine_update
 
 
 ReadController:
@@ -464,6 +487,8 @@ ReadRightDone:
   
   .bank 1
   .org $E000
+  include "ggsound.asm"
+  include "songs.asm"
 palette:
   .db $0F,$01,$20,$10,$0F,$19,$20,$10,$0F,$06,$20,$10,$3C,$3D,$3E,$0F
   .db $0F,$01,$20,$10,$0F,$19,$20,$10,$0F,$06,$20,$10,$3C,$3D,$3E,$0F
