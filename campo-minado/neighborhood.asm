@@ -13,8 +13,8 @@ setNeighborsVisib:
     CheckVisib:
         TAX
         LDA $0100, x            ; Load the tile byte information
-        AND #%10000000          ; Get the visibility bit
-        CMP #%10000000
+        AND #$80                ; Get the visibility bit
+        CMP #$80
         BNE IterativeLoop       ; If tile is not visible, start iterativeLoop
 
         TYA
@@ -23,7 +23,7 @@ setNeighborsVisib:
     
     IterativeLoop:
         ; Set the visibility bit
-        ORA #%10000000
+        ORA #$80
         STA $0100, x
         DEY                     ; Decrement iterative array
 
@@ -31,11 +31,12 @@ setNeighborsVisib:
             TXA
             ; Go to the top neighbor
             ; Test if upper bound exists
-            AND #%11111000
+            AND #$f8
             CMP #$00
             BEQ RigthNeighbor   ; In case the upper bound doesn't exist, branch
             ; Add TopNeighbor to iterative array
             TXA
+            CLC
             SBC #$08
             STA $0200, y
             INY
@@ -44,11 +45,12 @@ setNeighborsVisib:
             TXA
             ; Go to the right neighbor
             ; Test if righter bound exists
-            AND #%00000111
+            AND #$07
             CMP #$07
             BEQ BotNeighbor     ; In case the righter bound doesn't exist, branch
             ; Add RightNeighbor to iterative array
             TXA
+            CLC
             ADC #$01
             STA $0200, y
             INY
@@ -62,6 +64,7 @@ setNeighborsVisib:
             BEQ LeftNeighbot    ; In case the lower bound doesn't exist, branch
             ; Add BotNeighbor to iterative array
             TXA
+            CLC
             ADC #$08
             STA $0200, y
             INY
@@ -75,10 +78,11 @@ setNeighborsVisib:
             BEQ CheckVisib    ; In case the lefter bound doesn't exist, branch to the start again
 
             AND #$08
-            SBC #$08
+            CMP #$08
             BEQ CheckVisib    ; In case the lefter bound doesn't exist, branch to the start again
             ; Add LeftNeighbot to iterative array
             TXA
+            CLC
             SBC #$01
             STA $0200, y
             INY
