@@ -1,0 +1,132 @@
+; LDA #$67
+; STA $0123
+; LDA #$67
+; STA $011b
+
+; LDA #$87
+; STA $0124
+; LDA #$87
+; STA $0122
+; LDA #$87
+; STA $012b
+
+; LDA #$87
+; STA $011c
+; LDA #$87
+; STA $011a
+; LDA #$87
+; STA $0113
+
+; LDA #$23
+; PHA
+; LDA #$00
+
+setNeighborsVisib:
+    ; Load clicked tile from the stack
+    PLA
+    ; We will use an iterate algorithm to search
+    ; the neighbors, avoiding recursion we save memory
+    ; in case of a big board
+    ; First we add the clicked tile to the iterative array (starts at $200)
+    LDY #$00
+    STA $0200, y
+    INY
+
+    CheckVisib:
+        DEY
+        LDA $0200, y
+        INY
+        TAX
+        LDA $0100, x            ; Load the tile byte information
+        AND #$80                ; Get the visibility bit
+        CMP #$80
+        BNE IterativeLoop       ; If tile is not visible, start iterativeLoop
+
+        TYA
+        CMP #$01                ; If Y == 1 we reached the end of the iterativeLoop
+        BEQ EndIterative
+
+        DEY                     ; If Y != 1 we keep iterating after decreasing Y
+        BNE CheckVisib
+    
+    IterativeLoop:
+        ; Set the visibility bit
+        TXA
+        LDA $0100, x
+        ORA #$80
+        STA $0100, x
+        DEY                     ; Decrement iterative array
+
+        ; Check if selected tile is zero or a numbered tile
+        TXA
+        AND #%00001111
+        BNE CheckVisib
+
+        TopNeighbor:
+            TXA
+            ; Go to the top neighbor
+            ; Test if upper bound exists
+            AND #$f8
+            CMP #$00
+            BEQ RigthNeighbor   ; In case the upper bound doesn't exist, branch
+            ; Add TopNeighbor to iterative array
+            TXA
+            CLC
+            SBC #$08
+            STA $0200, y
+            INY
+
+        RigthNeighbor:
+            TXA
+            ; Go to the right neighbor
+            ; Test if righter bound exists
+            AND #$07
+            CMP #$07
+            BEQ BotNeighbor     ; In case the righter bound doesn't exist, branch
+            ; Add RightNeighbor to iterative array
+            TXA
+            CLC
+            ADC #$01
+            STA $0200, y
+            INY
+
+        BotNeighbor:
+            TXA
+            ; Go to the bot neighbor
+            ; Test if lower bound exists
+            AND #$38
+            CMP #$38
+            BEQ LeftNeighbot    ; In case the lower bound doesn't exist, branch
+            ; Add BotNeighbor to iterative array
+            TXA
+            CLC
+            ADC #$08
+            STA $0200, y
+            INY
+
+        LeftNeighbot:
+            TXA
+            ; Go to the left neighbor
+            ; Test if lefter bound exists
+            AND #$0f
+            CMP #$00
+            BEQ CheckVisib    ; In case the lefter bound doesn't exist, branch to the start again
+
+            TXA
+            AND #$08
+            CMP #$08
+            BEQ CheckVisib    ; In case the lefter bound doesn't exist, branch to the start again
+            ; Add LeftNeighbot to iterative array
+            TXA
+            CLC
+            SBC #$01
+            STA $0200, y
+            INY
+        
+        LDA #$00
+        CMP #$00                ; Go back to the start
+        BEQ CheckVisib
+
+
+    EndIterative:
+        BRK
