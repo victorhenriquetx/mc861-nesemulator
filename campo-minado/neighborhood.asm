@@ -1,3 +1,25 @@
+; LDA #$67
+; STA $0123
+; LDA #$67
+; STA $011b
+
+; LDA #$87
+; STA $0124
+; LDA #$87
+; STA $0122
+; LDA #$87
+; STA $012b
+
+; LDA #$87
+; STA $011c
+; LDA #$87
+; STA $011a
+; LDA #$87
+; STA $0113
+
+; LDA #$23
+; PHA
+; LDA #$00
 
 setNeighborsVisib:
     ; Load clicked tile from the stack
@@ -11,6 +33,9 @@ setNeighborsVisib:
     INY
 
     CheckVisib:
+        DEY
+        LDA $0200, y
+        INY
         TAX
         LDA $0100, x            ; Load the tile byte information
         AND #$80                ; Get the visibility bit
@@ -20,9 +45,14 @@ setNeighborsVisib:
         TYA
         CMP #$01                ; If Y == 1 we reached the end of the iterativeLoop
         BEQ EndIterative
+
+        DEY                     ; If Y != 1 we keep iterating after decreasing Y
+        BNE CheckVisib
     
     IterativeLoop:
         ; Set the visibility bit
+        TXA
+        LDA $0100, x
         ORA #$80
         STA $0100, x
         DEY                     ; Decrement iterative array
@@ -60,7 +90,7 @@ setNeighborsVisib:
             ; Go to the bot neighbor
             ; Test if lower bound exists
             AND #$38
-            CMP #$37
+            CMP #$38
             BEQ LeftNeighbot    ; In case the lower bound doesn't exist, branch
             ; Add BotNeighbor to iterative array
             TXA
@@ -77,6 +107,7 @@ setNeighborsVisib:
             CMP #$00
             BEQ CheckVisib    ; In case the lefter bound doesn't exist, branch to the start again
 
+            TXA
             AND #$08
             CMP #$08
             BEQ CheckVisib    ; In case the lefter bound doesn't exist, branch to the start again
