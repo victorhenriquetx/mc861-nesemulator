@@ -57,6 +57,11 @@ setNeighborsVisib:
         STA $0100, x
         DEY                     ; Decrement iterative array
 
+        ; Check if selected tile is zero or a numbered tile
+        TXA
+        AND #%00001111
+        BNE CheckVisib
+
         TopNeighbor:
             TXA
             ; Go to the top neighbor
