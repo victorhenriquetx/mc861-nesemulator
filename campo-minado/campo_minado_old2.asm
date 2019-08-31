@@ -16,6 +16,11 @@ tile_value .rs 1
 temp      .rs 1
 temp_2    .rs 1
 
+var_i     .rs 1
+var_j     .rs 1
+
+bombs     .rs 1
+
 button_a .rs 1
 button_b .rs 1
 button_up .rs 1
@@ -25,6 +30,7 @@ button_right .rs 1
 button_select .rs 1
 button_start .rs 1
 
+queue .rs 64
 array .rs 64
 
 ;;;;;;;;;;;;;;;
@@ -85,11 +91,6 @@ LoadPalettesLoop:
                         ; if compare was equal to 32, keep going down
 
 
-  LDA #%10000000   ; enable NMI, sprites from Pattern Table 1
-  STA $2000
-
-  LDA #%00010000   ; enable sprites
-  STA $2001
 
   LDA #$00
   STA tile_selected
@@ -107,19 +108,37 @@ LoadPalettesLoop:
   
   LDX #$00
 load_map_ram:
-  LDA sprites, x
+  LDA field, x
   STA array, x
   INX
   CPX #$40
   BNE load_map_ram
   
+  LDA #$00
+  STA bombs
+
+  LDA #$80
+  STA $0200        ;put sprite 0 in center ($80) of screen vertically
+  LDA #$0A
+  STA $0201        ;tile number = 0
+  LDA #$00
+  STA $0202        ;color palette = 0, no flipping
+  LDA #$80
+  STA $0203        ;put sprite 0 in center ($80) of screen horizontally
+  
+  ; select the first tile
   LDY #$00
   LDA array, y 
   ORA #$40
   STA array, y
-  
 
   JSR print_field
+
+  LDA #%10000000   ; enable NMI, sprites from Pattern Table 1
+  STA $2000
+
+  LDA #%00010000   ; enable sprites
+  STA $2001
 Forever:
   JMP Forever     ;jump back to Forever, infinite loop
   
@@ -145,12 +164,6 @@ NMI:
   JSR ReadController
 
   ; LDA click
-  ; CMP #$06
-  ; BNE button_release
-  ; JMP button_done
-
-; button_release:
-;   JSR check_release
   
 button_done:
   JSR print_field
@@ -163,12 +176,12 @@ print_field:
   LDY #$00
   
   LDA #$00
-  STA $0050 ; i
-  STA $0051 ; j
+  STA var_i ; i
+  STA var_j ; j
 
   LDA #$40
-  STA $0052 ; horizontal
-  STA $0053 ; vertical
+  STA temp ; horizontal
+  STA temp_2 ; vertical
 
   LDA #$00
   STA p_tiles_Lo
@@ -182,11 +195,11 @@ print_field:
 
 for_i:
   LDA #$40
-  STA $0052
+  STA temp
 for_j:
 
   ; select position
-  LDA $0053
+  LDA temp_2
   STA $0200, x        ; put sprite 0 in center ($40) of screen vert
   INX
   ; select tile
@@ -235,28 +248,28 @@ select_tile:
   
   ; select position
   CLC
-  LDA $0052
+  LDA temp
   ADC #$8
   STA $0200, x        ; put sprite 0 in center ($80) of screen horiz
-  STA $0052
+  STA temp
   INX
   
-  INC $0051
-  LDA $0051
+  INC var_j
+  LDA var_j
   CMP #$8
   BNE for_j
 
   LDA #$00
-  STA $0051
+  STA var_j
   
   CLC
-  LDA $0053
+  LDA temp_2
   ADC #$08
-  STA $0053
+  STA temp_2
   
   CLC
-  INC $0050
-  LDA $0050
+  INC var_i
+  LDA var_i
   CMP #$8
   BEQ end_print
   JMP for_i
@@ -288,11 +301,28 @@ ReadA:
   STA button_a
   CMP #$00
   BEQ ReadADone
-  
+
   LDX tile_selected
   LDA array, x
-  ORA #$80
-  STA array, x
+  AND #%00100000
+  BNE ReadADone
+
+  ; disable bombs select
+  LDA array, x
+  AND #$0F
+  CMP #$0B
+  BNE continue
+
+  JSR gameover
+  BRK
+continue:
+
+  ; LDA array, x
+  ; ORA #$80
+  ; STA array, x
+
+  ; LDA array, x
+  JSR setNeighborsVisib
 
 ReadADone:
 ReadB:
@@ -313,6 +343,14 @@ ReadB:
   ADC #%00100000
   AND #%00100000
   STA temp_2
+
+  AND #%00100000
+  BEQ decrement_flags
+  INC bombs
+  JMP draw_flag
+decrement_flags:
+  DEC bombs
+draw_flag:
   LDA temp
   AND #%11011111
   ORA temp_2
@@ -458,6 +496,209 @@ ReadRight:
 ReadRightDone:
   RTS
 
+setNeighborsVisib:
+  ; Load clicked tile from the stack
+  LDA tile_selected
+  ; We will use an iterate algorithm to search
+  ; the neighbors, avoiding recursion we save memory
+  ; in case of a big board
+  ; First we add the clicked tile to the iterative array (starts at $200)
+  LDY #$00
+  STA queue, y
+  INY
+
+CheckVisib:
+  CPY #$00
+  BNE continue_while
+  JMP EndIterative
+continue_while:
+
+
+  DEY
+  LDA queue, y
+  STA temp
+
+  LDX temp
+  LDA array, x            ; Load the tile byte information
+  
+  AND #%00100000          ; check if flag
+  BNE CheckVisib
+
+  LDA array, x
+  AND #$80                ; Get the visibility bit
+  BNE CheckVisib          ; If tile is not visible, start iterativeLoop
+
+  ; Set the visibility bit
+  LDX temp
+  LDA array, x
+  ORA #$80
+  STA array, x
+
+  ; Check if selected tile is zero or a numbered tile
+  ; TXA
+  LDA array, x
+  AND #%00001111
+  ; CMP #$00
+  BNE CheckVisib
+
+TopNeighbor:
+  
+  ; Go to the top neighbor
+  ; Test if upper bound exists
+  TXA
+  AND #$f8
+  BEQ RigthNeighbor   ; In case the upper bound doesn't exist, branch
+  ; Add TopNeighbor to iterative array
+  TXA
+  CLC
+  SBC #$07
+  
+  STA queue, y
+  INY
+
+RigthNeighbor:
+  
+  ; Go to the right neighbor
+  ; Test if righter bound exists
+  TXA
+  AND #$07
+  CMP #$07
+  
+  BEQ BotNeighbor     ; In case the righter bound doesn't exist, branch
+  ; Add RightNeighbor to iterative array
+  TXA
+  CLC
+  ADC #$01
+  
+  STA queue, y
+  INY
+
+BotNeighbor:
+  
+  ; Go to the bot neighbor
+  ; Test if lower bound exists
+  TXA
+  AND #$38
+  CMP #$38
+  BEQ LeftNeighbot    ; In case the lower bound doesn't exist, branch
+  ; Add BotNeighbor to iterative array
+  TXA
+  CLC
+  ADC #$08
+  
+  STA queue, y
+  INY
+
+LeftNeighbot:
+  
+  ; Go to the left neighbor
+  ; Test if lefter bound exists
+  TXA
+  AND #%00000111
+  BEQ CheckVisib    ; In case the lefter bound doesn't exist, branch to the start again
+
+  ; TXA
+  ; AND #$08
+  ; CMP #$08
+  ; BEQ CheckVisib    ; In case the lefter bound doesn't exist, branch to the start again
+  ; Add LeftNeighbot to iterative array
+  TXA
+  CLC
+  SBC #$00
+  
+  STA queue, y
+  INY
+
+TopLeft:
+  TXA
+  AND #%00000111      ; left margin
+  BEQ TopRight
+
+  TXA
+  AND #$f8
+  BEQ TopRight     ; test up
+  
+  TXA
+  CLC
+  SBC #$08
+  
+  STA queue, y
+  INY
+
+
+TopRight:
+
+  TXA
+  AND #$07
+  CMP #$07      
+  BEQ BotLeft   ; test right
+
+  TXA
+  AND #$f8
+  BEQ BotLeft     ; test up
+  
+  TXA
+  CLC
+  SBC #$06
+  
+  STA queue, y
+  INY
+
+BotLeft:
+  TXA
+  AND #%00000111      ; left margin
+  BEQ BotRight
+
+  TXA
+  AND #$38
+  CMP #$38
+  BEQ BotRight
+
+  TXA
+  CLC
+  ADC #$07
+  
+  STA queue, y
+  INY
+
+BotRight:
+
+  ; TXA
+  ; AND #$07
+  ; CMP #$07      
+  ; BEQ end_border   ; test right  
+  
+  ; TXA
+  ; AND #$38
+  ; CMP #$38
+  ; BEQ end_border
+
+  ; TXA
+  ; CLC
+  ; ADC #$09
+  
+  ; STA queue, y
+  ; INY
+end_border:
+
+  JMP CheckVisib  
+EndIterative:
+  RTS
+
+gameover:
+  LDX #$00
+init_game_over:
+  LDA array, x
+  ORA #$80
+  STA array, x
+  INX
+  CMP #$40
+  BNE init_game_over
+
+  RTS
+
+
+
 ;;;;;;;;;;;;;;  
   
   
@@ -468,15 +709,15 @@ palette:
   .db $0F,$01,$20,$10,$0F,$19,$20,$10,$0F,$06,$20,$10,$3C,$3D,$3E,$0F
   .db $0F,$01,$20,$10,$0F,$19,$20,$10,$0F,$06,$20,$10,$3C,$3D,$3E,$0F
 
-sprites:
-  .db $00, $00, $01, $02, $0B, $01, $00, $00
-  .db $00, $01, $03, $0B, $03, $01, $01, $01
-  .db $01, $02, $0B, $0B, $02, $01, $03, $0B
-  .db $0B, $02, $02, $02, $01, $01, $0B, $0B
-  .db $01, $01, $00, $00, $00, $02, $03, $03
-  .db $00, $00, $00, $00, $00, $01, $0B, $01
-  .db $01, $01, $00, $00, $00, $01, $01, $01
-  .db $0B, $01, $00, $00, $00, $0B, $0B, $0B
+field:
+  .db $01, $02, $01, $01, $01, $0B, $0B, $02
+  .db $0B, $02, $0B, $01, $01, $03, $0B, $02
+  .db $01, $02, $01, $01, $00, $01, $01, $01
+  .db $00, $00, $00, $00, $00, $00, $00, $00
+  .db $00, $00, $00, $00, $01, $01, $01, $00 
+  .db $00, $00, $00, $01, $02, $0B, $02, $01
+  .db $00, $00, $00, $01, $0B, $03, $0B, $01
+  .db $00, $00, $00, $01, $01, $02, $01, $01
 
   .org $FFFA     ;first of the three vectors starts here
   .dw NMI        ;when an NMI happens (once per frame if enabled) the 
