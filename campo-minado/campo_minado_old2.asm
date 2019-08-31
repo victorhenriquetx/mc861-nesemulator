@@ -30,8 +30,8 @@ button_right .rs 1
 button_select .rs 1
 button_start .rs 1
 
-queue .rs 64
-array .rs 64
+queue .rs 96
+array .rs 65
 
 ;;;;;;;;;;;;;;;
   .bank 0
@@ -627,7 +627,6 @@ TopLeft:
 
 
 TopRight:
-
   TXA
   AND #$07
   CMP #$07      
@@ -646,12 +645,19 @@ TopRight:
 
 BotLeft:
   TXA
+  AND #%00001000      ; left margin
+  CMP #$08
+  BEQ BotRight
+
+  TXA  
   AND #%00000111      ; left margin
   BEQ BotRight
 
   TXA
-  AND #$38
-  CMP #$38
+  ; AND #$38
+  ; CMP #$38
+  AND #%11111000            ; invalid movement
+  EOR #%00111000
   BEQ BotRight
 
   TXA
@@ -662,23 +668,24 @@ BotLeft:
   INY
 
 BotRight:
-
-  ; TXA
-  ; AND #$07
-  ; CMP #$07      
-  ; BEQ end_border   ; test right  
+  TXA
+  AND #$07
+  CMP #$07      
+  BEQ end_border   ; test right
   
-  ; TXA
+  TXA
   ; AND #$38
   ; CMP #$38
-  ; BEQ end_border
+  AND #%11111000            ; invalid movement
+  EOR #%00111000
+  BEQ end_border
 
-  ; TXA
-  ; CLC
-  ; ADC #$09
+  TXA
+  CLC
+  ADC #$09
   
-  ; STA queue, y
-  ; INY
+  STA queue, y
+  INY
 end_border:
 
   JMP CheckVisib  
@@ -692,7 +699,7 @@ init_game_over:
   ORA #$80
   STA array, x
   INX
-  CMP #$40
+  CPX #$40
   BNE init_game_over
 
   RTS
@@ -710,14 +717,14 @@ palette:
   .db $0F,$01,$20,$10,$0F,$19,$20,$10,$0F,$06,$20,$10,$3C,$3D,$3E,$0F
 
 field:
-  .db $01, $02, $01, $01, $01, $0B, $0B, $02
-  .db $0B, $02, $0B, $01, $01, $03, $0B, $02
-  .db $01, $02, $01, $01, $00, $01, $01, $01
-  .db $00, $00, $00, $00, $00, $00, $00, $00
-  .db $00, $00, $00, $00, $01, $01, $01, $00 
-  .db $00, $00, $00, $01, $02, $0B, $02, $01
-  .db $00, $00, $00, $01, $0B, $03, $0B, $01
-  .db $00, $00, $00, $01, $01, $02, $01, $01
+  .db $00, $00, $00, $00, $00, $01, $0B, $0B
+  .db $00, $00, $00, $00, $00, $02, $03, $03
+  .db $00, $00, $00, $00, $00, $01, $0B, $01
+  .db $01, $01, $01, $00, $00, $01, $02, $02
+  .db $01, $0B, $01, $01, $01, $01, $01, $0B
+  .db $01, $01, $02, $02, $0B, $01, $01, $01
+  .db $00, $01, $02, $0B, $02, $01, $00, $00
+  .db $00, $01, $0B, $02, $01, $00, $00, $00
 
   .org $FFFA     ;first of the three vectors starts here
   .dw NMI        ;when an NMI happens (once per frame if enabled) the 
