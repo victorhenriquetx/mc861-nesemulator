@@ -1,12 +1,12 @@
 PY=python3
 #CCFLAGS=-std=gnu++11 -O3
 
-TST=./tst
-RES=./res
-BIN=./bin
-LOG=./log
-EXT=./ext
-NES=${PY} processor.py
+TST=./month_2_processor/tst
+RES=./month_2_processor/res
+BIN=./month_2_processor/bin
+LOG=./month_2_processor/log
+EXT=./month_2_processor/ext
+NES=${PY} ./month_2_processor/processor.py
 
 TESTS=$(addprefix ${BIN}/, $(notdir $(patsubst %.s,%,$(sort $(wildcard ${TST}/*.s)))))
 CROSS_AS=${EXT}/asm6/asm6
