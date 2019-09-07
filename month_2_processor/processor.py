@@ -2,7 +2,7 @@ import os, sys
 import src.Switcher as s
 
 
-def emula(filename):
+def emula(filename, init_pos):
     # carrega arquivo em bytes p memo
     memo = readFile(filename)
     pc = init_pos
@@ -30,7 +30,7 @@ def log():
 
 def main():
     filename = sys.argv[1]
-    emula(filename)
+    emula(filename, 0)
 
 
 main()
