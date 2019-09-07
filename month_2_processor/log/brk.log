@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "processor.py", line 36, in <module>
+    main()
+  File "processor.py", line 33, in main
+    emula(filename)
+  File "processor.py", line 8, in emula
+    pc = init_pos
+NameError: name 'init_pos' is not defined

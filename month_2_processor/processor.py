@@ -1,10 +1,10 @@
-import os
+import os, sys
 import src.Switcher as s
 
 
-def emula():
+def emula(filename):
     # carrega arquivo em bytes p memo
-    memo = readFile()
+    memo = readFile(filename)
     pc = init_pos
 
     while True:
@@ -28,4 +28,9 @@ def decodeInstruction():
 def log():
     return ""
 
-emula()
+def main():
+    filename = sys.argv[1]
+    emula(filename)
+
+
+main()

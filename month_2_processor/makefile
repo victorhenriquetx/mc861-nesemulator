@@ -6,15 +6,12 @@ RES=./res
 BIN=./bin
 LOG=./log
 EXT=./ext
-NES=./bin/nesemu
+NES=${PY} processor.py
 
 TESTS=$(addprefix ${BIN}/, $(notdir $(patsubst %.s,%,$(sort $(wildcard ${TST}/*.s)))))
 CROSS_AS=${EXT}/asm6/asm6
 
 all: ${BIN} ${LOG} ${NES}
-
-${NES}:
-	${PY} processor.py
 
 ${BIN}:
 	@mkdir -p ${BIN}
@@ -25,7 +22,7 @@ ${BIN}/%: ${TST}/%.s
 ${LOG}:
 	@mkdir -p ${LOG}
 
-test: ${BIN} ${LOG} ${NES} ${TESTS}
+test: ${BIN} ${LOG} ${TESTS}
 	@{  echo "************************* Tests ******************************"; \
 		test_failed=0; \
 		test_passed=0; \
