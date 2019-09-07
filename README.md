@@ -1,7 +1,5 @@
 # mc861-nesemulator
 
-## MAKEFILE na pasta 'month_2_processor'
-
 Projeto para a disciplina MC861 - segundo semestre de 2019.
 
 ### Integrantes do grupo:
