@@ -1,7 +1,8 @@
-import os, sys
+import os
+import sys
 import src.Switcher as s
-import src.registers as registers
-from struct import pack
+from src.registers import registers
+
 
 def emula(filename, init_pos):
     # carrega arquivo em bytes p memo
@@ -16,18 +17,21 @@ def emula(filename, init_pos):
         err = a.which_instruction(decod_instruction, instruction_param) # tratativa da instrucao no metodo de classe
 
         log(err)
+        print(registers.X)
         break
 
-#TODO implementar funcoes auxiliares
+# TODO implementar funcoes auxiliares
 
 
 def readFile(filename):
     byte_str = open(filename, "rb").read()
     return list(byte_str)
 
+
 def read_memo():
     registers.PC += 1
     return registers.MEMO[registers.PC - 1]
+
 
 def decode_instruction(bin_instruction):
     # converte byte para string no formato do which_instruction
@@ -41,12 +45,15 @@ def decode_instruction(bin_instruction):
         return "_inx", False
     return ""
 
+
 def log(err):
     return ""
+
 
 def main():
     filename = sys.argv[1]
     emula(filename, 0)
+
 
 if __name__ == "__main__":
     main()
