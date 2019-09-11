@@ -1,4 +1,6 @@
 bin/
 *.pyc
 .vscode/
-*/__pycache__/*
+__pycache__/
+src/__pycache__/
+
