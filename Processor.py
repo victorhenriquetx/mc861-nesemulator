@@ -2,6 +2,7 @@ import os
 import sys
 from src.Register import Register8bit, Register16bit, RegisterFlag
 from src.Memory import Memory
+from src.methods import _adc
 
 _DEBUG = True
 
@@ -36,7 +37,7 @@ class Processor():
             # Debug instruction
             debug_print('Instruction', hex(instruction))
 
-            # TODO: Check PC increment oerflow
+            # TODO: Check PC increment overflow
 
             decod_instruction, instruction_param = self.decode_instruction(instruction)
             
@@ -60,7 +61,7 @@ class Processor():
 
         if bin_instruction == int('69', 16): # ADC Immediate
             immediate = self.read_memo()
-            return self._adc, immediate
+            return _adc(self, immediate)
         
         elif bin_instruction == int('AD', 16): # LDA Absolute
             # TODO: Check if the HI/LOW order is right
@@ -125,7 +126,6 @@ def debug_print(*args):
 
 def main():
     filename = sys.argv[1]
-
     processor = Processor(filename)
     processor.emula(0)
 
