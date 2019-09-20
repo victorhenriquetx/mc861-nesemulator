@@ -2,6 +2,7 @@ import os
 import sys
 from src.Register import Register8bit, Register16bit, RegisterFlag
 from src.Memory import Memory
+import src.Methods as methods
 
 _DEBUG = True
 
@@ -36,11 +37,9 @@ class Processor():
             # Debug instruction
             debug_print('Instruction', hex(instruction))
 
-            # TODO: Check PC increment oerflow
+            # TODO: Check PC increment overflow
 
-            decod_instruction, instruction_param = self.decode_instruction(instruction)
-            
-            decod_instruction(instruction_param)
+            self.decode_instruction(instruction)
 
             err = ""
             self.log(err)
@@ -60,64 +59,38 @@ class Processor():
 
         if bin_instruction == int('69', 16): # ADC Immediate
             immediate = self.read_memo()
-            return self._adc, immediate
+            return methods._adc(self, immediate)
         
         elif bin_instruction == int('AD', 16): # LDA Absolute
             # TODO: Check if the HI/LOW order is right
             absolute_position_hi = self.read_memo()
             absolute_position_lo = self.read_memo()
-            return self._lda, absolute_position_hi * 256 + absolute_position_lo
+            return methods._lda(self, absolute_position_hi * 256 + absolute_position_lo)
 
         elif bin_instruction == int('BD', 16): # LDA Absolute,X
             absolute_position_hi = self.read_memo()
             absolute_position_lo = self.read_memo()
-            return self._lda, absolute_position_hi * 256 + absolute_position_lo + self.X.value
+            return methods._lda(self, absolute_position_hi * 256 + absolute_position_lo + self.X.value)
 
         elif bin_instruction == int('81', 16): # STA Indirect,X
             # TODO: Check indirect order
             indirect_memory = self.read_memo() + self.X.value
             memory_position = self.memory.read_memo(indirect_memory)
 
-            return self._sta, memory_position
+            return methods._sta(self, memory_position)
 
         elif bin_instruction == int('00', 16): # BRK
             # TODO: Set flagas and move PC
-            return self._brk, 0
+            return methods._brk(self, 0)
 
         else:
             # TODO: Add error to log
-            return self._brk, 1
+            return methods._brk(self, 1)
 
 
     def log(self, err):
         return ""
 
-    # Instructions
-    def _adc(self, instruction_param):
-        self.A.value += instruction_param
-
-        if self.A.check_overflow():
-            self.A.value -= 255
-            self.FLAGS.set_C()
-            self.FLAGS.set_V()
-        if self.A.is_negative():
-            self.FLAGS.set_N()
-        if self.A.value == 0:
-            self.FLAGS.set_Z()
-
-    def _lda(self, memory_position):
-        debug_print(memory_position)
-        self.A.value = self.memory.read_memo(memory_position)
-        # TODO: Set flags
-
-    def _sta(self, memory_position):
-        debug_print(memory_position)
-        self.memory.write_memo(memory_position, self.A.value)
-        # TODO: Set flags
-
-    def _brk(self, exit_status):
-        print("Exit with status", exit_status)
-        sys.exit(exit_status)
 
 def debug_print(*args):
     if _DEBUG:
@@ -125,7 +98,6 @@ def debug_print(*args):
 
 def main():
     filename = sys.argv[1]
-
     processor = Processor(filename)
     processor.emula(0)
 
