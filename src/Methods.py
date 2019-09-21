@@ -20,5 +20,4 @@ def _sta(processor, memory_position):
         # TODO: Set flags
 
 def _brk(processor, exit_status):
-    print("Exit with status", exit_status)
     sys.exit(exit_status)
