@@ -80,6 +80,15 @@ class Processor():
 
             return methods._sta(self, memory_position)
 
+        elif bin_instruction == int('58', 16): # CLI
+            return methods._cli(self, None)
+
+        elif bin_instruction == int('D8', 16): # CLD
+            return methods._cld(self, None)
+
+        elif bin_instruction == int('B8', 16): # CLV
+            return methods._clv(self, None)
+
         elif bin_instruction == int('00', 16): # BRK
             # TODO: Set flagas and move PC
             return methods._brk(self, 0)

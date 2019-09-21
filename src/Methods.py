@@ -19,5 +19,14 @@ def _sta(processor, memory_position):
         processor.memory.write_memo(memory_position, processor.A.value)
         # TODO: Set flags
 
+def _cli(processor, instruction_param):
+    processor.FLAGS.clear_I()
+
+def _cld(processor, instruction_param):
+    processor.FLAGS.clear_D()
+
+def _clv(processor, instruction_param):
+    processor.FLAGS.clear_V()
+
 def _brk(processor, exit_status):
     sys.exit(exit_status)
