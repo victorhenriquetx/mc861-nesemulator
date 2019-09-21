@@ -89,6 +89,33 @@ class Processor():
         elif bin_instruction == int('B8', 16): # CLV
             return methods._clv(self, None)
 
+        elif bin_instruction == int('C9', 16): # CMP Immediate
+            immediate = self.read_memo()
+            return methods._cmp(self, immediate, is_immediate=True)
+
+        elif bin_instruction == int('C5', 16): # CMP Zero Page
+            zero_position = self.read_memo()
+            return methods._cmp(self, zero_position)
+
+        elif bin_instruction == int('D5', 16): # CMP Zero Page,X
+            zero_position = self.read_memo() + self.X.value
+            return methods._cmp(self, None)
+
+        elif bin_instruction == int('CD', 16): # CMP Absolute
+            return methods._cmp(self, None)
+
+        elif bin_instruction == int('DD', 16): # CMP Absolute,X
+            return methods._cmp(self, None)
+
+        elif bin_instruction == int('D9', 16): # CMP Absolute,Y
+            return methods._cmp(self, None)   
+
+        elif bin_instruction == int('C1', 16): # Indirect,X
+            return methods._cmp(self, None)   
+
+        elif bin_instruction == int('D1', 16): # Indirect,Y
+            return methods._cmp(self, None)            
+
         elif bin_instruction == int('00', 16): # BRK
             # TODO: Set flagas and move PC
             return methods._brk(self, 0)
