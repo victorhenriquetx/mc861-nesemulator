@@ -28,5 +28,13 @@ def _cld(processor, instruction_param):
 def _clv(processor, instruction_param):
     processor.FLAGS.clear_V()
 
+def _cmp(processor, instruction_param):
+    if processor.A.value >= instruction_param:
+        processor.FLAGS.set_C()
+    if processor.A.value == instruction_param:
+        processor.FLAGS.set_Z()
+    if processor.A.value >= int('80', 16):
+        processor.FLAGS.set_N()
+
 def _brk(processor, exit_status):
     sys.exit(exit_status)
