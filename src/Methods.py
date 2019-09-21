@@ -19,6 +19,10 @@ def _sta(processor, memory_position):
         processor.memory.write_memo(memory_position, processor.A.value)
         # TODO: Set flags
 
+
+def _jsr(processor, memory_position):
+    
+
 def _brk(processor, exit_status):
     print("Exit with status", exit_status)
     sys.exit(exit_status)
