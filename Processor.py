@@ -13,6 +13,7 @@ class Processor():
         self.X = Register8bit()
         self.Y = Register8bit()
         self.A = Register8bit()
+        self.STACK = Register8bit()
         self.FLAGS = RegisterFlag()
         
         self.PC = Register16bit()
