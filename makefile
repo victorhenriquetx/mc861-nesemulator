@@ -25,7 +25,7 @@ ${BIN}/%: ${TST}/%.s
 ${LOG}:
 	@mkdir -p ${LOG}
 
-test: ${BIN} ${LOG} ${TESTS} ${CROSS_AS}
+test: ${CROSS_AS} ${BIN} ${LOG} ${TESTS} 
 	@{  echo "************************* Tests ******************************"; \
 		test_failed=0; \
 		test_passed=0; \
