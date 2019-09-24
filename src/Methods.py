@@ -48,7 +48,10 @@ def _tay(processor):
     processor.FLAGS.set_N()
     processor.FLAGS.set_Z()
 
-#TODO: TSX TXS
+def _tsx(processor):
+    processor.X.value = processor.memory[processor.memory.stack_offset + processor.STACK.value]
+
+#TODO: TXS
 
 def _txa(processor):
     processor.A.value = processor.X.value
