@@ -97,6 +97,9 @@ class Processor():
         elif bin_instruction == int('F8', 16): # SED
             return methods._sed(self)
 
+        elif bin_instruction == int('78', 16): # SEI
+            return methods._sei(self)
+
         else:
             # TODO: Add error to log
             return methods._brk(self, 1)

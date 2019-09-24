@@ -32,3 +32,6 @@ def _sec(processor):
 
 def _sed(processor):
     processor.FLAGS.set_D()
+
+def _sei(processor):
+    processor.FLAGS.set_I()
