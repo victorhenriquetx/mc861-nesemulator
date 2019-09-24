@@ -54,3 +54,8 @@ def _txa(processor):
     processor.A.value = processor.X.value
     processor.FLAGS.set_N()
     processor.FLAGS.set_Z()
+
+def _tya(processor):
+    processor.A.value = processor.Y.value
+    processor.FLAGS.set_N()
+    processor.FLAGS.set_Z()
