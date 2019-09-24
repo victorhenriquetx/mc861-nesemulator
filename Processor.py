@@ -100,6 +100,11 @@ class Processor():
         elif bin_instruction == int('78', 16): # SEI
             return methods._sei(self)
 
+        #TODO: STA, STX, STY
+
+        elif bin_instruction == int('AA', 16): # TAX
+            return methods._tax(self)
+
         else:
             # TODO: Add error to log
             return methods._brk(self, 1)
