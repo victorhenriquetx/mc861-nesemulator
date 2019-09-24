@@ -89,6 +89,11 @@ class Processor():
             absolute_position_lo = self.memory.pop_stack(self.STACK)
             return methods._rts(self, absolute_position_hi * 256 + absolute_position_lo +1)
 
+        #TODO: SBC
+
+        elif bin_instruction == int('38', 16): # SEC
+            return methods._sec(self)
+
         else:
             # TODO: Add error to log
             return methods._brk(self, 1)

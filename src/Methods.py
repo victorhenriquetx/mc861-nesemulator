@@ -24,3 +24,8 @@ def _brk(processor, exit_status):
 
 def _rts(processor, memory_position):
     processor.PC.value = memory_position
+
+#TODO: SBC
+
+def _sec(processor):
+    processor.FLAGS.set_C
