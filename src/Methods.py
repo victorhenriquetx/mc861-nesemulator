@@ -21,3 +21,6 @@ def _sta(processor, memory_position):
 
 def _brk(processor, exit_status):
     sys.exit(exit_status)
+
+def _rts(processor, memory_position):
+    processor.PC.value = memory_position

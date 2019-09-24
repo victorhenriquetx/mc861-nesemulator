@@ -84,6 +84,11 @@ class Processor():
             # TODO: Set flagas and move PC
             return methods._brk(self, 0)
 
+        elif bin_instruction == int('60', 16): # RTS
+            absolute_position_hi = self.memory.pop_stack(self.STACK)
+            absolute_position_lo = self.memory.pop_stack(self.STACK)
+            return methods._rts(self, absolute_position_hi * 256 + absolute_position_lo +1)
+
         else:
             # TODO: Add error to log
             return methods._brk(self, 1)
