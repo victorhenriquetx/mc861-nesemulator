@@ -105,6 +105,9 @@ class Processor():
         elif bin_instruction == int('AA', 16): # TAX
             return methods._tax(self)
 
+        elif bin_instruction == int('A8', 16): # TAY
+            return methods._tay(self)
+
         else:
             # TODO: Add error to log
             return methods._brk(self, 1)

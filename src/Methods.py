@@ -40,3 +40,8 @@ def _tax(processor):
     processor.X.value = processor.A.value
     processor.FLAGS.set_N()
     processor.FLAGS.set_Z()
+
+def _tay(processor):
+    processor.Y.value = processor.A.value
+    processor.FLAGS.set_N()
+    processor.FLAGS.set_Z()
