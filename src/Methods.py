@@ -36,6 +36,8 @@ def _sed(processor):
 def _sei(processor):
     processor.FLAGS.set_I()
 
+#TODO: STA, STX, STY
+
 def _tax(processor):
     processor.X.value = processor.A.value
     processor.FLAGS.set_N()
@@ -43,5 +45,12 @@ def _tax(processor):
 
 def _tay(processor):
     processor.Y.value = processor.A.value
+    processor.FLAGS.set_N()
+    processor.FLAGS.set_Z()
+
+#TODO: TSX TXS
+
+def _txa(processor):
+    processor.A.value = processor.X.value
     processor.FLAGS.set_N()
     processor.FLAGS.set_Z()

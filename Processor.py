@@ -108,6 +108,12 @@ class Processor():
         elif bin_instruction == int('A8', 16): # TAY
             return methods._tay(self)
 
+        #TODO: TSX TXS
+
+        elif bin_instruction == int('8A', 16): # TXA
+            return methods._txa(self)
+        
+
         else:
             # TODO: Add error to log
             return methods._brk(self, 1)
