@@ -28,4 +28,7 @@ def _rts(processor, memory_position):
 #TODO: SBC
 
 def _sec(processor):
-    processor.FLAGS.set_C
+    processor.FLAGS.set_C()
+
+def _sed(processor):
+    processor.FLAGS.set_D()

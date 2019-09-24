@@ -94,6 +94,9 @@ class Processor():
         elif bin_instruction == int('38', 16): # SEC
             return methods._sec(self)
 
+        elif bin_instruction == int('F8', 16): # SED
+            return methods._sed(self)
+
         else:
             # TODO: Add error to log
             return methods._brk(self, 1)
