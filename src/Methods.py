@@ -15,10 +15,6 @@ def _adc(processor, instruction_param):
 def _lda(processor, memory_position):
     processor.A.value = processor.memory.read_memo(memory_position)
 
-def _sta(processor, memory_position):
-        processor.memory.write_memo(memory_position, processor.A.value)
-        # TODO: Set flags
-
 def _brk(processor, exit_status):
     sys.exit(exit_status)
 
@@ -36,7 +32,10 @@ def _sed(processor):
 def _sei(processor):
     processor.FLAGS.set_I()
 
-#TODO: STA, STX, STY
+def _sta(processor, memory_position):
+    processor.memory.write_memo(memory_position, processor.A.value)
+
+#TODO: STX, STY
 
 def _tax(processor):
     processor.X.value = processor.A.value

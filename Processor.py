@@ -73,13 +73,6 @@ class Processor():
             absolute_position_lo = self.read_memo()
             return methods._lda(self, absolute_position_hi * 256 + absolute_position_lo + self.X.value)
 
-        elif bin_instruction == int('81', 16): # STA Indirect,X
-            # TODO: Check indirect order
-            indirect_memory = self.read_memo() + self.X.value
-            memory_position = self.memory.read_memo(indirect_memory)
-
-            return methods._sta(self, memory_position)
-
         elif bin_instruction == int('00', 16): # BRK
             # TODO: Set flagas and move PC
             return methods._brk(self, 0)
@@ -100,7 +93,31 @@ class Processor():
         elif bin_instruction == int('78', 16): # SEI
             return methods._sei(self)
 
-        #TODO: STA, STX, STY
+        elif bin_instruction == int('8D', 16): # STA Absolute
+            absolute_position_hi = self.read_memo()
+            absolute_position_lo = self.read_memo()
+            return methods._rts(self, absolute_position_hi * 256 + absolute_position_lo)
+
+        elif bin_instruction == int('9D', 16): # STA Absolute,X
+            absolute_position_hi = self.read_memo()
+            absolute_position_lo = self.read_memo()
+            return methods._rts(self, absolute_position_hi * 256 + absolute_position_lo + self.X.value)
+
+        elif bin_instruction == int('99', 16): # STA Absolute,Y
+            absolute_position_hi = self.read_memo()
+            absolute_position_lo = self.read_memo()
+            return methods._rts(self, absolute_position_hi * 256 + absolute_position_lo + self.Y.value)
+
+        elif bin_instruction == int('81', 16): # STA Indirect,X
+            memory_position = self.read_memo()
+            # memory_position = self.memory.read_memo(indirect_memory)
+            return methods._sta(self, memory_position + self.X.value)
+
+        elif bin_instruction == int('91', 16): # STA Indirect,Y
+            # memory_position = self.memory.read_memo(indirect_memory)
+            return methods._sta(self, memory_position + self.Y.value)
+
+        #TODO: STX, STY
 
         elif bin_instruction == int('AA', 16): # TAX
             return methods._tax(self)
