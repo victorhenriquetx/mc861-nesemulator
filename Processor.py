@@ -93,29 +93,38 @@ class Processor():
         elif bin_instruction == int('78', 16): # SEI
             return methods._sei(self)
 
+        elif bin_instruction == int('85', 16): # STA Zero Page
+            memory_position = self.read_memo()
+            return methods._sta(self, memory_position)
+
+        elif bin_instruction == int('95', 16): # STA Zero Page, X
+            memory_position = self.read_memo()
+            return methods._sta(self, memory_position + self.X.value)
+
         elif bin_instruction == int('8D', 16): # STA Absolute
             absolute_position_hi = self.read_memo()
             absolute_position_lo = self.read_memo()
-            return methods._rts(self, absolute_position_hi * 256 + absolute_position_lo)
+            return methods._sta(self, absolute_position_hi * 256 + absolute_position_lo)
 
         elif bin_instruction == int('9D', 16): # STA Absolute,X
             absolute_position_hi = self.read_memo()
             absolute_position_lo = self.read_memo()
-            return methods._rts(self, absolute_position_hi * 256 + absolute_position_lo + self.X.value)
+            return methods._sta(self, absolute_position_hi * 256 + absolute_position_lo + self.X.value)
 
         elif bin_instruction == int('99', 16): # STA Absolute,Y
             absolute_position_hi = self.read_memo()
             absolute_position_lo = self.read_memo()
-            return methods._rts(self, absolute_position_hi * 256 + absolute_position_lo + self.Y.value)
+            return methods._sta(self, absolute_position_hi * 256 + absolute_position_lo + self.Y.value)
 
         elif bin_instruction == int('81', 16): # STA Indirect,X
-            memory_position = self.read_memo()
-            # memory_position = self.memory.read_memo(indirect_memory)
-            return methods._sta(self, memory_position + self.X.value)
+            indirect_memory = self.read_memo() + self.X.value
+            memory_position = self.memory.read_memo(indirect_memory)
+            return methods._sta(self, memory_position)
 
         elif bin_instruction == int('91', 16): # STA Indirect,Y
-            # memory_position = self.memory.read_memo(indirect_memory)
-            return methods._sta(self, memory_position + self.Y.value)
+            indirect_memory = self.read_memo() + self.Y.value
+            memory_position = self.memory.read_memo(indirect_memory)
+            return methods._sta(self, memory_position)
 
         #TODO: STX, STY
 
