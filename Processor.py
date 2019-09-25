@@ -4,7 +4,7 @@ from src.Register import Register8bit, Register16bit, RegisterFlag
 from src.Memory import Memory
 import src.Methods as methods
 
-_DEBUG = False
+_DEBUG = True
 
 class Processor():
     def __init__(self, filename):
