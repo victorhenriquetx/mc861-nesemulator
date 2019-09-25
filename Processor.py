@@ -126,7 +126,20 @@ class Processor():
             memory_position = self.memory.read_memo(indirect_memory)
             return methods._sta(self, memory_position)
 
-        #TODO: STX, STY
+        elif bin_instruction == int('86', 16): # STX Zero Page
+            memory_position = self.read_memo()
+            return methods._stx(self, memory_position)
+
+        elif bin_instruction == int('96', 16): # STX Zero Page, Y
+            memory_position = self.read_memo()
+            return methods._stx(self, memory_position + self.Y.value)
+
+        elif bin_instruction == int('8E', 16): # STX Absolute
+            absolute_position_hi = self.read_memo()
+            absolute_position_lo = self.read_memo()
+            return methods._stx(self, absolute_position_hi * 256 + absolute_position_lo)
+
+        #TODO: STY
 
         elif bin_instruction == int('AA', 16): # TAX
             return methods._tax(self)
