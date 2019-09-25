@@ -38,7 +38,8 @@ def _sta(processor, memory_position):
 def _stx(processor, memory_position):
     processor.memory.write_memo(memory_position, processor.X.value)
 
-#TODO: STY
+def _sty(processor, memory_position):
+    processor.memory.write_memo(memory_position, processor.Y.value)
 
 def _tax(processor):
     processor.X.value = processor.A.value

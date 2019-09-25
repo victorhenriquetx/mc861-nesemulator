@@ -139,7 +139,18 @@ class Processor():
             absolute_position_lo = self.read_memo()
             return methods._stx(self, absolute_position_hi * 256 + absolute_position_lo)
 
-        #TODO: STY
+        elif bin_instruction == int('84', 16): # STY Zero Page
+            memory_position = self.read_memo()
+            return methods._sty(self, memory_position)
+
+        elif bin_instruction == int('94', 16): # STY Zero Page, X
+            memory_position = self.read_memo()
+            return methods._sty(self, memory_position + self.X.value)
+
+        elif bin_instruction == int('8C', 16): # STY Absolute
+            absolute_position_hi = self.read_memo()
+            absolute_position_lo = self.read_memo()
+            return methods._sty(self, absolute_position_hi * 256 + absolute_position_lo)
 
         elif bin_instruction == int('AA', 16): # TAX
             return methods._tax(self)
