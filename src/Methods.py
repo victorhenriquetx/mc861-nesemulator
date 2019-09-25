@@ -40,13 +40,17 @@ def _sei(processor):
 
 def _tax(processor):
     processor.X.value = processor.A.value
-    processor.FLAGS.set_N()
-    processor.FLAGS.set_Z()
+    if processor.X.value == 0:
+        processor.FLAGS.set_Z()
+    if processor.X.value & 128 == 0:
+        processor.FLAGS.set_N()
 
 def _tay(processor):
     processor.Y.value = processor.A.value
-    processor.FLAGS.set_N()
-    processor.FLAGS.set_Z()
+    if processor.Y.value == 0:
+        processor.FLAGS.set_Z()
+    if processor.Y.value & 128 == 0:
+        processor.FLAGS.set_N()
 
 def _tsx(processor):
     processor.X.value = processor.memory[processor.memory.stack_offset + processor.STACK.value]
@@ -56,10 +60,14 @@ def _txs(processor):
 
 def _txa(processor):
     processor.A.value = processor.X.value
-    processor.FLAGS.set_N()
-    processor.FLAGS.set_Z()
+    if processor.A.value == 0:
+        processor.FLAGS.set_Z()
+    if processor.A.value & 128 == 0:
+        processor.FLAGS.set_N()
 
 def _tya(processor):
     processor.A.value = processor.Y.value
-    processor.FLAGS.set_N()
-    processor.FLAGS.set_Z()
+    if processor.A.value == 0:
+        processor.FLAGS.set_Z()
+    if processor.A.value & 128 == 0:
+        processor.FLAGS.set_N()
