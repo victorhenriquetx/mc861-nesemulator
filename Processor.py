@@ -4,8 +4,6 @@ from src.Register import Register8bit, Register16bit, RegisterFlag
 from src.Memory import Memory
 import src.Methods as methods
 
-_DEBUG = False
-
 class Processor():
     def __init__(self, filename):
         self.filename = filename
@@ -24,28 +22,29 @@ class Processor():
     def emula(self, init_pos):
         # Emulation Loop
         while True:
-            # Debug registers
-            debug_print('======')
-            debug_print('X:', hex(self.X.value))
-            debug_print('Y:', hex(self.Y.value))
-            debug_print('A:', hex(self.A.value))
-            debug_print('PC:', hex(self.PC.value))
-            debug_print('Memory:', [hex(hex_v) for hex_v in self.memory.mem])
-            debug_print('======')
-
             instruction = self.read_memo()
 
-            # Debug instruction
-            debug_print('Instruction', hex(instruction))
+            # Log instruction - ONLY FOR TESTING PURPOSES
+            # print('| instruction = ' + hex(instruction), end = ' ')
+
+            # Log registers
+            print('| pc = ' + hex(self.PC.value), end = ' ')
+            print('| a = ' + hex(self.A.value), end = ' ')
+            print('| x = ' + hex(self.X.value), end = ' ')
+            print('| y = ' + hex(self.Y.value), end = ' ')
+            print('| sp = ' + hex(self.STACK.value), end = ' ')
+            print('| p[NV-BDIZC] = ' + str(self.FLAGS.get_N()) + str(self.FLAGS.get_V()) + '1' + str(self.FLAGS.get_B()) + str(self.FLAGS.get_D()) + str(self.FLAGS.get_I()) + str(self.FLAGS.get_Z()) + str(self.FLAGS.get_C()), end = '')
 
             # TODO: Check PC increment overflow
 
             self.decode_instruction(instruction)
 
+            # Finishes log print (there may be memory logs while decoding specific instructions)
+            print(' |')
+
             err = ""
             self.log(err)
             
-
     # TODO implementar funcoes auxiliares
     def read_memo(self):
         readed_value = self.memory.read_memo(self.PC.value)
@@ -91,11 +90,6 @@ class Processor():
 
     def log(self, err):
         return ""
-
-
-def debug_print(*args):
-    if _DEBUG:
-        print(args)
 
 def main():
     filename = sys.argv[1]
