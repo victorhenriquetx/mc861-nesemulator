@@ -165,7 +165,18 @@ class Processor():
             absolute_position_lo = self.read_memo()
             value = self.memory.read_memo(absolute_position_hi * 256 + absolute_position_lo + self.X.value)
             return methods._asl(self, value)
-            
+        
+        #---------------------- BIT Instruction-------------------------------------
+        elif bin_instruction == int('24', 16): # BIT Zero Page
+            zero_position = self.read_memo()
+            value = self.memory.read_memo(zero_position)
+            return methods._bit(self, value)
+        elif bin_instruction == int('2C', 16): # BIT Absolute
+            absolute_position_hi = self.read_memo()
+            absolute_position_lo = self.read_memo()
+            value = self.memory.read_memo(absolute_position_hi * 256 + absolute_position_lo)
+            return methods._bit(self,value)    
+        
         #---------------------- Branch Instruction---------------------------------- 
         elif bin_instruction == int('10', 16):
             return methods._bpl(self)
