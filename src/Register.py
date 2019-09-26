@@ -45,6 +45,27 @@ class RegisterFlag(Register8bit):
     def set_C(self):
         self.value = self.value | 1
 
+    def get_N(self):
+        return self.value & 128
+
+    def get_V(self):
+        return self.value & 64
+    
+    def get_B(self):
+        return self.value & 16
+    
+    def get_D(self):
+        return self.value & 8
+    
+    def get_I(self):
+        return self.value & 4
+
+    def get_Z(self):
+        return self.value & 2
+
+    def get_C(self):
+        return self.value & 1
+
 
 class Register16bit(Register):
     def is_negative(self):
