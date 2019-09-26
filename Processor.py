@@ -179,21 +179,29 @@ class Processor():
         
         #---------------------- Branch Instruction---------------------------------- 
         elif bin_instruction == int('10', 16):
-            return methods._bpl(self)
+            label_position = self.read_memo()
+            return methods._bpl(self, label_position)
         elif bin_instruction == int('30', 16):
-            return methods._bmi(self)
+            label_position = self.read_memo()
+            return methods._bmi(self, label_position)
         elif bin_instruction == int('50', 16):
-            return methods._bvc(self)
+            label_position = self.read_memo()
+            return methods._bvc(self, label_position)
         elif bin_instruction == int('70', 16):
-            return methods._bvs(self)
+            label_position = self.read_memo()
+            return methods._bvs(self, label_position)
         elif bin_instruction == int('90', 16):
-            return methods._bcc(self)
+            label_position = self.read_memo()
+            return methods._bcc(self, label_position)
         elif bin_instruction == int('B0', 16):
-            return methods._bcs(self)
+            label_position = self.read_memo()
+            return methods._bcs(self, label_position)
         elif bin_instruction == int('D0', 16):
-            return methods._bne(self)
+            label_position = self.read_memo()
+            return methods._bne(self, label_position)
         elif bin_instruction == int('F0', 16):
-            return methods._beq(self)
+            label_position = self.read_memo()
+            return methods._beq(self, label_position)
 
 
         elif bin_instruction == int('AD', 16): # LDA Absolute
