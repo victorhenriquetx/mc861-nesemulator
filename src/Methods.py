@@ -37,7 +37,7 @@ def _bit(processor, value):
         processor.FLAGS.set_Z()
 
 def _bcc(processor, memory_position):
-    if(!processor.FLAGS.is_C()):
+    if(processor.FLAGS.is_C() == 0):
         processor.PC = memory_position
 def _bcs(processor, memory_position):
     if(processor.FLAGS.is_C()):
@@ -49,13 +49,13 @@ def _bmi(processor, memory_position):
     if(processor.FLAGS.is_N()):
         processor.PC = memory_position
 def _bne(processor, memory_position):
-    if(!processor.FLAGS.is_Z()):
+    if(processor.FLAGS.is_Z() == 0):
         processor.PC = memory_position
 def _bpl(processor, memory_position):
-    if(!processor.FLAGS.is_N()):
+    if(processor.FLAGS.is_N() == 0):
         processor.PC = memory_position
 def _bvc(processor, memory_position):
-    if(!processor.FLAGS.is_V()):
+    if(processor.FLAGS.is_V() == 0):
         processor.PC = memory_position
 def _bvs(processor, memory_position):
     if(processor.FLAGS.is_V()):
