@@ -46,25 +46,25 @@ class RegisterFlag(Register8bit):
         self.value = self.value | 1
 
     def get_N(self):
-        return self.value & 128
+        return 1 if self.value & 128 else 0
 
     def get_V(self):
-        return self.value & 64
+        return 1 if self.value & 64 else 0
     
     def get_B(self):
-        return self.value & 16
+        return 1 if self.value & 16 else 0
     
     def get_D(self):
-        return self.value & 8
+        return 1 if self.value & 8 else 0
     
     def get_I(self):
-        return self.value & 4
+        return 1 if self.value & 4 else 0
 
     def get_Z(self):
-        return self.value & 2
+        return 1 if self.value & 2 else 0
 
     def get_C(self):
-        return self.value & 1
+        return 1 if self.value & 1 else 0
 
 
 class Register16bit(Register):
