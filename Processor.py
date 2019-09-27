@@ -99,22 +99,32 @@ class Processor():
 
         elif bin_instruction == int('D5', 16): # CMP Zero Page,X
             zero_position = self.read_memo() + self.X.value
-            return methods._cmp(self, None)
+            return methods._cmp(self, zero_position)
 
         elif bin_instruction == int('CD', 16): # CMP Absolute
-            return methods._cmp(self, None)
+            absolute_position_hi = self.read_memo()
+            absolute_position_lo = self.read_memo()
+            return methods._cmp(self, absolute_position_hi * 256 + absolute_position_lo)
 
         elif bin_instruction == int('DD', 16): # CMP Absolute,X
-            return methods._cmp(self, None)
+            absolute_position_hi = self.read_memo()
+            absolute_position_lo = self.read_memo()
+            return methods._cmp(self, absolute_position_hi * 256 + absolute_position_lo + self.X.value)
 
         elif bin_instruction == int('D9', 16): # CMP Absolute,Y
-            return methods._cmp(self, None)   
+            absolute_position_hi = self.read_memo()
+            absolute_position_lo = self.read_memo()
+            return methods._cmp(self, absolute_position_hi * 256 + absolute_position_lo + self.Y.value)  
 
-        elif bin_instruction == int('C1', 16): # Indirect,X
-            return methods._cmp(self, None)   
+        elif bin_instruction == int('C1', 16): # CMP (Indirect,X)
+            indirect_memory = self.read_memo() + self.X.value
+            memory_position = self.memory.read_memo(indirect_memory)
+            return methods._cmp(self, memory_position)   
 
-        elif bin_instruction == int('D1', 16): # Indirect,Y
-            return methods._cmp(self, None)            
+        elif bin_instruction == int('D1', 16): # CMP (Indirect),Y
+            indirect_memory = self.read_memo()
+            memory_position = self.memory.read_memo(indirect_memory) + self.Y.value
+            return methods._cmp(self, memory_position)   
 
         elif bin_instruction == int('00', 16): # BRK
             # TODO: Set flagas and move PC

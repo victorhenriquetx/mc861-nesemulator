@@ -29,15 +29,19 @@ def _clv(processor, instruction_param):
     processor.FLAGS.clear_V()
 
 def _cmp(processor, instruction_param, is_immediate=False):
+    # Load value to be compared from memory if not using an immediate
     if not is_immediate:
         value = processor.memory.read_memo(instruction_param)
     else:
         value = instruction_param
+
+    result = processor.A.value - value
+    # Set comparissons flag
     if processor.A.value >= value:
         processor.FLAGS.set_C()
     if processor.A.value == value:
         processor.FLAGS.set_Z()
-    if processor.A.value >= int('80', 16):
+    if result >= int('80', 16):
         processor.FLAGS.set_N()
 
 def _brk(processor, exit_status):
