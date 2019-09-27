@@ -82,7 +82,49 @@ class Processor():
             absolute_position_lo = self.memory.pop_stack(self.STACK)
             return methods._rts(self, absolute_position_hi * 256 + absolute_position_lo +1)
 
-        #TODO: SBC
+        if bin_instruction == int('E9', 16): # SBC Immediate
+            value = self.read_memo()
+            return methods._sbc(self, value)
+
+        elif bin_instruction == int('E5', 16): # SBC Zero Page
+            zero_position = self.read_memo()
+            value = self.memory.read_memo(zero_position)
+            return methods._sbc(self, value)
+
+        elif bin_instruction == int('F5', 16): # SBC Zero Page,X
+            zero_position = self.read_memo() + self.X.value
+            value = self.memory.read_memo(zero_position)
+            return methods._sbc(self, value)
+
+        elif bin_instruction == int('ED', 16): # SBC Absolute
+            absolute_position_hi = self.read_memo()
+            absolute_position_lo = self.read_memo()
+            value = self.memory.read_memo(absolute_position_hi * 256 + absolute_position_lo)
+            return methods._sbc(self,value)
+
+        elif bin_instruction == int('FD', 16): # SBC Absolute,X
+            absolute_position_hi = self.read_memo()
+            absolute_position_lo = self.read_memo()
+            value = self.memory.read_memo(absolute_position_hi * 256 + absolute_position_lo + self.X.value)
+            return methods._sbc(self, value)
+
+        elif bin_instruction == int('F9', 16): # SBC Absolute,Y
+            absolute_position_hi = self.read_memo()
+            absolute_position_lo = self.read_memo()
+            value = self.memory.read_memo(absolute_position_hi * 256 + absolute_position_lo + self.Y.value)
+            return methods._sbc(self, value)   
+
+        elif bin_instruction == int('E1', 16): # SBC Indirect,X
+            indirect_memory = self.read_memo() + self.X.value
+            memory_position = self.memory.read_memo(indirect_memory)
+            value = self.memory.read_memo(memory_position)
+            return methods._sbc(self, value)   
+
+        elif bin_instruction == int('F1', 16): # SBC Indirect,Y
+            indirect_memory = self.read_memo()
+            memory_position = self.memory.read_memo(indirect_memory) + self.Y.value
+            value = self.memory.read_memo(memory_position)
+            return methods._sbc(self, value)
 
         elif bin_instruction == int('38', 16): # SEC
             return methods._sec(self)
@@ -119,12 +161,14 @@ class Processor():
         elif bin_instruction == int('81', 16): # STA Indirect,X
             indirect_memory = self.read_memo() + self.X.value
             memory_position = self.memory.read_memo(indirect_memory)
-            return methods._sta(self, memory_position)
+            actual_memory = self.memory.read_memo(memory_position)
+            return methods._sta(self, actual_memory)
 
         elif bin_instruction == int('91', 16): # STA Indirect,Y
-            indirect_memory = self.read_memo() + self.Y.value
-            memory_position = self.memory.read_memo(indirect_memory)
-            return methods._sta(self, memory_position)
+            indirect_memory = self.read_memo()
+            memory_position = self.memory.read_memo(indirect_memory) + self.Y.value
+            actual_memory = self.memory.read_memo(memory_position)
+            return methods._sta(self, actual_memory)
 
         elif bin_instruction == int('86', 16): # STX Zero Page
             memory_position = self.read_memo()

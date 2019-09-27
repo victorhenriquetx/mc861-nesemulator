@@ -21,7 +21,17 @@ def _brk(processor, exit_status):
 def _rts(processor, memory_position):
     processor.PC.value = memory_position
 
-#TODO: SBC
+def _sbc(processor, value):
+    processor.A.value -= value - processor.FLAGS.is_C()
+
+    if processor.A.value < -128:
+        processor.A.value += 255
+        processor.FLAGS.set_C()
+        processor.FLAGS.set_V()
+    if processor.A.is_negative():
+        processor.FLAGS.set_N()
+    if processor.A.value == 0:
+        processor.FLAGS.set_Z()
 
 def _sec(processor):
     processor.FLAGS.set_C()
