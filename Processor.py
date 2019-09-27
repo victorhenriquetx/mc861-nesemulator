@@ -277,8 +277,20 @@ class Processor():
             indirect_position_hi = self.read_memo()
             indirect_position_lo = self.read_memo()
             
+            # Due to 6502 implementations of additions in register
+            # if the indirect low value is $FF, the value that will
+            # be loaded will be not the expected.
+
+            # For example if address $3000 contains $40, $30FF contains $80, and $3100
+            # contains $50, the result of JMP ($30FF) will be a transfer of control to 
+            # $4080 rather than $5080 as you intended i.e. the 6502 took the low byte 
+            # of the address from $30FF and the high byte from $3000.
+            indirect_position_lo_plus_one = indirect_position_lo + 1
+            if indirect_position_lo_plus_one > 255:
+                indirect_position_lo_plus_one -= 256
+
             memory_position_lo = self.memory.read_memo(indirect_position_hi * 256 + indirect_position_lo)
-            memory_position_hi = self.memory.read_memo(indirect_position_hi * 256 + indirect_position_lo + 1)
+            memory_position_hi = self.memory.read_memo(indirect_position_hi * 256 + indirect_position_lo_plus_one)
             return methods._jmp(self, memory_position_hi * 256, memory_position_lo)
 
         elif bin_instruction == int('00', 16): # BRK
