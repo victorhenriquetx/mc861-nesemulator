@@ -255,8 +255,6 @@ class Processor():
         elif bin_instruction == int('FE', 16): # INC Absolute,X
             absolute_position_hi = self.read_memo()
             absolute_position_lo = self.read_memo() + self.X.value
-            if absolute_position_lo > 255:
-                absolute_position_lo -= 256
             return methods._inc(self, absolute_position_hi * 256 + absolute_position_lo)
         
         elif bin_instruction == int('E8', 16): # INX
