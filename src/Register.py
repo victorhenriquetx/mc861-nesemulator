@@ -27,20 +27,38 @@ class RegisterFlag(Register8bit):
     def set_N(self):
         self.value = self.value | 128
 
+    def clear_N(self):
+        self.value = self.value & 128
+
     def set_V(self):
         self.value = self.value | 64
+
+    def clear_V(self):
+        self.value = self.value & 64
     
     def set_B(self):
         self.value = self.value | 16
+
+    def clear_B(self):
+        self.value = self.value & 16
     
     def set_D(self):
         self.value = self.value | 8
     
+    def clear_D(self):
+        self.value = self.value & 8
+    
     def set_I(self):
         self.value = self.value | 4
 
+    def clear_I(self):
+        self.value = self.value & 4
+
     def set_Z(self):
         self.value = self.value | 2
+
+    def clear_Z(self):
+        self.value = self.value & 2
 
     def set_C(self):
         self.value = self.value | 1
@@ -86,8 +104,6 @@ class RegisterFlag(Register8bit):
 
     def is_C(self):
         return 1 if self.value & 1 == 1 else 0
-        
-        
 
 class Register16bit(Register):
     def is_negative(self):
