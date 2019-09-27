@@ -6,12 +6,15 @@ RES=./res
 BIN=./bin
 LOG=./log
 EXT=./ext
-NES=${PY} ./processor.py
+NES=${PY} ./Processor.py
 
 TESTS=$(addprefix ${BIN}/, $(notdir $(patsubst %.s,%,$(sort $(wildcard ${TST}/*.s)))))
 CROSS_AS=${EXT}/asm6/asm6
 
-all: ${BIN} ${LOG} ${NES}
+all: ${BIN} ${LOG}
+
+${CROSS_AS}:
+	cd ${EXT}/asm6;	make all
 
 ${BIN}:
 	@mkdir -p ${BIN}
@@ -22,7 +25,7 @@ ${BIN}/%: ${TST}/%.s
 ${LOG}:
 	@mkdir -p ${LOG}
 
-test: ${BIN} ${LOG} ${TESTS}
+test: ${CROSS_AS} ${BIN} ${LOG} ${TESTS} 
 	@{  echo "************************* Tests ******************************"; \
 		test_failed=0; \
 		test_passed=0; \
@@ -46,8 +49,5 @@ test: ${BIN} ${LOG} ${TESTS}
 		echo "**************************************************************"; \
 	}
 
-# setup:
-# sudo apt-get install g++ libsdl1.2-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev
-
 clean:
-	rm -rf ${BIN}/* ${LOG}/*
+	rm -rf ${BIN}/* ${LOG}/* ${EXT}/asm/asm6
