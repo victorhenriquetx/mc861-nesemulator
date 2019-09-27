@@ -18,6 +18,49 @@ def _and(processor, value):
         processor.FLAGS.set_N()
     if processor.A.value == 0:
         processor.FLAGS.set_Z()
+def _lda(processor, value, immediate=False):
+    if not immediate:
+        processor.A.value = processor.memory.read_memo(value)
+    else:
+        processor.A.value = value
+
+def _ldx(processor, value, immediate=False):
+    if not immediate:
+        processor.X.value = processor.memory.read_memo(value)
+    else:
+        processor.X.value = value
+
+def _ldy(processor, value, immediate=False):
+    if not immediate:
+        processor.Y.value = processor.memory.read_memo(value)
+    else:
+        processor.Y.value = value
+
+def _lsr(processor, memory_position):
+    if isinstance(memory_position, str) and memory_position == 'A':
+        c = processor.A.value & 1 # get carry
+        processor.A.value = processor.A.value >> 1 # shift and store to Acc
+    else:
+        v = processor.memory.read_memo(memory_position)
+        c = v & 1 # get carry
+        v = v >> 1 # shift right
+        processor.memory.write_memo(memory_position, v) # store to memo
+
+    # store bit 7 to carry
+    if c == 0:
+        processor.FLAGS.clear_C()
+    else:
+        processor.FLAGS.set_C()
+
+def _nop():
+    pass
+
+def _ora(processor, value, immediate=False):
+    if not immediate:
+        v = processor.memory.read_memo(value)
+        processor.A.value = processor.A.value | v
+    else:
+        processor.A.value = processor.A.value | value
 
 def _asl(processor, value):
     processor.A.value = value << 1
@@ -261,6 +304,10 @@ def _jsr(processor, address, next_instruction):
     processor.memory.push_stack(processor.STACK, next_instruction)
     processor.PC.value = address
 
+def _jsr(processor, address, next_instruction):
+    processor.memory.push_stack(processor.STACK, next_instruction)
+    processor.PC.value = address
+
 def _brk(processor, exit_status):
     sys.exit(exit_status)
 
@@ -317,6 +364,7 @@ def _ror(processor, memory_position):
 def _rti(processor):
     processor.FLAGS.value = processor.memory.pop_stack(processor.STACK)
     processor.PC.value = processor.memory.pop_stack(processor.STACK)
+    
 def _rts(processor, memory_position):
     processor.PC.value = memory_position
 

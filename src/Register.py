@@ -44,6 +44,9 @@ class RegisterFlag(Register8bit):
 
     def set_C(self):
         self.value = self.value | 1
+    
+    def clear_N(self):
+        self.value &= ~(1 << 7)
 
     def clear_V(self):
         self.value &= ~(1 << 6)
