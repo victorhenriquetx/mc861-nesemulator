@@ -13,6 +13,9 @@ CROSS_AS=${EXT}/asm6/asm6
 
 all: ${BIN} ${LOG} ${NES}
 
+${CROSS_AS}:
+	${EXT}/asm6/make all
+
 ${BIN}:
 	@mkdir -p ${BIN}
 
