@@ -190,6 +190,34 @@ class Processor():
         elif bin_instruction == int('88', 16): # DEY
             return methods._dey(self, None)
 
+        elif bin_instruction == int('E6', 16): # INC Zero Page
+            zero_position = self.read_memo()
+            return methods._inc(self, zero_position)
+
+        elif bin_instruction == int('F6', 16): # INC Zero Page,X
+            zero_position = self.read_memo() + self.X.value
+            if zero_position > 255:
+                zero_position -= 256
+            return methods._inc(self, zero_position)
+
+        elif bin_instruction == int('EE', 16): # INC Absolute
+            absolute_position_hi = self.read_memo()
+            absolute_position_lo = self.read_memo()
+            return methods._inc(self, absolute_position_hi * 256 + absolute_position_lo)
+
+        elif bin_instruction == int('FE', 16): # INC Absolute,X
+            absolute_position_hi = self.read_memo()
+            absolute_position_lo = self.read_memo() + self.X.value
+            if absolute_position_lo > 255:
+                absolute_position_lo -= 256
+            return methods._inc(self, absolute_position_hi * 256 + absolute_position_lo)
+        
+        elif bin_instruction == int('E8', 16): # INX
+            return methods._inx(self, None)
+        
+        elif bin_instruction == int('C8', 16): # INY
+            return methods._iny(self, None)
+
         elif bin_instruction == int('00', 16): # BRK
             # TODO: Set flagas and move PC
             return methods._brk(self, 0)
