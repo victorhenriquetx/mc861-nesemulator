@@ -44,5 +44,21 @@ def _cmp(processor, instruction_param, is_immediate=False):
     if result >= int('80', 16):
         processor.FLAGS.set_N()
 
+def _cpx(processor, instruction_param, is_immediate=False):
+    # Load value to be compared from memory if not using an immediate
+    if not is_immediate:
+        value = processor.memory.read_memo(instruction_param)
+    else:
+        value = instruction_param
+
+    result = processor.X.value - value
+    # Set comparissons flag
+    if processor.X.value >= value:
+        processor.FLAGS.set_C()
+    if processor.X.value == value:
+        processor.FLAGS.set_Z()
+    if result >= int('80', 16):
+        processor.FLAGS.set_N()
+
 def _brk(processor, exit_status):
     sys.exit(exit_status)

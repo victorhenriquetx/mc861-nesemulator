@@ -124,7 +124,20 @@ class Processor():
         elif bin_instruction == int('D1', 16): # CMP (Indirect),Y
             indirect_memory = self.read_memo()
             memory_position = self.memory.read_memo(indirect_memory) + self.Y.value
-            return methods._cmp(self, memory_position)   
+            return methods._cmp(self, memory_position)  
+
+        elif bin_instruction == int('E0', 16): # CPX Immediate
+            immediate = self.read_memo()
+            return methods._cpx(self, immediate, is_immediate=True)
+
+        elif bin_instruction == int('E4', 16): # CPX Zero Page
+            zero_position = self.read_memo()
+            return methods._cpx(self, zero_position)
+
+        elif bin_instruction == int('EC', 16): # CPX Absolute
+            absolute_position_hi = self.read_memo()
+            absolute_position_lo = self.read_memo()
+            return methods._cpx(self, absolute_position_hi * 256 + absolute_position_lo) 
 
         elif bin_instruction == int('00', 16): # BRK
             # TODO: Set flagas and move PC
