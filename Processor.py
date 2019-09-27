@@ -190,6 +190,53 @@ class Processor():
         elif bin_instruction == int('88', 16): # DEY
             return methods._dey(self, None)
 
+        elif bin_instruction == int('49', 16): # EOR Immediate
+            immediate = self.read_memo()
+            return methods._eor(self, immediate, is_immediate=True)
+
+        elif bin_instruction == int('45', 16): # EOR Zero Page
+            zero_position = self.read_memo()
+            return methods._eor(self, zero_position)
+
+        elif bin_instruction == int('55', 16): # EOR Zero Page,X
+            zero_position = self.read_memo() + self.X.value
+            if zero_position > 255:
+                zero_position -= 256
+            return methods._eor(self, zero_position)
+
+        elif bin_instruction == int('4D', 16): # EOR Absolute
+            absolute_position_hi = self.read_memo()
+            absolute_position_lo = self.read_memo()
+            return methods._eor(self, absolute_position_hi * 256 + absolute_position_lo)
+
+        elif bin_instruction == int('5D', 16): # EOR Absolute,X
+            absolute_position_hi = self.read_memo()
+            absolute_position_lo = self.read_memo() + self.X.value
+            if absolute_position_lo > 255:
+                absolute_position_lo -= 256
+            return methods._eor(self, absolute_position_hi * 256 + absolute_position_lo)
+
+        elif bin_instruction == int('59', 16): # EOR Absolute,Y
+            absolute_position_hi = self.read_memo()
+            absolute_position_lo = self.read_memo() + self.Y.value
+            if absolute_position_lo > 255:
+                absolute_position_lo -= 256
+            return methods._eor(self, absolute_position_hi * 256 + absolute_position_lo)
+
+        elif bin_instruction == int('41', 16): # EOR (Indirect,X)
+            indirect_memory = self.read_memo() + self.X.value
+            if indirect_memory > 255:
+                indirect_memory -= 256
+            memory_position = self.memory.read_memo(indirect_memory)
+            return methods._eor(self, memory_position)   
+
+        elif bin_instruction == int('51', 16): # EOR (Indirect),Y
+            indirect_memory = self.read_memo()
+            memory_position = self.memory.read_memo(indirect_memory) + self.Y.value
+            if memory_position > 255:
+                memory_position -= 256
+            return methods._eor(self, memory_position)  
+
         elif bin_instruction == int('E6', 16): # INC Zero Page
             zero_position = self.read_memo()
             return methods._inc(self, zero_position)
@@ -217,6 +264,22 @@ class Processor():
         
         elif bin_instruction == int('C8', 16): # INY
             return methods._iny(self, None)
+        
+        elif bin_instruction == int('4C', 16): # JMP Absolute
+            absolute_position_hi = self.read_memo()
+            absolute_position_lo = self.read_memo()
+            return methods._jmp(self, absolute_position_hi * 256 + absolute_position_lo)
+        
+        elif bin_instruction == int('6C', 16): # JMP Indirect
+            # indirect_position points to low indirect value, a subsequent
+            # read in the memory for indirect_position + 1 is needed
+            # for the memory high position
+            indirect_position_hi = self.read_memo()
+            indirect_position_lo = self.read_memo()
+            
+            memory_position_lo = self.memory.read_memo(indirect_position_hi * 256 + indirect_position_lo)
+            memory_position_hi = self.memory.read_memo(indirect_position_hi * 256 + indirect_position_lo + 1)
+            return methods._jmp(self, memory_position_hi * 256, memory_position_lo)
 
         elif bin_instruction == int('00', 16): # BRK
             # TODO: Set flagas and move PC

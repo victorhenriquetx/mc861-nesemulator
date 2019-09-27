@@ -116,6 +116,20 @@ def _dey(processor, instruction_param):
     if processor.Y.value >= int('80', 16):
         processor.FLAGS.set_N()
 
+def _eor(processor, instruction_param, is_immediate=False):
+    # Load value to be XORed from memory if not using an immediate
+    if not is_immediate:
+        value = processor.memory.read_memo(instruction_param)
+    else:
+        value = instruction_param
+
+    processor.A.value = processor.A.value ^ value
+    # Set flags
+    if processor.A.value == value:
+        processor.FLAGS.set_Z()
+    if processor.A.value >= int('80', 16):
+        processor.FLAGS.set_N()
+
 def _inc(processor, instruction_param):
     value = processor.memory.read_memo(instruction_param)
     value += 1
@@ -154,6 +168,9 @@ def _iny(processor, instruction_param):
         processor.FLAGS.set_Z()
     if processor.Y.value >= int('80', 16):
         processor.FLAGS.set_N()
+
+def _jmp(processor, instruction_param):
+    pass
 
 def _brk(processor, exit_status):
     sys.exit(exit_status)
