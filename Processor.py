@@ -99,6 +99,8 @@ class Processor():
 
         elif bin_instruction == int('D5', 16): # CMP Zero Page,X
             zero_position = self.read_memo() + self.X.value
+            if zero_position > 255:
+                zero_position -= 256
             return methods._cmp(self, zero_position)
 
         elif bin_instruction == int('CD', 16): # CMP Absolute
@@ -108,22 +110,30 @@ class Processor():
 
         elif bin_instruction == int('DD', 16): # CMP Absolute,X
             absolute_position_hi = self.read_memo()
-            absolute_position_lo = self.read_memo()
-            return methods._cmp(self, absolute_position_hi * 256 + absolute_position_lo + self.X.value)
+            absolute_position_lo = self.read_memo() + self.X.value
+            if absolute_position_lo > 255:
+                absolute_position_lo -= 256
+            return methods._cmp(self, absolute_position_hi * 256 + absolute_position_lo)
 
         elif bin_instruction == int('D9', 16): # CMP Absolute,Y
             absolute_position_hi = self.read_memo()
-            absolute_position_lo = self.read_memo()
-            return methods._cmp(self, absolute_position_hi * 256 + absolute_position_lo + self.Y.value)  
+            absolute_position_lo = self.read_memo() + self.Y.value
+            if absolute_position_lo > 255:
+                absolute_position_lo -= 256
+            return methods._cmp(self, absolute_position_hi * 256 + absolute_position_lo)
 
         elif bin_instruction == int('C1', 16): # CMP (Indirect,X)
             indirect_memory = self.read_memo() + self.X.value
+            if indirect_memory > 255:
+                indirect_memory -= 256
             memory_position = self.memory.read_memo(indirect_memory)
             return methods._cmp(self, memory_position)   
 
         elif bin_instruction == int('D1', 16): # CMP (Indirect),Y
             indirect_memory = self.read_memo()
             memory_position = self.memory.read_memo(indirect_memory) + self.Y.value
+            if memory_position > 255:
+                memory_position -= 256
             return methods._cmp(self, memory_position)  
 
         elif bin_instruction == int('E0', 16): # CPX Immediate
@@ -137,20 +147,48 @@ class Processor():
         elif bin_instruction == int('EC', 16): # CPX Absolute
             absolute_position_hi = self.read_memo()
             absolute_position_lo = self.read_memo()
-            return methods._cpx(self, absolute_position_hi * 256 + absolute_position_lo) 
+            return methods._cpx(self, absolute_position_hi * 256 + absolute_position_lo)
         
-        elif bin_instruction == int('C0', 16): # CPX Immediate
+        elif bin_instruction == int('C0', 16): # CPY Immediate
             immediate = self.read_memo()
             return methods._cpy(self, immediate, is_immediate=True)
 
-        elif bin_instruction == int('C4', 16): # CPX Zero Page
+        elif bin_instruction == int('C4', 16): # CPY Zero Page
             zero_position = self.read_memo()
             return methods._cpy(self, zero_position)
 
-        elif bin_instruction == int('CC', 16): # CPX Absolute
+        elif bin_instruction == int('CC', 16): # CPY Absolute
             absolute_position_hi = self.read_memo()
             absolute_position_lo = self.read_memo()
-            return methods._cpy(self, absolute_position_hi * 256 + absolute_position_lo) 
+            return methods._cpy(self, absolute_position_hi * 256 + absolute_position_lo)
+
+        elif bin_instruction == int('C6', 16): # DEC Zero Page
+            zero_position = self.read_memo()
+            return methods._dec(self, zero_position)
+
+        elif bin_instruction == int('D6', 16): # DEC Zero Page,X
+            zero_position = self.read_memo() + self.X.value
+            if zero_position > 255:
+                zero_position -= 256
+            return methods._dec(self, zero_position)
+
+        elif bin_instruction == int('CE', 16): # DEC Absolute
+            absolute_position_hi = self.read_memo()
+            absolute_position_lo = self.read_memo()
+            return methods._dec(self, absolute_position_hi * 256 + absolute_position_lo)
+
+        elif bin_instruction == int('DE', 16): # DEC Absolute,X
+            absolute_position_hi = self.read_memo()
+            absolute_position_lo = self.read_memo() + self.X.value
+            if absolute_position_lo > 255:
+                absolute_position_lo -= 256
+            return methods._dec(self, absolute_position_hi * 256 + absolute_position_lo)
+
+        elif bin_instruction == int('CA', 16): # DEX
+            return methods._dex(self, None)
+
+        elif bin_instruction == int('88', 16): # DEY
+            return methods._dey(self, None)
 
         elif bin_instruction == int('00', 16): # BRK
             # TODO: Set flagas and move PC

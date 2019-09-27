@@ -1,5 +1,6 @@
 import sys
 
+
 def _adc(processor, instruction_param):
         processor.A.value += instruction_param
 
@@ -74,6 +75,45 @@ def _cpy(processor, instruction_param, is_immediate=False):
     if processor.Y.value == value:
         processor.FLAGS.set_Z()
     if result >= int('80', 16):
+        processor.FLAGS.set_N()
+
+def _dec(processor, instruction_param):
+    value = processor.memory.read_memo(instruction_param)
+    value -= 1
+
+    if value <= -1:
+        value += 256
+
+    processor.memory.write_memo(instruction_param, value)
+
+    # Set flags
+    if value == 0:
+        processor.FLAGS.set_Z()
+    if value >= int('80', 16):
+        processor.FLAGS.set_N()
+
+def _dex(processor, instruction_param):
+    processor.X.value -= 1
+    
+    if processor.X.value <= -1:
+        processor.X.value += 256
+    
+    # Set flags
+    if processor.X.value == 0:
+        processor.FLAGS.set_Z()
+    if processor.X.value >= int('80', 16):
+        processor.FLAGS.set_N()
+
+def _dey(processor, instruction_param):
+    processor.Y.value -= 1
+    
+    if processor.Y.value <= -1:
+        processor.Y.value += 256
+    
+    # Set flags
+    if processor.Y.value == 0:
+        processor.FLAGS.set_Z()
+    if processor.Y.value >= int('80', 16):
         processor.FLAGS.set_N()
 
 def _brk(processor, exit_status):
