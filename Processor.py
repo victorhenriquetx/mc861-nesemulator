@@ -23,20 +23,23 @@ class Processor():
 
     def emula(self, init_pos):
         # Emulation Loop
+        # debug_print('| ' + 'pc = ' + hex(self.PC.value) + ' | ' + 'a = ' + hex(self.A.value) + ' | ' + 'x = ' + hex(self.X.value)+ ' | ' + 'y = ' + hex(self.Y.value)+ ' | ' + 'sp = ' + hex(self.STACK.value)+ ' | ' + 'p[NV-BDIZC] = ' + hex(self.FLAGS.value) + ' | ')
+        # debug_print('Memory:', [hex(hex_v) for hex_v in self.memory.mem])
         while True:
-            debug_print('| ' + 'pc = ' + hex(self.PC.value) + ' | ' + 'a = ' + hex(self.A.value) + ' | ' + 'x = ' + hex(self.X.value)+ ' | ' + 'y = ' + hex(self.Y.value)+ ' | ' + 'sp = ' + hex(self.STACK.value)+ ' | ' + 'p[NV-BDIZC] = ' + hex(self.FLAGS.value) + ' | ')
-            # debug_print('Memory:', [hex(hex_v) for hex_v in self.memory.mem])
             instruction = self.read_memo()
 
-            # TODO: Check PC increment overflow
+            # Log instruction - ONLY FOR TESTING PURPOSES
+            # print('| instruction = ' + hex(instruction), end = ' ')
+
+            # Log registers
+            debug_print('| pc = ' + hex(self.PC.value) + ' | a = ' + hex(self.A.value) + ' | x = ' + hex(self.X.value) + ' | y = ' + hex(self.Y.value) + ' | sp = ' + hex(self.STACK.value) +' | p[NV-BDIZC] = ' + str(self.FLAGS.is_N()) + str(self.FLAGS.is_V()) + '1' + str(self.FLAGS.is_B()) + str(self.FLAGS.is_D()) + str(self.FLAGS.is_I()) + str(self.FLAGS.is_Z()) + str(self.FLAGS.is_C()) + ' |')
 
             self.decode_instruction(instruction)
 
-            
+            # Finishes log print (there may be memory logs while decoding specific instructions)
 
             err = ""
-            self.log(err)
-            
+            self.log(err)   
 
     # TODO implementar funcoes auxiliares
     def read_memo(self):
