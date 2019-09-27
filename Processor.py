@@ -138,6 +138,19 @@ class Processor():
             absolute_position_hi = self.read_memo()
             absolute_position_lo = self.read_memo()
             return methods._cpx(self, absolute_position_hi * 256 + absolute_position_lo) 
+        
+        elif bin_instruction == int('C0', 16): # CPX Immediate
+            immediate = self.read_memo()
+            return methods._cpy(self, immediate, is_immediate=True)
+
+        elif bin_instruction == int('C4', 16): # CPX Zero Page
+            zero_position = self.read_memo()
+            return methods._cpy(self, zero_position)
+
+        elif bin_instruction == int('CC', 16): # CPX Absolute
+            absolute_position_hi = self.read_memo()
+            absolute_position_lo = self.read_memo()
+            return methods._cpy(self, absolute_position_hi * 256 + absolute_position_lo) 
 
         elif bin_instruction == int('00', 16): # BRK
             # TODO: Set flagas and move PC
