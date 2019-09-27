@@ -22,9 +22,7 @@ class Processor():
         self.memory.read_file(self.filename)
 
     def emula(self, init_pos):
-        # Emulation Loop
-        # debug_print('| ' + 'pc = ' + hex(self.PC.value) + ' | ' + 'a = ' + hex(self.A.value) + ' | ' + 'x = ' + hex(self.X.value)+ ' | ' + 'y = ' + hex(self.Y.value)+ ' | ' + 'sp = ' + hex(self.STACK.value)+ ' | ' + 'p[NV-BDIZC] = ' + hex(self.FLAGS.value) + ' | ')
-        # debug_print('Memory:', [hex(hex_v) for hex_v in self.memory.mem])
+        # Emulation
         while True:
             instruction = self.read_memo()
 
@@ -65,6 +63,8 @@ class Processor():
 
         elif bin_instruction == int('75', 16): # ADC Zero Page,X
             zero_position = self.read_memo() + self.X.value
+            if zero_position > 255:
+                zero_position -= 256
             value = self.memory.read_memo(zero_position)
             return methods._adc(self, value)
 
