@@ -60,9 +60,15 @@ def _sta(processor, memory_position):
         processor.memory.write_memo(memory_position, processor.A.value)
         # TODO: Set flags
 
+<<<<<<< HEAD
 def _jsr(processor, address, next_instruction):
     processor.memory.push_stack(processor.STACK, next_instruction)
     processor.PC.value = address
+=======
+
+def _jsr(processor, memory_position):
+    
+>>>>>>> 0d77432e91c2f79a0fae82e3c63894baadef85c4
 
 def _brk(processor, exit_status):
     print("Exit with status", exit_status)
