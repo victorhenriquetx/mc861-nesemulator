@@ -21,3 +21,9 @@ class Memory():
     
     def write_memo(self, position, value):
         self.mem[position] = value
+
+    def write_stack(self, stack_register, value):
+        self.mem[self.stack_offset + stack_register] = value
+
+    def read_stack(self, stack_register):
+        return self.mem[self.stack_offset + stack_register]

@@ -267,10 +267,10 @@ def _tay(processor):
         processor.FLAGS.set_N()
 
 def _tsx(processor):
-    processor.X.value = processor.memory[processor.memory.stack_offset + processor.STACK.value]
+    processor.X.value = processor.memory.read_stack(processor.STACK.value)
 
 def _txs(processor):
-    processor.memory[processor.memory.stack_offset + processor.STACK.value] = processor.X.value
+    processor.memory.write_stack(processor.STACK.value, processor.X.value)
 
 def _txa(processor):
     processor.A.value = processor.X.value
