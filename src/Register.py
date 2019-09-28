@@ -1,6 +1,6 @@
 class Register():
-    def __init__(self):
-        self.value = 0
+    def __init__(self, value=0):
+        self.value = value
 
     # def __get__(self, instance, owner):
     #     return instance.value
