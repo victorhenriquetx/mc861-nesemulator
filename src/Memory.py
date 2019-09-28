@@ -12,15 +12,15 @@ class Memory():
             self.mem = list(byte_str)[self.initial:self.size]
         else:
             
-            a = list(byte_str)[self.initial:]
-            print(len(a))
-            print([hex(i) for i in a[:20]])
-            print([hex(i) for i in a[-20:]])
-            # a.reverse()
-            # print(a[:20])
+            # a = list(byte_str)[self.initial:]
+            # print(len(a))
+            # print([hex(i) for i in a[:20]])
+            # print([hex(i) for i in a[-20:]])
+            
+            
             self.mem[int('ffff', 16)-16384+1:] = list(byte_str)[self.initial:]
-            print('size: ', end=' ')
-            print(len(list(byte_str)[self.initial:]))
+            # print('size: ', end=' ')
+            # print(len(list(byte_str)[self.initial:]))
             
 
     def read_memo(self, position):
