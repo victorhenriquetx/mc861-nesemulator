@@ -148,6 +148,9 @@ def _ora(processor, value, immediate=False):
     else:
         processor.A.value = processor.A.value | value
 
+def _clc(processor, instruction_param):
+    processor.FLAGS.clear_C()
+
 def _cli(processor, instruction_param):
     processor.FLAGS.clear_I()
 

@@ -17,23 +17,25 @@ class Processor():
         self.FLAGS = RegisterFlag()
         
         self.PC = Register16bit()
-
-        self.memory = Memory(10)
+        self.PC.value = 0
+        self.header = Memory(0,16)
+        self.memory = Memory(16,-1)
+        self.header.read_file(self.filename)
         self.memory.read_file(self.filename)
 
     def emula(self, init_pos):
         # Emulation
         while True:
             instruction = self.read_memo()
-
+            print(instruction)
             # Log instruction - ONLY FOR TESTING PURPOSES
             # print('| instruction = ' + hex(instruction), end = ' ')
 
             # Log registers
-            debug_print('| pc = ' + hex(self.PC.value) + ' | a = ' + hex(self.A.value) + ' | x = ' + hex(self.X.value) + ' | y = ' + hex(self.Y.value) + ' | sp = ' + hex(self.STACK.value) +' | p[NV-BDIZC] = ' + str(self.FLAGS.is_N()) + str(self.FLAGS.is_V()) + '1' + str(self.FLAGS.is_B()) + str(self.FLAGS.is_D()) + str(self.FLAGS.is_I()) + str(self.FLAGS.is_Z()) + str(self.FLAGS.is_C()) + ' |')
 
-            self.decode_instruction(instruction)
-
+            decode = self.decode_instruction(instruction)
+            print(decode)
+            debug_print('| pc = ' + hex(self.PC.value-1) + ' | a = ' + hex(self.A.value) + ' | x = ' + hex(self.X.value) + ' | y = ' + hex(self.Y.value) + ' | sp = ' + hex(self.STACK.value) +' | p[NV-BDIZC] = ' + str(self.FLAGS.is_N()) + str(self.FLAGS.is_V()) + '1' + str(self.FLAGS.is_B()) + str(self.FLAGS.is_D()) + str(self.FLAGS.is_I()) + str(self.FLAGS.is_Z()) + str(self.FLAGS.is_C()) + ' |')
             # Finishes log print (there may be memory logs while decoding specific instructions)
 
             err = ""
@@ -206,6 +208,17 @@ class Processor():
             label_position = self.read_memo()
             return methods._beq(self, label_position)
 
+        elif bin_instruction == int('A9', 16): # LDA Immediate
+            immediate = self.read_memo()
+            return methods._lda(self, immediate, is_immediate=True)
+
+        elif bin_instruction == int('A5', 16): # LDA Zero Page
+            zero_position = self.read_memo()
+            return methods._lda(self, zero_position)
+
+        elif bin_instruction == int('B5', 16): # LDA Zero Page,X
+            zero_position = self.read_memo() + self.X.value
+            return methods._lda(self, zero_position)
 
         elif bin_instruction == int('AD', 16): # LDA Absolute
             # TODO: Check if the HI/LOW order is right
@@ -283,7 +296,9 @@ class Processor():
         elif bin_instruction == int('85', 16): # STA Zero Page
             memory_position = self.read_memo()
             return methods._sta(self, memory_position)
-          
+        elif bin_instruction == int('18', 16): # CLI
+            return methods._clc(self, None)
+
         elif bin_instruction == int('58', 16): # CLI
             return methods._cli(self, None)
 
@@ -805,7 +820,6 @@ class Processor():
         else:
             # TODO: Add error to log
             return methods._brk(self, 1)
-        
 
     def log(self, err):
         return ""
