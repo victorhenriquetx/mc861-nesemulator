@@ -1,12 +1,17 @@
 class Memory():
-    def __init__(self, size):
+    def __init__(self, initial, size):
+        self.initial = initial
         self.size = size
         self.mem = []
         self.stack_offset = int('100', 16)
 
     def read_file(self, filename):
-        byte_str = open(filename, "rb").read()
-        self.mem = list(byte_str)
+        with open(filename, 'rb') as file:
+            byte_str = file.read()
+        if self.size != -1:
+            self.mem = list(byte_str)[self.initial:self.size]
+        else:
+            self.mem = list(byte_str)[self.initial:]
 
     def read_memo(self, position):
         return self.mem[position]

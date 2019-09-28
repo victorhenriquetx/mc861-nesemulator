@@ -61,8 +61,13 @@ def _bvs(processor, memory_position):
     if(processor.FLAGS.is_V()):
         processor.PC = memory_position
 
-def _lda(processor, memory_position):
-    processor.A.value = processor.memory.read_memo(memory_position)
+def _lda(processor, instruction_param,is_immediate=False):
+        if not is_immediate:
+            processor.A.value = processor.memory.read_memo(instruction_param)
+        else:
+            processor.A.value = instruction_param
+def _clc(processor, instruction_param):
+    processor.FLAGS.clear_C()
 
 def _cli(processor, instruction_param):
     processor.FLAGS.clear_I()
