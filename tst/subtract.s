@@ -44,13 +44,14 @@ MIRRORING = %0001 ;%0000 = horizontal, %0001 = vertical, %1000 = four-screen
    .base $10000-(PRG_COUNT*$4000)
 
 Reset:
-   brk ; Abort execution
+   ; brk ; Abort execution
 
 NMI:
-   LDA $1600
+   LDA #$16
    TAX
    SBC #$10
-   SBC #$10, X
+   SBC #$06
+   SBC #$10
 
    BRK
    ;NOTE: NMI code goes here
