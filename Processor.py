@@ -53,7 +53,6 @@ class Processor():
         elif bin_instruction == int('69', 16): # ADC Immediate
             value = self.read_memo() #immediate
             methods._adc(self, value)
-            self.print_mem = 'MEM[0xff]=0x80'
 
         elif bin_instruction == int('65', 16): # ADC Zero Page
             zero_position = self.read_memo()
@@ -266,6 +265,7 @@ class Processor():
         elif bin_instruction == int('85', 16): # STA Zero Page
             memory_position = self.read_memo()
             methods._sta(self, memory_position)
+            
         elif bin_instruction == int('18', 16): # CLI
             methods._clc(self, None)
 
@@ -793,7 +793,7 @@ class Processor():
 
         else:
             methods._brk(self, 1)
-            
+
     def mem_print(self,memory_position,value):
         self.print_mem = ' MEM['+str(hex(memory_position))+'] = ' + str(hex(value)) + ' |'
 
