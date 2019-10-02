@@ -574,7 +574,7 @@ class Processor():
             absolute_position_hi = self.read_memo()
 
             address = absolute_position_hi * 256 + absolute_position_lo + self.X.value
-            next_instruction =  self.PC.value + 1
+            next_instruction =  self.PC.value - 1
             return methods._jsr(self, address, next_instruction)
 
         elif bin_instruction == int('A9', 16): # LDA Immediate

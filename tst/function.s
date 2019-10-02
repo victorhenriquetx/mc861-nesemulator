@@ -44,16 +44,18 @@ MIRRORING = %0001 ;%0000 = horizontal, %0001 = vertical, %1000 = four-screen
    .base $10000-(PRG_COUNT*$4000)
 
 Reset:
-   brk ; Abort execution
+   ; brk ; Abort execution
 
 NMI:
+   LDA #$11
    JSR func
    TAY
    BRK
 
 func:
-    TAX
-    RTS
+   LDA #$10
+   TAX
+   RTS
 
    BRK
    ;NOTE: NMI code goes here
