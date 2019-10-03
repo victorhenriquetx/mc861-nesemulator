@@ -31,8 +31,14 @@ class Memory():
         return self.mem[self.stack_offset + stack_register.value]
 
     def push_stack(self, stack_register, value):
-        self.mem[self.stack_offset + stack_register] = value
+        self.mem[self.stack_offset + stack_register.value] = value
         stack_register.value += 1
     
     def write_memo(self, position, value):
         self.mem[position] = value
+
+    def write_stack(self, stack_register, value):
+        self.mem[self.stack_offset + stack_register] = value
+
+    def read_stack(self, stack_register):
+        return self.mem[self.stack_offset + stack_register]
