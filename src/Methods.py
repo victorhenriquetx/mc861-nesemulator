@@ -308,7 +308,6 @@ def _jsr(processor, address, next_instruction):
     processor.PC.value = address
 
 def _brk(processor, exit_status):
-    processor.debug_print('| pc = ' + hex(processor.PC.value-1) + ' | a = ' + hex(processor.A.value) + ' | x = ' + hex(processor.X.value) + ' | y = ' + hex(processor.Y.value) + ' | sp = ' + hex(processor.STACK.value) +' | p[NV-BDIZC] = ' + str(processor.FLAGS.is_N()) + str(processor.FLAGS.is_V()) + '1' + str(processor.FLAGS.is_B()) + str(processor.FLAGS.is_D()) + str(processor.FLAGS.is_I()) + str(processor.FLAGS.is_Z()) + str(processor.FLAGS.is_C()) + ' |')
     sys.exit(exit_status)
     
 
