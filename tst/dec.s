@@ -44,18 +44,20 @@ MIRRORING = %0001 ;%0000 = horizontal, %0001 = vertical, %1000 = four-screen
    .base $10000-(PRG_COUNT*$4000)
 
 Reset:
-    ;LDA #$10
-    ;STA $0001
-    STA $0009
+    LDA #$20
+    STA $0101
+    STA $01
     LDX #$01
     ; Test all four DEC
     DEC $01
     DEC $00, X
-    DEC $0001
-    DEC $0000, X
+    DEC $0101
+    DEC $0100, X
     ; Compare for fun
-    LDA $0001
-    CMP #$1c
+    LDA $0101
+    CMP #$1e
+    LDA $01
+    CMP #$1e
     BRK
 NMI:
    ;NOTE: NMI code goes here
