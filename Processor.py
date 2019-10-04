@@ -332,11 +332,14 @@ class Processor():
         elif bin_instruction == int('E4', 16): # CPX Zero Page
             zero_position = self.read_memo()
             methods._cpx(self, zero_position)
+            self.mem_print(zero_position, self.memory.read_memo(zero_position))
 
         elif bin_instruction == int('EC', 16): # CPX Absolute
             absolute_position_lo = self.read_memo()
             absolute_position_hi = self.read_memo()
-            methods._cpx(self, absolute_position_hi * 256 + absolute_position_lo)
+            absolute_position = absolute_position_hi * 256 + absolute_position_lo
+            methods._cmp(self, absolute_position)
+            self.mem_print(absolute_position, self.memory.read_memo(absolute_position))
         
         elif bin_instruction == int('C0', 16): # CPY Immediate
             immediate = self.read_memo()
@@ -345,11 +348,14 @@ class Processor():
         elif bin_instruction == int('C4', 16): # CPY Zero Page
             zero_position = self.read_memo()
             methods._cpy(self, zero_position)
+            self.mem_print(zero_position, self.memory.read_memo(zero_position))
 
         elif bin_instruction == int('CC', 16): # CPY Absolute
             absolute_position_lo = self.read_memo()
             absolute_position_hi = self.read_memo()
-            methods._cpy(self, absolute_position_hi * 256 + absolute_position_lo)
+            absolute_position = absolute_position_hi * 256 + absolute_position_lo
+            methods._cmp(self, absolute_position)
+            self.mem_print(absolute_position, self.memory.read_memo(absolute_position))
 
         elif bin_instruction == int('C6', 16): # DEC Zero Page
             zero_position = self.read_memo()
