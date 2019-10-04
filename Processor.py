@@ -285,35 +285,45 @@ class Processor():
         elif bin_instruction == int('C5', 16): # CMP Zero Page
             zero_position = self.read_memo()
             methods._cmp(self, zero_position)
+            self.mem_print(zero_position, self.memory.read_memo(zero_position))
 
         elif bin_instruction == int('D5', 16): # CMP Zero Page,X
             zero_position = self.read_memo() + self.X.value
             methods._cmp(self, zero_position)
+            self.mem_print(zero_position, self.memory.read_memo(zero_position))
 
         elif bin_instruction == int('CD', 16): # CMP Absolute
             absolute_position_lo = self.read_memo()
             absolute_position_hi = self.read_memo()
-            methods._cmp(self, absolute_position_hi * 256 + absolute_position_lo)
+            absolute_position = absolute_position_hi * 256 + absolute_position_lo
+            methods._cmp(self, absolute_position)
+            self.mem_print(absolute_position, self.memory.read_memo(absolute_position))
 
         elif bin_instruction == int('DD', 16): # CMP Absolute,X
             absolute_position_lo = self.read_memo() + self.X.value
             absolute_position_hi = self.read_memo()
-            methods._cmp(self, absolute_position_hi * 256 + absolute_position_lo)
+            absolute_position = absolute_position_hi * 256 + absolute_position_lo
+            methods._cmp(self, absolute_position)
+            self.mem_print(absolute_position, self.memory.read_memo(absolute_position))
 
         elif bin_instruction == int('D9', 16): # CMP Absolute,Y
             absolute_position_lo = self.read_memo() + self.Y.value
             absolute_position_hi = self.read_memo()
-            methods._cmp(self, absolute_position_hi * 256 + absolute_position_lo)
+            absolute_position = absolute_position_hi * 256 + absolute_position_lo
+            methods._cmp(self, absolute_position)
+            self.mem_print(absolute_position, self.memory.read_memo(absolute_position))
 
         elif bin_instruction == int('C1', 16): # CMP (Indirect,X)
             indirect_memory = self.read_memo() + self.X.value
             memory_position = self.memory.read_memo(indirect_memory)
-            methods._cmp(self, memory_position)   
+            methods._cmp(self, memory_position)
+            self.mem_print(memory_position, self.memory.read_memo(memory_position))
 
         elif bin_instruction == int('D1', 16): # CMP (Indirect),Y
             indirect_memory = self.read_memo()
             memory_position = self.memory.read_memo(indirect_memory) + self.Y.value
-            methods._cmp(self, memory_position)  
+            methods._cmp(self, memory_position)
+            self.mem_print(memory_position, self.memory.read_memo(memory_position))
 
         elif bin_instruction == int('E0', 16): # CPX Immediate
             immediate = self.read_memo()
