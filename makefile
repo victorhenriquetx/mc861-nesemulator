@@ -16,12 +16,6 @@ all: ${BIN} ${LOG}
 ${CROSS_AS}:
 	cd ${EXT}/asm6;	make all
 
-${CROSS_AS}:
-	${EXT}/asm6/make all
-
-${CROSS_AS}:
-	${EXT}/asm6/make all
-
 ${BIN}:
 	@mkdir -p ${BIN}
 
