@@ -50,4 +50,4 @@ test: ${CROSS_AS} ${BIN} ${LOG} ${TESTS}
 	}
 
 clean:
-	rm -rf ${BIN}/* ${LOG}/* ${EXT}/asm/asm6
+	rm -rf ${BIN}/* ${LOG}/* ${EXT}/asm6/asm6
