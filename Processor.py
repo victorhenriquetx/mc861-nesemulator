@@ -498,81 +498,78 @@ class Processor():
             self.mem_print(memory_position, self.memory.read_memo(memory_position)) 
 
         elif bin_instruction == int('95', 16): # STA Zero Page, X
-            memory_address = self.read_memo()
-            memory_position = memory_address + self.X.value 
+            memory_position = self.read_memo() + self.X.value
             methods._sta(self, memory_position)
-            self.mem_print(memory_position, self.A.value)
+            self.mem_print(memory_position, self.memory.read_memo(memory_position)) 
 
         elif bin_instruction == int('8D', 16): # STA Absolute
             absolute_position_lo = self.read_memo()
             absolute_position_hi = self.read_memo()
-            memory_position = absolute_position_hi * 256 + absolute_position_lo
-            methods._sta(self, memory_position)
-            self.mem_print(memory_position, self.A.value)
+            absolute_position = absolute_position_hi * 256 + absolute_position_lo
+            methods._sta(self, absolute_position)
+            self.mem_print(absolute_position, self.memory.read_memo(absolute_position))
 
         elif bin_instruction == int('9D', 16): # STA Absolute,X
-            absolute_position_lo = self.read_memo()
+            absolute_position_lo = self.read_memo() + self.X.value
             absolute_position_hi = self.read_memo()
-            memory_position = absolute_position_hi * 256 + absolute_position_lo + self.X.value
-            methods._sta(self, memory_position)
-            self.mem_print(memory_position, self.A.value)
+            absolute_position = absolute_position_hi * 256 + absolute_position_lo
+            methods._sta(self, absolute_position)
+            self.mem_print(absolute_position, self.memory.read_memo(absolute_position))
 
         elif bin_instruction == int('99', 16): # STA Absolute,Y
-            absolute_position_lo = self.read_memo()
+            absolute_position_lo = self.read_memo() + self.Y.value
             absolute_position_hi = self.read_memo()
-            memory_position = absolute_position_hi * 256 + absolute_position_lo + self.Y.value
-            methods._sta(self, memory_position)
-            self.mem_print(memory_position, self.A.value)
+            absolute_position = absolute_position_hi * 256 + absolute_position_lo
+            methods._sta(self, absolute_position)
+            self.mem_print(absolute_position, self.memory.read_memo(absolute_position))
 
         elif bin_instruction == int('81', 16): # STA Indirect,X
             indirect_memory = self.read_memo() + self.X.value
             memory_position = self.memory.read_memo(indirect_memory)
             actual_memory = self.memory.read_memo(memory_position)
             methods._sta(self, actual_memory)
-            self.mem_print(actual_memory, self.A.value)
+            self.mem_print(actual_memory, self.memory.read_memo(actual_memory))
 
         elif bin_instruction == int('91', 16): # STA Indirect,Y
             indirect_memory = self.read_memo()
             memory_position = self.memory.read_memo(indirect_memory) + self.Y.value
             actual_memory = self.memory.read_memo(memory_position)
             methods._sta(self, actual_memory)
-            self.mem_print(actual_memory, self.A.value)
+            self.mem_print(actual_memory, self.memory.read_memo(actual_memory))
 
         elif bin_instruction == int('86', 16): # STX Zero Page
             memory_position = self.read_memo()
             methods._stx(self, memory_position)
-            self.mem_print(memory_position, self.X.value)
+            self.mem_print(memory_position, self.memory.read_memo(memory_position))
 
         elif bin_instruction == int('96', 16): # STX Zero Page, Y
-            memory_position = self.read_memo()
-            actual_memory = memory_position + self.Y.value
-            methods._stx(self, actual_memory)
-            self.mem_print(actual_memory, self.X.value)
+            memory_position = self.read_memo() + self.Y.value
+            methods._stx(self, memory_position)
+            self.mem_print(memory_position, self.memory.read_memo(memory_position))
 
         elif bin_instruction == int('8E', 16): # STX Absolute
             absolute_position_lo = self.read_memo()
             absolute_position_hi = self.read_memo()
-            memory_position = absolute_position_hi * 256 + absolute_position_lo
-            methods._stx(self, memory_position)
-            self.mem_print(memory_position, self.X.value)
+            absolute_position = absolute_position_hi * 256 + absolute_position_lo
+            methods._stx(self, absolute_position)
+            self.mem_print(absolute_position, self.memory.read_memo(absolute_position))
 
         elif bin_instruction == int('84', 16): # STY Zero Page
             memory_position = self.read_memo()
             methods._sty(self, memory_position)
-            self.mem_print(memory_position, self.Y.value)
+            self.mem_print(memory_position, self.memory.read_memo(memory_position))
 
         elif bin_instruction == int('94', 16): # STY Zero Page, X
-            memory_position = self.read_memo()
-            actual_memory = memory_position + self.X.value
-            methods._sty(self, actual_memory)
-            self.mem_print(actual_memory, self.Y.value)
+            memory_position = self.read_memo() + self.X.value
+            methods._sty(self, memory_position)
+            self.mem_print(memory_position, self.memory.read_memo(memory_position))
 
         elif bin_instruction == int('8C', 16): # STY Absolute
             absolute_position_lo = self.read_memo()
             absolute_position_hi = self.read_memo()
-            memory_position = absolute_position_hi * 256 + absolute_position_lo
-            methods._sty(self, memory_position)
-            self.mem_print(memory_position, self.Y.value)
+            absolute_position = absolute_position_hi * 256 + absolute_position_lo
+            methods._sty(self, absolute_position)
+            self.mem_print(absolute_position, self.memory.read_memo(absolute_position))
 
         elif bin_instruction == int('AA', 16): # TAX
             methods._tax(self)
@@ -608,11 +605,13 @@ class Processor():
         elif bin_instruction == int('A5', 16): # LDA zero page
             absolute_position_lo = self.read_memo()
             methods._lda(self, absolute_position_lo)
+            self.mem_print(absolute_position_lo, self.A.value)
 
         elif bin_instruction == int('B5', 16): # LDA zero page, X
             absolute_position_lo = self.read_memo()
             memory_position = absolute_position_lo + self.X.value
             methods._lda(self, memory_position)
+            self.mem_print(memory_position, self.A.value)
 
         elif bin_instruction == int('AD', 16): # LDA Absolute
             # TODO: Check if the HI/LOW order is right
@@ -620,26 +619,37 @@ class Processor():
             absolute_position_hi = self.read_memo()
             memory_position = absolute_position_hi * 256 + absolute_position_lo
             methods._lda(self, memory_position)
-            self.mem_print(memory_position,self.A.value)
+            self.mem_print(memory_position, self.A.value)
             
 
         elif bin_instruction == int('BD', 16): # LDA Absolute,X
-            absolute_position_lo = self.read_memo()
+            absolute_position_lo = self.read_memo() + self.X.value
             absolute_position_hi = self.read_memo()
-            memory_position =  absolute_position_hi * 256 + absolute_position_lo + self.X.value
+            memory_position = absolute_position_hi * 256 + absolute_position_lo
             methods._lda(self, memory_position)
+            self.mem_print(memory_position, self.A.value)
 
-        elif bin_instruction == int('B9', 16): # LA Absolute, Y
-            absolute_position_lo = self.read_memo()
+        elif bin_instruction == int('B9', 16): # LDA Absolute, Y
+            absolute_position_lo = self.read_memo() + self.Y.value
             absolute_position_hi = self.read_memo()
-            memory_position =  absolute_position_hi * 256 + absolute_position_lo + self.Y.value
+            memory_position = absolute_position_hi * 256 + absolute_position_lo
             methods._lda(self, memory_position)
+            self.mem_print(memory_position, self.A.value)
         
         elif bin_instruction == int('A1', 16): # LDA Indirect, X
-            pass
+            indirect_memory = self.read_memo() + self.X.value
+            memory_position = self.memory.read_memo(indirect_memory)
+            actual_memory = self.memory.read_memo(memory_position)
+            methods._lda(self, actual_memory)
+            self.mem_print(actual_memory, self.A.value)
         
         elif bin_instruction == int('B1', 16): # LDA Indirect, Y
-            pass
+            indirect_memory = self.read_memo()
+            memory_position = self.memory.read_memo(indirect_memory) + self.Y.value
+            actual_memory = self.memory.read_memo(memory_position)
+            methods._lda(self, actual_memory)
+            self.mem_print(actual_memory, self.A.value)
+
         # LDX A2, A6, B6, AE, BE
         elif bin_instruction == int('A2', 16): # LDX Immediate
             value = self.read_memo()
@@ -648,23 +658,27 @@ class Processor():
         elif bin_instruction == int('A6', 16): # LDX Zero Page
             absolute_position_lo = self.read_memo()
             methods._ldx(self, absolute_position_lo)
+            self.mem_print(absolute_position_lo, self.X.value)
 
         elif bin_instruction == int('B6', 16): # LDX Zero Page, Y
             absolute_position_lo = self.read_memo()
             memory_position = absolute_position_lo + self.Y.value
             methods._ldx(self, memory_position)
+            self.mem_print(memory_position, self.X.value)
 
         elif bin_instruction == int('AE', 16): # LDX Absolute
             absolute_position_lo = self.read_memo()
             absolute_position_hi = self.read_memo()
             memory_position = absolute_position_hi * 256 + absolute_position_lo
             methods._ldx(self, memory_position)
+            self.mem_print(memory_position, self.X.value)
 
         elif bin_instruction == int('BE', 16): # LDX Absolute, Y
             absolute_position_lo = self.read_memo()
             absolute_position_hi = self.read_memo()
             memory_position = absolute_position_hi * 256 + absolute_position_lo + self.Y.value
             methods._ldx(self, memory_position)
+            self.mem_print(memory_position, self.X.value)
             
         # Immediate     LDY #$44      $A0  2   2
         # Zero Page     LDY $44       $A4  2   3
@@ -680,23 +694,27 @@ class Processor():
         elif bin_instruction == int('A4', 16): # LDY Zero Page
             absolute_position_lo = self.read_memo()
             methods._ldy(self, absolute_position_lo)
+            self.mem_print(absolute_position_lo, self.Y.value)
 
         elif bin_instruction == int('B4', 16): # LDY Zero Page, X
             absolute_position_lo = self.read_memo()
             memory_position = absolute_position_lo + self.Y.value
             methods._ldy(self, memory_position)
+            self.mem_print(memory_position, self.Y.value)
 
         elif bin_instruction == int('AC', 16): # LDY Absolute
             absolute_position_lo = self.read_memo()
             absolute_position_hi = self.read_memo()
             memory_position = absolute_position_hi * 256 + absolute_position_lo
             methods._ldy(self, memory_position)
+            self.mem_print(memory_position, self.Y.value)
 
         elif bin_instruction == int('BC', 16): # LDY Absolute, X
             absolute_position_lo = self.read_memo()
             absolute_position_hi = self.read_memo()
             memory_position = absolute_position_hi * 256 + absolute_position_lo + self.X.value
             methods._ldy(self, memory_position)
+            self.mem_print(memory_position, self.Y.value)
 
         # Accumulator   LSR A         $4A  1   2
         # Zero Page     LSR $44       $46  2   5
