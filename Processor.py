@@ -799,6 +799,7 @@ class Processor():
 
     def print_log(self):
         print('| pc = ' + hex(self.fake_PC.value) + ' | a = ' + hex(self.A.value) + ' | x = ' + hex(self.X.value) + ' | y = ' + hex(self.Y.value) + ' | sp = ' + hex(self.STACK.value) +' | p[NV-BDIZC] = ' + str(self.FLAGS.is_N()) + str(self.FLAGS.is_V()) + '1' + str(self.FLAGS.is_B()) + str(self.FLAGS.is_D()) + str(self.FLAGS.is_I()) + str(self.FLAGS.is_Z()) + str(self.FLAGS.is_C()) + ' |' + self.print_mem)
+        self.print_mem = ''
 
 def main():
     filename = sys.argv[1]
