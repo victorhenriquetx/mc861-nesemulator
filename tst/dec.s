@@ -46,7 +46,6 @@ MIRRORING = %0001 ;%0000 = horizontal, %0001 = vertical, %1000 = four-screen
 Reset:
     ;LDA #$10
     ;STA $0001
-    LDA #$15
     STA $0009
     LDX #$01
     ; Test all four DEC
