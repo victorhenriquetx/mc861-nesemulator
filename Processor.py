@@ -142,7 +142,7 @@ class Processor():
             methods._and(self, value)
 
         #---------------------- AND Instruction----------------------------------
-        if bin_instruction == int('0A', 16): # ASL Accumulator
+        elif bin_instruction == int('0A', 16): # ASL Accumulator
             methods._asl(self, self.A)
 
         elif bin_instruction == int('06', 16): # ASL Zero Page
@@ -437,20 +437,26 @@ class Processor():
         elif bin_instruction == int('E6', 16): # INC Zero Page
             zero_position = self.read_memo()
             methods._inc(self, zero_position)
+            self.mem_print(zero_position, self.memory.read_memo(zero_position))
 
         elif bin_instruction == int('F6', 16): # INC Zero Page,X
             zero_position = self.read_memo() + self.X.value
             methods._inc(self, zero_position)
+            self.mem_print(zero_position, self.memory.read_memo(zero_position))
 
         elif bin_instruction == int('EE', 16): # INC Absolute
             absolute_position_lo = self.read_memo()
             absolute_position_hi = self.read_memo()
-            methods._inc(self, absolute_position_hi * 256 + absolute_position_lo)
+            absolute_position = absolute_position_hi * 256 + absolute_position_lo
+            methods._inc(self, absolute_position)
+            self.mem_print(absolute_position, self.memory.read_memo(absolute_position))
 
         elif bin_instruction == int('FE', 16): # INC Absolute,X
             absolute_position_lo = self.read_memo() + self.X.value
             absolute_position_hi = self.read_memo()
-            methods._inc(self, absolute_position_hi * 256 + absolute_position_lo)
+            absolute_position = absolute_position_hi * 256 + absolute_position_lo
+            methods._inc(self, absolute_position)
+            self.mem_print(absolute_position, self.memory.read_memo(absolute_position))
         
         elif bin_instruction == int('E8', 16): # INX
             methods._inx(self, None)
@@ -461,8 +467,9 @@ class Processor():
         elif bin_instruction == int('4C', 16): # JMP Absolute
             absolute_position_lo = self.read_memo()
             absolute_position_hi = self.read_memo()
-            # absolute_position_lo = self.read_memo()
-            methods._jmp(self, absolute_position_hi * 256 + absolute_position_lo)
+            absolute_position = absolute_position_hi * 256 + absolute_position_lo
+            methods._jmp(self, absolute_position)
+            self.mem_print(absolute_position, self.memory.read_memo(absolute_position))
         
         elif bin_instruction == int('6C', 16): # JMP Indirect
             # indirect_position points to low indirect value, a subsequent
@@ -485,11 +492,9 @@ class Processor():
 
             memory_position_lo = self.memory.read_memo(indirect_position_hi * 256 + indirect_position_lo)
             memory_position_hi = self.memory.read_memo(indirect_position_hi * 256 + indirect_position_lo_plus_one)
-            methods._jmp(self, memory_position_hi * 256 + memory_position_lo)
-
-        elif bin_instruction == int('00', 16): # BRK
-            # TODO: Set flagas and move PC
-            methods._brk(self, 0)
+            memory_position = memory_position_hi * 256 + memory_position_lo
+            methods._jmp(self, memory_position)
+            self.mem_print(memory_position, self.memory.read_memo(memory_position)) 
 
         elif bin_instruction == int('95', 16): # STA Zero Page, X
             memory_position = self.read_memo()
