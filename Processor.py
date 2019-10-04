@@ -657,23 +657,27 @@ class Processor():
         elif bin_instruction == int('A6', 16): # LDX Zero Page
             absolute_position_lo = self.read_memo()
             methods._ldx(self, absolute_position_lo)
+            self.mem_print(absolute_position_lo, self.X.value)
 
         elif bin_instruction == int('B6', 16): # LDX Zero Page, Y
             absolute_position_lo = self.read_memo()
             memory_position = absolute_position_lo + self.Y.value
             methods._ldx(self, memory_position)
+            self.mem_print(memory_position, self.X.value)
 
         elif bin_instruction == int('AE', 16): # LDX Absolute
             absolute_position_lo = self.read_memo()
             absolute_position_hi = self.read_memo()
             memory_position = absolute_position_hi * 256 + absolute_position_lo
             methods._ldx(self, memory_position)
+            self.mem_print(memory_position, self.X.value)
 
         elif bin_instruction == int('BE', 16): # LDX Absolute, Y
             absolute_position_lo = self.read_memo()
             absolute_position_hi = self.read_memo()
             memory_position = absolute_position_hi * 256 + absolute_position_lo + self.Y.value
             methods._ldx(self, memory_position)
+            self.mem_print(memory_position, self.X.value)
             
         # Immediate     LDY #$44      $A0  2   2
         # Zero Page     LDY $44       $A4  2   3
@@ -689,23 +693,27 @@ class Processor():
         elif bin_instruction == int('A4', 16): # LDY Zero Page
             absolute_position_lo = self.read_memo()
             methods._ldy(self, absolute_position_lo)
+            self.mem_print(absolute_position_lo, self.Y.value)
 
         elif bin_instruction == int('B4', 16): # LDY Zero Page, X
             absolute_position_lo = self.read_memo()
             memory_position = absolute_position_lo + self.Y.value
             methods._ldy(self, memory_position)
+            self.mem_print(memory_position, self.Y.value)
 
         elif bin_instruction == int('AC', 16): # LDY Absolute
             absolute_position_lo = self.read_memo()
             absolute_position_hi = self.read_memo()
             memory_position = absolute_position_hi * 256 + absolute_position_lo
             methods._ldy(self, memory_position)
+            self.mem_print(memory_position, self.Y.value)
 
         elif bin_instruction == int('BC', 16): # LDY Absolute, X
             absolute_position_lo = self.read_memo()
             absolute_position_hi = self.read_memo()
             memory_position = absolute_position_hi * 256 + absolute_position_lo + self.X.value
             methods._ldy(self, memory_position)
+            self.mem_print(memory_position, self.Y.value)
 
         # Accumulator   LSR A         $4A  1   2
         # Zero Page     LSR $44       $46  2   5
