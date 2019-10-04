@@ -539,28 +539,36 @@ class Processor():
         elif bin_instruction == int('86', 16): # STX Zero Page
             memory_position = self.read_memo()
             methods._stx(self, memory_position)
+            self.mem_print(memory_position, self.memory.read_memo(memory_position))
 
         elif bin_instruction == int('96', 16): # STX Zero Page, Y
-            memory_position = self.read_memo()
-            methods._stx(self, memory_position + self.Y.value)
+            memory_position = self.read_memo() + self.Y.value
+            methods._stx(self, memory_position)
+            self.mem_print(memory_position, self.memory.read_memo(memory_position))
 
         elif bin_instruction == int('8E', 16): # STX Absolute
             absolute_position_lo = self.read_memo()
             absolute_position_hi = self.read_memo()
-            methods._stx(self, absolute_position_hi * 256 + absolute_position_lo)
+            absolute_position = absolute_position_hi * 256 + absolute_position_lo
+            methods._stx(self, absolute_position)
+            self.mem_print(absolute_position, self.memory.read_memo(absolute_position))
 
         elif bin_instruction == int('84', 16): # STY Zero Page
             memory_position = self.read_memo()
             methods._sty(self, memory_position)
+            self.mem_print(memory_position, self.memory.read_memo(memory_position))
 
         elif bin_instruction == int('94', 16): # STY Zero Page, X
-            memory_position = self.read_memo()
-            methods._sty(self, memory_position + self.X.value)
+            memory_position = self.read_memo() + self.X.value
+            methods._sty(self, memory_position)
+            self.mem_print(memory_position, self.memory.read_memo(memory_position))
 
         elif bin_instruction == int('8C', 16): # STY Absolute
             absolute_position_lo = self.read_memo()
             absolute_position_hi = self.read_memo()
-            methods._sty(self, absolute_position_hi * 256 + absolute_position_lo)
+            absolute_position = absolute_position_hi * 256 + absolute_position_lo
+            methods._sty(self, absolute_position)
+            self.mem_print(absolute_position, self.memory.read_memo(absolute_position))
 
         elif bin_instruction == int('AA', 16): # TAX
             methods._tax(self)
