@@ -26,12 +26,14 @@ class Processor():
         start_pc_addr_lo = self.memory.read_memo(int('fffc', 16))
         start_pc_addr_hi = self.memory.read_memo(int('fffd', 16))
         self.PC = Register16bit(start_pc_addr_hi*256 + start_pc_addr_lo)
+        self.fake_PC = Register16bit(self.PC.value)
 
         self.print_mem = ''
 
     def emula(self, init_pos):
         # Emulation
         while True:
+            self.fake_PC.value = self.PC.value
             instruction = self.read_memo()
             decode = self.decode_instruction(instruction)
             self.print_log()
@@ -798,7 +800,7 @@ class Processor():
         self.print_mem = ' MEM['+str(hex(memory_position))+'] = ' + str(hex(value)) + ' |'
 
     def print_log(self):
-        print('| pc = ' + hex(self.PC.value-1) + ' | a = ' + hex(self.A.value) + ' | x = ' + hex(self.X.value) + ' | y = ' + hex(self.Y.value) + ' | sp = ' + hex(self.STACK.value) +' | p[NV-BDIZC] = ' + str(self.FLAGS.is_N()) + str(self.FLAGS.is_V()) + '1' + str(self.FLAGS.is_B()) + str(self.FLAGS.is_D()) + str(self.FLAGS.is_I()) + str(self.FLAGS.is_Z()) + str(self.FLAGS.is_C()) + ' |' + self.print_mem)
+        print('| pc = ' + hex(self.fake_PC.value) + ' | a = ' + hex(self.A.value) + ' | x = ' + hex(self.X.value) + ' | y = ' + hex(self.Y.value) + ' | sp = ' + hex(self.STACK.value) +' | p[NV-BDIZC] = ' + str(self.FLAGS.is_N()) + str(self.FLAGS.is_V()) + '1' + str(self.FLAGS.is_B()) + str(self.FLAGS.is_D()) + str(self.FLAGS.is_I()) + str(self.FLAGS.is_Z()) + str(self.FLAGS.is_C()) + ' |' + self.print_mem)
 
 def main():
     filename = sys.argv[1]
