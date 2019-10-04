@@ -16,8 +16,6 @@ class Processor():
         self.STACK = Register8bit()
         self.FLAGS = RegisterFlag()
         
-
-
         self.header = Memory(0,16)
         self.memory = Memory(16,-1)
         self.header.read_file(self.filename)
