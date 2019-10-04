@@ -52,6 +52,7 @@ NMI:
    SBC #$10
    SBC #$06
    SBC #$10
+   SBC #$FF
 
    BRK
    ;NOTE: NMI code goes here

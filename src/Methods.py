@@ -369,16 +369,24 @@ def _rts(processor, memory_position):
     processor.PC.value = memory_position
 
 def _sbc(processor, value):
-    processor.A.value -= value - processor.FLAGS.is_C()
+    a_value = processor.A.value - 256 if processor.FLAGS.is_N() else processor.A.value
 
-    if processor.A.value < -128:
-        processor.A.value += 255
-        processor.FLAGS.set_C()
+    result = a_value- value - processor.FLAGS.is_C()
+
+    if result < -128:
         processor.FLAGS.set_V()
-    if processor.A.value < 0:
+    if result < 0:
         processor.FLAGS.set_N()
-    if processor.A.value == 0:
+    if result == 0:
         processor.FLAGS.set_Z()
+
+    if result < 0 and result >= -128:
+        result = 256 + result
+
+    if result < -128:
+        result += 256
+
+    processor.A.value = result
 
 def _sec(processor):
     processor.FLAGS.set_C()
