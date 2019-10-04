@@ -604,11 +604,13 @@ class Processor():
         elif bin_instruction == int('A5', 16): # LDA zero page
             absolute_position_lo = self.read_memo()
             methods._lda(self, absolute_position_lo)
+            self.mem_print(absolute_position_lo, self.A.value)
 
         elif bin_instruction == int('B5', 16): # LDA zero page, X
             absolute_position_lo = self.read_memo()
             memory_position = absolute_position_lo + self.X.value
             methods._lda(self, memory_position)
+            self.mem_print(memory_position, self.A.value)
 
         elif bin_instruction == int('AD', 16): # LDA Absolute
             # TODO: Check if the HI/LOW order is right
@@ -616,26 +618,37 @@ class Processor():
             absolute_position_hi = self.read_memo()
             memory_position = absolute_position_hi * 256 + absolute_position_lo
             methods._lda(self, memory_position)
-            self.mem_print(memory_position,self.A.value)
+            self.mem_print(memory_position, self.A.value)
             
 
         elif bin_instruction == int('BD', 16): # LDA Absolute,X
-            absolute_position_lo = self.read_memo()
+            absolute_position_lo = self.read_memo() + self.X.value
             absolute_position_hi = self.read_memo()
-            memory_position =  absolute_position_hi * 256 + absolute_position_lo + self.X.value
+            memory_position = absolute_position_hi * 256 + absolute_position_lo
             methods._lda(self, memory_position)
+            self.mem_print(memory_position, self.A.value)
 
-        elif bin_instruction == int('B9', 16): # LA Absolute, Y
-            absolute_position_lo = self.read_memo()
+        elif bin_instruction == int('B9', 16): # LDA Absolute, Y
+            absolute_position_lo = self.read_memo() + self.Y.value
             absolute_position_hi = self.read_memo()
-            memory_position =  absolute_position_hi * 256 + absolute_position_lo + self.Y.value
+            memory_position = absolute_position_hi * 256 + absolute_position_lo
             methods._lda(self, memory_position)
+            self.mem_print(memory_position, self.A.value)
         
         elif bin_instruction == int('A1', 16): # LDA Indirect, X
-            pass
+            indirect_memory = self.read_memo() + self.X.value
+            memory_position = self.memory.read_memo(indirect_memory)
+            actual_memory = self.memory.read_memo(memory_position)
+            methods._lda(self, actual_memory)
+            self.mem_print(actual_memory, self.A.value)
         
         elif bin_instruction == int('B1', 16): # LDA Indirect, Y
-            pass
+            indirect_memory = self.read_memo()
+            memory_position = self.memory.read_memo(indirect_memory) + self.Y.value
+            actual_memory = self.memory.read_memo(memory_position)
+            methods._lda(self, actual_memory)
+            self.mem_print(actual_memory, self.A.value)
+
         # LDX A2, A6, B6, AE, BE
         elif bin_instruction == int('A2', 16): # LDX Immediate
             value = self.read_memo()
