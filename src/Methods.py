@@ -1,4 +1,5 @@
 import sys
+from math import floor
 
 def _adc(processor, value):
     processor.A.value += value + processor.FLAGS.is_C()
@@ -304,7 +305,10 @@ def _jmp(processor, value):
     processor.PC.value = value
 
 def _jsr(processor, address, next_instruction):
-    processor.memory.push_stack(processor.STACK, next_instruction)
+    next_instruction_lo = next_instruction % 256
+    next_instruction_hi = int(floor(next_instruction / 256))
+    processor.memory.push_stack(processor.STACK, next_instruction_hi)
+    processor.memory.push_stack(processor.STACK, next_instruction_lo)
     processor.PC.value = address
 
 def _brk(processor, exit_status):
