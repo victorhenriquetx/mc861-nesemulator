@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "./Processor.py", line 913, in <module>
+    main()
+  File "./Processor.py", line 909, in main
+    processor = Processor(filename)
+  File "./Processor.py", line 16, in __init__
+    self.STACK = Register8bit(int('ff'), 16)
+ValueError: invalid literal for int() with base 10: 'ff'

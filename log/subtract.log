@@ -1,5 +1,8 @@
-| pc = 0xc000 | a = 0x16 | x = 0x0 | y = 0x0 | sp = 0x0 | p[NV-BDIZC] = 00100000 |
-| pc = 0xc002 | a = 0x16 | x = 0x16 | y = 0x0 | sp = 0x0 | p[NV-BDIZC] = 00100000 |
-| pc = 0xc003 | a = 0x6 | x = 0x16 | y = 0x0 | sp = 0x0 | p[NV-BDIZC] = 00100000 |
-| pc = 0xc005 | a = 0x0 | x = 0x16 | y = 0x0 | sp = 0x0 | p[NV-BDIZC] = 00100010 |
-| pc = 0xc007 | a = -0x10 | x = 0x16 | y = 0x0 | sp = 0x0 | p[NV-BDIZC] = 10100010 |
+Traceback (most recent call last):
+  File "./Processor.py", line 913, in <module>
+    main()
+  File "./Processor.py", line 909, in main
+    processor = Processor(filename)
+  File "./Processor.py", line 16, in __init__
+    self.STACK = Register8bit(int('ff'), 16)
+ValueError: invalid literal for int() with base 10: 'ff'

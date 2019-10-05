@@ -13,7 +13,7 @@ class Processor():
         self.X = Register8bit()
         self.Y = Register8bit()
         self.A = Register8bit()
-        self.STACK = Register8bit()
+        self.STACK = Register8bit(int('ff'), 16)
         self.FLAGS = RegisterFlag()
         
         self.header = Memory(0,16)
@@ -638,16 +638,24 @@ class Processor():
         elif bin_instruction == int('A1', 16): # LDA Indirect, X
             indirect_memory = self.read_memo() + self.X.value
             memory_position = self.memory.read_memo(indirect_memory)
-            actual_memory = self.memory.read_memo(memory_position)
-            methods._lda(self, actual_memory)
-            self.mem_print(actual_memory, self.A.value)
+
+            absolute_position_lo = self.memory.read_memo(memory_position)
+            absolute_position_hi = self.memory.read_memo(memory_position + 1)
+            memory_position = absolute_position_hi * 256 + absolute_position_lo
+
+            methods._lda(self, memory_position)
+            self.mem_print(memory_position, self.A.value)
         
         elif bin_instruction == int('B1', 16): # LDA Indirect, Y
             indirect_memory = self.read_memo()
             memory_position = self.memory.read_memo(indirect_memory) + self.Y.value
-            actual_memory = self.memory.read_memo(memory_position)
-            methods._lda(self, actual_memory)
-            self.mem_print(actual_memory, self.A.value)
+
+            absolute_position_lo = self.memory.read_memo(memory_position)
+            absolute_position_hi = self.memory.read_memo(memory_position + 1)
+            memory_position = absolute_position_hi * 256 + absolute_position_lo
+
+            methods._lda(self, memory_position)
+            self.mem_print(memory_position, self.A.value)
 
         # LDX A2, A6, B6, AE, BE
         elif bin_instruction == int('A2', 16): # LDX Immediate
@@ -799,17 +807,25 @@ class Processor():
         elif bin_instruction == int('01', 16): # ORA Indirect, X
             indirect_memory = self.read_memo() + self.X.value
             memory_position = self.memory.read_memo(indirect_memory)
-            actual_memory = self.memory.read_memo(memory_position)
-            methods._ora(self, actual_memory)
-            self.mem_print(actual_memory, self.A.value)
+
+            absolute_position_lo = self.memory.read_memo(memory_position)
+            absolute_position_hi = self.memory.read_memo(memory_position + 1)
+            memory_position = absolute_position_hi * 256 + absolute_position_lo
+
+            methods._ora(self, memory_position)
+            self.mem_print(memory_position, self.A.value)
             
         
         elif bin_instruction == int('11', 16): # ORA Indirect, Y
             indirect_memory = self.read_memo()
             memory_position = self.memory.read_memo(indirect_memory) + self.Y.value
-            actual_memory = self.memory.read_memo(memory_position)
-            methods._ora(self, actual_memory)
-            self.mem_print(actual_memory, self.A.value)
+            
+            absolute_position_lo = self.memory.read_memo(memory_position)
+            absolute_position_hi = self.memory.read_memo(memory_position + 1)
+            memory_position = absolute_position_hi * 256 + absolute_position_lo
+
+            methods._ora(self, memory_position)
+            self.mem_print(memory_position, self.A.value)
 
         # PHA (Push Acc)
         elif bin_instruction == int('48', 16): # Push Accumulator
