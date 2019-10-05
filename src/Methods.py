@@ -381,6 +381,7 @@ def _sbc(processor, value):
         processor.FLAGS.set_V()
     if result < 0:
         processor.FLAGS.set_N()
+        processor.FLAGS.clear_C()
     if result == 0:
         processor.FLAGS.set_Z()
     else:
@@ -392,8 +393,6 @@ def _sbc(processor, value):
     if result < 0 and result >= -128:
         processor.FLAGS.set_C()
         result = 256 + result
-    else:
-        processor.FLAGS.clear_C()
 
     processor.A.value = result
 
