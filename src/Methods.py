@@ -370,7 +370,10 @@ def _rts(processor, memory_position):
 
 def _sbc(processor, value):
     a_value = processor.A.value - 256 if processor.FLAGS.is_N() else processor.A.value
-    result = a_value - value - processor.FLAGS.is_C()
+    result = a_value - value
+
+    if not processor.FLAGS.is_C():
+        result -= 1
 
     if result > 0:
         processor.FLAGS.clear_N()
@@ -387,7 +390,10 @@ def _sbc(processor, value):
         result += 256
 
     if result < 0 and result >= -128:
+        processor.FLAGS.set_C()
         result = 256 + result
+    else:
+        processor.FLAGS.clear_C()
 
     processor.A.value = result
 
