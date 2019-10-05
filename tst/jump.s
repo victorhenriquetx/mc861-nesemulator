@@ -45,24 +45,28 @@ MIRRORING = %0001 ;%0000 = horizontal, %0001 = vertical, %1000 = four-screen
 
 Reset:
     LDA #$20
+    ; Ignore everything, goes to end
+    JMP End
     STA $0101
     STA $01
     LDX #$01
     ; Test all four DEC
-    DEC $01
-    DEC $00, X
-    DEC $0101
-    DEC $0100, X
+    INC $01
+    INC $00, X
+    INC $0101
+    INC $0100, X
     ; Compare for fun
     LDA $0101
-    CMP #$1e
+    CMP #$22
     LDA $01
-    CMP #$1e
+    CMP #$22
     ; DEX and DEY
-    LDX #$01
-    LDY #$01
-    DEX
-    DEY
+    LDX #$ff
+    LDY #$ff
+    INX
+    INY
+End:
+    NOP ; Just to show PC
     BRK
 NMI:
    ;NOTE: NMI code goes here
