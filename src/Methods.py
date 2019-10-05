@@ -5,7 +5,7 @@ def _adc(processor, value):
     processor.A.value += value + processor.FLAGS.is_C()
 
     if processor.A.check_overflow():
-        processor.A.value -= 255
+        processor.A.value -= 256
         processor.FLAGS.set_C()
         processor.FLAGS.set_V()
     if processor.A.is_negative():
