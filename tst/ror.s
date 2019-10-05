@@ -53,6 +53,10 @@ Reset:
     ROL $2001
 
     JSR hey
+    LDX #$80
+    TXA
+    ROL A
+    LSR A
     NOP
     NOP
     NOP
@@ -62,7 +66,7 @@ Reset:
 
 hey:
     NOP
-    
+    RTS
 NMI:
    ;NOTE: NMI code goes here
 IRQ:
