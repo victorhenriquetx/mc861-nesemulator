@@ -368,14 +368,22 @@ class Processor():
         elif bin_instruction == int('C1', 16): # CMP (Indirect,X)
             indirect_memory = self.read_memo() + self.X.value
             memory_position = self.memory.read_memo(indirect_memory)
-            methods._cmp(self, memory_position)
-            self.mem_print(memory_position, self.memory.read_memo(memory_position))
+            
+            absolute_position_lo = self.memory.read_memo(memory_position)
+            absolute_position_hi = self.memory.read_memo(memory_position + 1)
+            absolute_position = absolute_position_hi * 256 + absolute_position_lo
+            methods._cmp(self, absolute_position)
+            self.mem_print(absolute_position, self.memory.read_memo(absolute_position))
 
         elif bin_instruction == int('D1', 16): # CMP (Indirect),Y
             indirect_memory = self.read_memo()
             memory_position = self.memory.read_memo(indirect_memory) + self.Y.value
-            methods._cmp(self, memory_position)
-            self.mem_print(memory_position, self.memory.read_memo(memory_position))
+            
+            absolute_position_lo = self.memory.read_memo(memory_position)
+            absolute_position_hi = self.memory.read_memo(memory_position + 1)
+            absolute_position = absolute_position_hi * 256 + absolute_position_lo
+            methods._cmp(self, absolute_position)
+            self.mem_print(absolute_position, self.memory.read_memo(absolute_position))
 
         elif bin_instruction == int('E0', 16): # CPX Immediate
             immediate = self.read_memo()
@@ -477,14 +485,22 @@ class Processor():
         elif bin_instruction == int('41', 16): # EOR (Indirect,X)
             indirect_memory = self.read_memo() + self.X.value
             memory_position = self.memory.read_memo(indirect_memory)
-            methods._eor(self, memory_position)
-            self.mem_print(memory_position, self.memory.read_memo(memory_position))
+
+            absolute_position_lo = self.memory.read_memo(memory_position)
+            absolute_position_hi = self.memory.read_memo(memory_position + 1)
+            absolute_position = absolute_position_hi * 256 + absolute_position_lo
+            methods._eor(self, absolute_position)
+            self.mem_print(absolute_position, self.memory.read_memo(absolute_position))
 
         elif bin_instruction == int('51', 16): # EOR (Indirect),Y
             indirect_memory = self.read_memo()
             memory_position = self.memory.read_memo(indirect_memory) + self.Y.value
-            methods._eor(self, memory_position)
-            self.mem_print(memory_position, self.memory.read_memo(memory_position)) 
+            
+            absolute_position_lo = self.memory.read_memo(memory_position)
+            absolute_position_hi = self.memory.read_memo(memory_position + 1)
+            absolute_position = absolute_position_hi * 256 + absolute_position_lo
+            methods._eor(self, absolute_position)
+            self.mem_print(absolute_position, self.memory.read_memo(absolute_position))
 
         elif bin_instruction == int('E6', 16): # INC Zero Page
             zero_position = self.read_memo()
@@ -521,7 +537,6 @@ class Processor():
             absolute_position_hi = self.read_memo()
             absolute_position = absolute_position_hi * 256 + absolute_position_lo
             methods._jmp(self, absolute_position)
-            self.mem_print(absolute_position, self.memory.read_memo(absolute_position))
         
         elif bin_instruction == int('6C', 16): # JMP Indirect
             # indirect_position points to low indirect value, a subsequent
@@ -546,7 +561,6 @@ class Processor():
             memory_position_hi = self.memory.read_memo(indirect_position_hi * 256 + indirect_position_lo_plus_one)
             memory_position = memory_position_hi * 256 + memory_position_lo
             methods._jmp(self, memory_position)
-            self.mem_print(memory_position, self.memory.read_memo(memory_position)) 
 
         elif bin_instruction == int('95', 16): # STA Zero Page, X
             memory_position = self.read_memo() + self.X.value
