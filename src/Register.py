@@ -52,19 +52,19 @@ class RegisterFlag(Register8bit):
         self.value &= ~(1 << 6)
 
     def clear_B(self):
-        self.value &= ~(1 << 5)
-
-    def clear_D(self):
         self.value &= ~(1 << 4)
 
-    def clear_I(self):
+    def clear_D(self):
         self.value &= ~(1 << 3)
 
-    def clear_Z(self):
+    def clear_I(self):
         self.value &= ~(1 << 2)
 
-    def clear_C(self):
+    def clear_Z(self):
         self.value &= ~(1 << 1)
+
+    def clear_C(self):
+        self.value &= ~(1 << 0)
 
     def is_N(self):
         return 1 if self.value & 128 == 128 else 0

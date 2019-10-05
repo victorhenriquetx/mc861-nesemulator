@@ -265,7 +265,7 @@ class Processor():
         elif bin_instruction == int('85', 16): # STA Zero Page
             memory_position = self.read_memo()
             methods._sta(self, memory_position)
-            self.mem_print(memory_position, self.memory.read_memo(memory_position))
+            self.mem_print(memory_position, self.A.value)
             
         elif bin_instruction == int('18', 16): # CLI
             methods._clc(self, None)
