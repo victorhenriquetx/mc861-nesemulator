@@ -252,41 +252,51 @@ class Processor():
             zero_position = self.read_memo()
             value = self.memory.read_memo(zero_position)
             methods._sbc(self, value)
+            self.mem_print(zero_position, value)
 
         elif bin_instruction == int('F5', 16): # SBC Zero Page,X
             zero_position = self.read_memo() + self.X.value
             value = self.memory.read_memo(zero_position)
             methods._sbc(self, value)
+            self.mem_print(zero_position, value)
 
         elif bin_instruction == int('ED', 16): # SBC Absolute
             absolute_position_lo = self.read_memo()
             absolute_position_hi = self.read_memo()
-            value = self.memory.read_memo(absolute_position_hi * 256 + absolute_position_lo)
+            absolute_position = absolute_position_hi * 256 + absolute_position_lo
+            value = self.memory.read_memo(absolute_position)
             methods._sbc(self,value)
+            self.mem_print(absolute_position, value)
 
         elif bin_instruction == int('FD', 16): # SBC Absolute,X
-            absolute_position_lo = self.read_memo()
+            absolute_position_lo = self.read_memo() + self.X.value
             absolute_position_hi = self.read_memo()
-            value = self.memory.read_memo(absolute_position_hi * 256 + absolute_position_lo + self.X.value)
+            absolute_position = absolute_position_hi * 256 + absolute_position_lo
+            value = self.memory.read_memo(absolute_position)
             methods._sbc(self, value)
+            self.mem_print(absolute_position, value)
 
         elif bin_instruction == int('F9', 16): # SBC Absolute,Y
-            absolute_position_lo = self.read_memo()
+            absolute_position_lo = self.read_memo() + self.Y.value
             absolute_position_hi = self.read_memo()
-            value = self.memory.read_memo(absolute_position_hi * 256 + absolute_position_lo + self.Y.value)
-            methods._sbc(self, value)   
+            absolute_position = absolute_position_hi * 256 + absolute_position_lo
+            value = self.memory.read_memo(absolute_position_hi * 256 + absolute_position_lo)
+            methods._sbc(self, value)
+            self.mem_print(absolute_position, value) 
 
         elif bin_instruction == int('E1', 16): # SBC Indirect,X
             indirect_memory = self.read_memo() + self.X.value
             memory_position = self.memory.read_memo(indirect_memory)
             value = self.memory.read_memo(memory_position)
-            methods._sbc(self, value)   
+            methods._sbc(self, value)
+            self.mem_print(memory_position, value)
 
         elif bin_instruction == int('F1', 16): # SBC Indirect,Y
             indirect_memory = self.read_memo()
             memory_position = self.memory.read_memo(indirect_memory) + self.Y.value
             value = self.memory.read_memo(memory_position)
             methods._sbc(self, value)
+            self.mem_print(memory_position, value)
 
         elif bin_instruction == int('38', 16): # SEC
             methods._sec(self)
