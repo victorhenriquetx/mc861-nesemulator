@@ -93,7 +93,9 @@ class Processor():
         elif bin_instruction == int('61', 16): # ADC Indirect,X
             indirect_memory = self.read_memo() + self.X.value
             memory_position = self.memory.read_memo(indirect_memory)
-            value = self.memory.read_memo(memory_position)
+            value_lo = self.memory.read_memo(memory_position)
+            value_hi = self.memory.read_memo(memory_position+1)
+            value = value_hi * 256 + value_lo
             methods._adc(self, value)
             self.mem_print(memory_position, value)   
 
@@ -148,14 +150,18 @@ class Processor():
         elif bin_instruction == int('21', 16): # AND Indirect,X
             indirect_memory = self.read_memo() + self.X.value
             memory_position = self.memory.read_memo(indirect_memory)
-            value = self.memory.read_memo(memory_position)
+            value_lo = self.memory.read_memo(memory_position)
+            value_hi = self.memory.read_memo(memory_position+1)
+            value = value_hi * 256 + value_lo
             methods._and(self, value)
             self.mem_print(memory_position, value)   
 
         elif bin_instruction == int('31', 16): # AND Indirect,Y
             indirect_memory = self.read_memo()
             memory_position = self.memory.read_memo(indirect_memory) + self.Y.value
-            value = self.memory.read_memo(memory_position)
+            value_lo = self.memory.read_memo(memory_position)
+            value_hi = self.memory.read_memo(memory_position+1)
+            value = value_hi * 256 + value_lo
             methods._adc(self, value)
             self.mem_print(memory_position, value)
 
