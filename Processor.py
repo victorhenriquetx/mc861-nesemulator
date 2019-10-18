@@ -83,7 +83,7 @@ class Processor():
         value_hi = self.memory.read_memo(memory_position + 1)
         final_memory = value_hi * 256 + value_lo
 
-        return final_memory
+        return final_memory, memory_position
     
     def read_indirect_y(self):
         indirect_memory = self.read_memo_pc()
@@ -93,7 +93,7 @@ class Processor():
         value_hi = self.memory.read_memo(memory_position + 1)
         final_memory = value_hi * 256 + value_lo
 
-        return final_memory
+        return final_memory, memory_position
 
     def decode_instruction(self, bin_instruction):
         # converte byte para string no formato do which_instruction
@@ -104,60 +104,48 @@ class Processor():
             methods._brk(self, 0)
         #---------------------- ADC Instruction----------------------------------
         elif bin_instruction == int('69', 16): # ADC Immediate
-            value = self.read_memo() #immediate
+            value = self.read_immediate()
             methods._adc(self, value)
 
         elif bin_instruction == int('65', 16): # ADC Zero Page
-            zero_position = self.read_memo()
+            zero_position = self.read_zero_page()
             value = self.memory.read_memo(zero_position)
             methods._adc(self, value)
             self.mem_print(zero_position, value)
 
         elif bin_instruction == int('75', 16): # ADC Zero Page,X
-            zero_position = self.read_memo() + self.X.value
+            zero_position = self.read_zero_page_x()
             value = self.memory.read_memo(zero_position)
             methods._adc(self, value)
             self.mem_print(zero_position, value)
 
         elif bin_instruction == int('6D', 16): # ADC Absolute
-            absolute_position_lo = self.read_memo()
-            absolute_position_hi = self.read_memo()
-            absolute_position = absolute_position_hi * 256 + absolute_position_lo
+            absolute_position = self.read_absolute()
             value = self.memory.read_memo(absolute_position)
             methods._adc(self,value)
             self.mem_print(absolute_position, value)
 
         elif bin_instruction == int('7D', 16): # ADC Absolute,X
-            absolute_position_lo = self.read_memo()
-            absolute_position_hi = self.read_memo()
-            absolute_position = absolute_position_hi * 256 + absolute_position_lo + self.X.value
+            absolute_position = self.read_absolute_x()
             value = self.memory.read_memo(absolute_position)
             methods._adc(self, value)
             self.mem_print(absolute_position, value)
 
         elif bin_instruction == int('79', 16): # ADC Absolute,Y
-            absolute_position_lo = self.read_memo()
-            absolute_position_hi = self.read_memo()
-            absolute_position = absolute_position_hi * 256 + absolute_position_lo + self.Y.value
+            absolute_position = self.read_absolute_y()
             value = self.memory.read_memo(absolute_position)
             methods._adc(self, value)
             self.mem_print(absolute_position, value)   
 
         elif bin_instruction == int('61', 16): # ADC Indirect,X
-            indirect_memory = self.read_memo() + self.X.value
-            memory_position = self.memory.read_memo(indirect_memory)
-            value_lo = self.memory.read_memo(memory_position)
-            value_hi = self.memory.read_memo(memory_position+1)
-            value = value_hi * 256 + value_lo
-            methods._adc(self, value)
-            self.mem_print(memory_position, value)   
+            final_memory, indirect_position = self.read_indirect_x()
+            methods._adc(self, final_memory)
+            self.mem_print(indirect_position, final_memory)   
 
         elif bin_instruction == int('71', 16): # ADC Indirect,Y
-            indirect_memory = self.read_memo()
-            memory_position = self.memory.read_memo(indirect_memory) + self.Y.value
-            value = self.memory.read_memo(memory_position)
-            methods._adc(self, value)
-            self.mem_print(memory_position, value)
+            final_memory, indirect_position = self.read_indirect_y()
+            methods._adc(self, final_memory)
+            self.mem_print(indirect_position, final_memory)   
 
         #---------------------- AND Instruction----------------------------------
         elif bin_instruction == int('29', 16): # AND Immediate
@@ -193,9 +181,7 @@ class Processor():
             self.mem_print(absolute_position, value)
 
         elif bin_instruction == int('39', 16): # AND Absolute,Y
-            absolute_position_lo = self.read_memo()
-            absolute_position_hi = self.read_memo()
-            absolute_position = absolute_position_hi * 256 + absolute_position_lo + self.Y.value
+            absolute_position = self.read_absolute_y()
             value = self.memory.read_memo(absolute_position)
             methods._and(self, value)
             self.mem_print(absolute_position, value)   
