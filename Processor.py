@@ -37,10 +37,63 @@ class Processor():
             self.print_log()
 
     # TODO implementar funcoes auxiliares
-    def read_memo(self):
+    def read_memo_pc(self):
         readed_value = self.memory.read_memo(self.PC.value)
         self.PC.increment()
         return readed_value
+
+    def read_immediate(self):
+        immediate = self.read_memo_pc()
+        return immediate
+    
+    def read_zero_page(self):
+        zero_position = self.read_memo_pc()
+        return zero_position
+    
+    def read_zero_page_x(self):
+        zero_position_x = self.read_memo_pc() + self.X.value
+        return zero_position_x
+    
+    def read_absolute(self):
+        absolute_position_lo = self.read_memo_pc()
+        absolute_position_hi = self.read_memo_pc()
+        absolute_position = absolute_position_hi * 256 + absolute_position_lo
+
+        return absolute_position
+    
+    def read_absolute_x(self):
+        absolute_position_lo = self.read_memo_pc() + self.X.value
+        absolute_position_hi = self.read_memo_pc()
+        absolute_position = absolute_position_hi * 256 + absolute_position_lo
+
+        return absolute_position
+
+    def read_absolute_y(self):
+        absolute_position_lo = self.read_memo_pc() + self.Y.value
+        absolute_position_hi = self.read_memo_pc()
+        absolute_position = absolute_position_hi * 256 + absolute_position_lo
+
+        return absolute_position
+    
+    def read_indirect_x(self):
+        indirect_memory = self.read_memo_pc() + self.X.value
+        
+        memory_position = self.memory.read_memo(indirect_memory)
+        value_lo = self.memory.read_memo(memory_position)
+        value_hi = self.memory.read_memo(memory_position + 1)
+        final_memory = value_hi * 256 + value_lo
+
+        return final_memory
+    
+    def read_indirect_y(self):
+        indirect_memory = self.read_memo_pc()
+        
+        memory_position = self.memory.read_memo(indirect_memory) + self.Y.value
+        value_lo = self.memory.read_memo(memory_position)
+        value_hi = self.memory.read_memo(memory_position + 1)
+        final_memory = value_hi * 256 + value_lo
+
+        return final_memory
 
     def decode_instruction(self, bin_instruction):
         # converte byte para string no formato do which_instruction
