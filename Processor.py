@@ -248,7 +248,7 @@ class Processor():
         elif bin_instruction == int('60', 16): # RTS
             absolute_position_lo = self.memory.pop_stack(self.STACK)
             absolute_position_hi = self.memory.pop_stack(self.STACK)
-            methods._rts(self, absolute_position_hi * 256 + absolute_position_lo +1)
+            methods._rts(self, absolute_position_hi * 256 + absolute_position_lo)
 
         elif bin_instruction == int('E9', 16): # SBC Immediate
             value = self.read_memo()
@@ -660,7 +660,7 @@ class Processor():
             absolute_position_hi = self.read_memo()
 
             address = absolute_position_hi * 256 + absolute_position_lo + self.X.value
-            next_instruction =  self.PC.value - 1
+            next_instruction =  self.PC.value
             methods._jsr(self, address, next_instruction)
 
         elif bin_instruction == int('A9', 16): # LDA Immediate
