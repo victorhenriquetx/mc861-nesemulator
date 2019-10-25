@@ -174,45 +174,53 @@ class Processor():
 
         #---------------------- AND Instruction----------------------------------
         elif bin_instruction == int('29', 16): # AND Immediate
+            self.cycles += 2
             value = self.read_immediate() #immediate
             methods._and(self, value)
 
         elif bin_instruction == int('25', 16): # AND Zero Page
+            self.cycles += 3
             zero_position = self.read_zero_page()
             value = self.memory.read_memo(zero_position)
             methods._and(self, value)
             self.mem_print(zero_position, value)
 
         elif bin_instruction == int('35', 16): # AND Zero Page,X
+            self.cycles += 4
             zero_position = self.read_zero_page_x()
             value = self.memory.read_memo(zero_position)
             methods._and(self, value)
             self.mem_print(zero_position, value)
 
         elif bin_instruction == int('2D', 16): # AND Absolute
+            self.cycles += 4
             absolute_position = self.read_absolute()
             value = self.memory.read_memo(absolute_position)
             methods._and(self,value)
             self.mem_print(absolute_position, value)
 
         elif bin_instruction == int('3D', 16): # AND Absolute,X
+            self.cycles += 4
             absolute_position = self.read_absolute_x()
             value = self.memory.read_memo(absolute_position)
             methods._and(self, value)
             self.mem_print(absolute_position, value)
 
         elif bin_instruction == int('39', 16): # AND Absolute,Y
+            self.cycles += 4
             absolute_position = self.read_absolute_y()
             value = self.memory.read_memo(absolute_position)
             methods._and(self, value)
             self.mem_print(absolute_position, value)   
 
         elif bin_instruction == int('21', 16): # AND Indirect,X
+            self.cycles += 6
             final_memory, indirect_position = self.read_indirect_x()
             methods._and(self, final_memory)
             self.mem_print(indirect_position, final_memory)   
 
         elif bin_instruction == int('31', 16): # AND Indirect,Y
+            self.cycles += 5
             final_memory, indirect_position = self.read_indirect_y()
             methods._and(self, final_memory)
             self.mem_print(indirect_position, final_memory)   
