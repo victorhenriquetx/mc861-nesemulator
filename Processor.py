@@ -25,16 +25,24 @@ class Processor():
         start_pc_addr_hi = self.memory.read_memo(int('fffd', 16))
         self.PC = Register16bit(start_pc_addr_hi*256 + start_pc_addr_lo)
         self.fake_PC = Register16bit(self.PC.value)
+        self.cycles = 0
 
         self.print_mem = ''
 
     def emula(self, init_pos):
         # Emulation
         while True:
+            if self.cycles >= 27756:
+                self.cycles = 0
+                self.draw_frame()
             self.fake_PC.value = self.PC.value
             instruction = self.read_memo()
             decode = self.decode_instruction(instruction)
             self.print_log()
+
+    def draw_frame(self):
+        # Função para atualizar o frame na tela
+        print('draw_frame')
 
     # TODO implementar funcoes auxiliares
     def read_memo(self):
