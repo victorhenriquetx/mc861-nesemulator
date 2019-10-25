@@ -260,11 +260,14 @@ class Processor():
         
         #---------------------- BIT Instruction-------------------------------------
         elif bin_instruction == int('24', 16): # BIT Zero Page
+            self.cycles += 3
             zero_position = self.read_zero_page()
             value = self.memory.read_memo(zero_position)
             methods._bit(self, value)
             self.mem_print(zero_position, value)
+
         elif bin_instruction == int('2C', 16): # BIT Absolute
+            self.cycles += 4
             absolute_position = self.read_absolute()
             value = self.memory.read_memo(absolute_position)
             methods._bit(self,value)
