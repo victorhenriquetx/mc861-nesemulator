@@ -2,6 +2,7 @@ import os
 import sys
 from src.Register import Register8bit, Register16bit, RegisterFlag
 from src.Memory import Memory
+from src.Utils import Timer
 import src.Methods as methods
 
 _DEBUG = True
@@ -25,18 +26,26 @@ class Processor():
         start_pc_addr_hi = self.memory.read_memo(int('fffd', 16))
         self.PC = Register16bit(start_pc_addr_hi*256 + start_pc_addr_lo)
         self.fake_PC = Register16bit(self.PC.value)
+        self.timeoutSet = False
 
         self.print_mem = ''
 
     def emula(self, init_pos):
         # Emulation
+        timer = Timer()
         while True:
+            if not timeoutSet:
+                self.timeoutSet = True
+                timer.setTimeout(self.draw_frame, 1/60)
             self.fake_PC.value = self.PC.value
             instruction = self.read_memo_pc()
             decode = self.decode_instruction(instruction)
             self.print_log()
 
-    # TODO implementar funcoes auxiliares
+    def draw_frame(self):
+        self.timeoutSet = False
+        # funções para atualizar tela aqui
+
     def read_memo_pc(self):
         readed_value = self.memory.read_memo(self.PC.value)
         self.PC.increment()
