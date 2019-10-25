@@ -225,29 +225,34 @@ class Processor():
             methods._and(self, final_memory)
             self.mem_print(indirect_position, final_memory)   
 
-        #---------------------- AND Instruction----------------------------------
+        #---------------------- ASL Instruction----------------------------------
         elif bin_instruction == int('0A', 16): # ASL Accumulator
+            self.cycles += 2
             methods._asl(self, self.A)
 
         elif bin_instruction == int('06', 16): # ASL Zero Page
+            self.cycles += 5
             zero_position = self.read_zero_page()
             value = self.memory.read_memo(zero_position)
             methods._asl(self, value)
             self.mem_print(zero_position, value)
 
         elif bin_instruction == int('16', 16): # ASL Zero Page,X
+            self.cycles += 6
             zero_position = self.read_zero_page_x()
             value = self.memory.read_memo(zero_position)
             methods._asl(self, value)
             self.mem_print(zero_position, value)
 
         elif bin_instruction == int('0E', 16): # ASL Absolute
+            self.cycles += 6
             absolute_position = self.read_absolute()
             value = self.memory.read_memo(absolute_position)
             methods._asl(self,value)
             self.mem_print(absolute_position, value)
 
         elif bin_instruction == int('1E', 16): # ASL Absolute,X
+            self.cycles += 7
             absolute_position = self.read_absolute_x()
             value = self.memory.read_memo(absolute_position)
             methods._asl(self, value)
