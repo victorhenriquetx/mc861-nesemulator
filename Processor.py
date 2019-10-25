@@ -274,40 +274,48 @@ class Processor():
             self.mem_print(absolute_position, value)   
         
         #---------------------- Branch Instruction---------------------------------- 
-        elif bin_instruction == int('10', 16):
+        elif bin_instruction == int('10', 16): # BPL relative
+            self.cycles += 2
             branch_increment = self.read_relative()
-            
             methods._bpl(self, branch_increment)
-        elif bin_instruction == int('30', 16):
+
+        elif bin_instruction == int('30', 16): # BMI relative
+            self.cycles += 2
             branch_increment = self.read_relative()
-            
             methods._bmi(self, branch_increment)
-        elif bin_instruction == int('50', 16):
+
+        elif bin_instruction == int('50', 16): # BVC relative
+            self.cycles += 2
             branch_increment = self.read_relative()
-            
             methods._bvc(self, branch_increment)
-        elif bin_instruction == int('70', 16):
+
+        elif bin_instruction == int('70', 16): # BVS relative
+            self.cycles += 2
             branch_increment = self.read_relative()
-            
             methods._bvs(self, branch_increment)
-        elif bin_instruction == int('90', 16):
+
+        elif bin_instruction == int('90', 16): # BCC relative
+            self.cycles += 2
             branch_increment = self.read_relative()
-            
             methods._bcc(self, branch_increment)
-        elif bin_instruction == int('B0', 16):
+
+        elif bin_instruction == int('B0', 16): # BCS relative
+            self.cycles += 2
             branch_increment = self.read_relative()
-            
             methods._bcs(self, branch_increment)
-        elif bin_instruction == int('D0', 16):
+
+        elif bin_instruction == int('D0', 16): # BNE relative
+            self.cycles += 2
             branch_increment = self.read_relative()
-            
             methods._bne(self, branch_increment)
-        elif bin_instruction == int('F0', 16):
+
+        elif bin_instruction == int('F0', 16): # BEQ relative
+            self.cycles += 2
             branch_increment = self.read_relative()
-            
             methods._beq(self, branch_increment)
 
         elif bin_instruction == int('60', 16): # RTS
+            self.cycles += 6
             absolute_position_lo = self.memory.pop_stack(self.STACK)
             absolute_position_hi = self.memory.pop_stack(self.STACK)
             methods._rts(self, absolute_position_hi * 256 + absolute_position_lo)
