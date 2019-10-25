@@ -121,45 +121,53 @@ class Processor():
             methods._brk(self, 0)
         #---------------------- ADC Instruction----------------------------------
         elif bin_instruction == int('69', 16): # ADC Immediate
+            self.cycles += 2
             value = self.read_immediate()
             methods._adc(self, value)
 
         elif bin_instruction == int('65', 16): # ADC Zero Page
+            self.cycles += 3
             zero_position = self.read_zero_page()
             value = self.memory.read_memo(zero_position)
             methods._adc(self, value)
             self.mem_print(zero_position, value)
 
         elif bin_instruction == int('75', 16): # ADC Zero Page,X
+            self.cycles += 4
             zero_position = self.read_zero_page_x()
             value = self.memory.read_memo(zero_position)
             methods._adc(self, value)
             self.mem_print(zero_position, value)
 
         elif bin_instruction == int('6D', 16): # ADC Absolute
+            self.cycles += 4
             absolute_position = self.read_absolute()
             value = self.memory.read_memo(absolute_position)
             methods._adc(self,value)
             self.mem_print(absolute_position, value)
 
         elif bin_instruction == int('7D', 16): # ADC Absolute,X
+            self.cycles += 4
             absolute_position = self.read_absolute_x()
             value = self.memory.read_memo(absolute_position)
             methods._adc(self, value)
             self.mem_print(absolute_position, value)
 
         elif bin_instruction == int('79', 16): # ADC Absolute,Y
+            self.cycles += 4
             absolute_position = self.read_absolute_y()
             value = self.memory.read_memo(absolute_position)
             methods._adc(self, value)
             self.mem_print(absolute_position, value)   
 
         elif bin_instruction == int('61', 16): # ADC Indirect,X
+            self.cycles += 6
             final_memory, indirect_position = self.read_indirect_x()
             methods._adc(self, final_memory)
             self.mem_print(indirect_position, final_memory)   
 
         elif bin_instruction == int('71', 16): # ADC Indirect,Y
+            self.cycles += 5
             final_memory, indirect_position = self.read_indirect_y()
             methods._adc(self, final_memory)
             self.mem_print(indirect_position, final_memory)   
