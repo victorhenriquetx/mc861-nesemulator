@@ -4,11 +4,55 @@ import numpy as np
 
 class PPU():
     def __init__(self):
-        self.memory = Memory(0, 16)
+        
+        self.rom_memory = Memory(0, 8*1024)
+        self.memory = Memory(0, (15 - 8)*1024)
+
+        chr_filename = ''
+        self.init_rom_memo(chr_filename)
+
+        self.PPUCTRL_value = 0
+
+        self.PPUADDR_first = True
+        self.PPUADDR_value = 0
+    
         self.screen_width = 256*4
         self.screen_height = 256*4
 
         self.screen_data = np.zeros((self.screen_width, self.screen_height, 3))
+    
+    def init_rom_memo(self, chr_filename):
+        self.rom_memory.read_file(chr_filename)
+    
+    def PPUADDR_signal(self, value):
+        if self.PPUADDR_first:
+            self.PPUADDR_value = 256 * value
+        else:
+            self.PPUADDR_value += value
+        
+        self.PPUADDR_first = not self.PPUADDR_first
+
+    def increment_PPUADDR(self):
+        if self.PPUCTRL_value & (1 << 2):
+            self.PPUADDR_value -= 32
+        else:
+            self.PPUADDR_value += 1
+
+    def PPUDATA_signal(self, value):
+        self.memory.write_memo(self.PPUADDR_value, value)
+        self.increment_PPUADDR()
+
+    def background_pattern_table(self):
+        if self.PPUCTRL_value & (1 << 4):
+            return int('1000', 16)
+        else:
+            return 0
+
+    def sprite_pattern_table(self):
+        if self.PPUCTRL_value & (1 << 3):
+            return int('1000', 16)
+        else:
+            return 0
 
     def start(self):
         # inicialize the pygame
