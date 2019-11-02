@@ -100,3 +100,30 @@ class PPU():
             tile = x
             # for pixel in 
             self.update(x, y, 1, 1, color)
+
+    def handle_input(self):
+        buttons = pygame.key.get_pressed()
+        nes_buttons = 0
+
+        # atualizar estado de cada botão no controller
+        if (buttons[pygame.K_z]): # A
+            nes_buttons += 1
+        if (buttons[pygame.K_x]): # B
+            nes_buttons += 2
+        if (buttons[pygame.K_LEFTBRACKET]): # SELECT
+            nes_buttons += 4
+        if (buttons[pygame.K_RIGHTBRACKET]): # START
+            nes_buttons += 8
+        if (buttons[pygame.K_UP]):
+            nes_buttons += 16
+        if (buttons[pygame.K_DOWN]):
+            nes_buttons += 32
+        if (buttons[pygame.K_LEFT]):
+            nes_buttons += 64
+        if (buttons[pygame.K_RIGHT]):
+            nes_buttons += 128
+
+        # escreve na memória o estado dos botões
+
+
+        # setar que interrupção deve ser tratada
