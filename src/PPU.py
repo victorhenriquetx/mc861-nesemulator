@@ -8,21 +8,26 @@ class PPU():
         self.rom_memory = Memory(0, 8*1024)
         self.memory = Memory(0, (15 - 8)*1024)
 
-        chr_filename = ''
-        self.init_rom_memo(chr_filename)
+        # chr_filename = ''
+        # self.init_rom_memo(chr_filename)
 
         self.PPUCTRL_value = 0
 
         self.PPUADDR_first = True
         self.PPUADDR_value = 0
-    
-        self.screen_width = 256*4
-        self.screen_height = 256*4
+
+        self._adjust = 2
+
+        self.screen_width = 256 * self._adjust
+        self.screen_height = 256 * self._adjust
 
         self.screen_data = np.zeros((self.screen_width, self.screen_height, 3))
     
     def init_rom_memo(self, chr_filename):
         self.rom_memory.read_file(chr_filename)
+    
+    def get_nametable(self):
+        return self.PPUCTRL_value & 3
     
     def PPUADDR_signal(self, value):
         if self.PPUADDR_first:
@@ -86,17 +91,26 @@ class PPU():
             pygame.display.update()
 
 
-    def update(self, x, y, width, height, color=(0,0,0)):
-        pygame.draw.rect(self.screen, color, (x, y, width, height))
+    def update():
+        # pygame.draw.rect(self.screen, color, (x, y, width, height))
+        pygame.surfarray.blit_array(self.screen, self.screen_data)
         pygame.display.update()
 
     def render_frame(self, memory:Memory, memory_position):
         for i in range(64):
-            y = memory.read_memo(memory_position + i)
-            p_tile = memory.read_memo(memory_position + i)
-            p_color = memory.read_memo(memory_position + i)
-            x = memory.read_memo(memory_position + i)
+            y = self.memory.read_memo(memory_position + i)
+            tile_index = self.memory.read_memo(memory_position + i + 1)
+            p_color = self.memory.read_memo(memory_position + i + 2)
+            x = self.memory.read_memo(memory_position + i + 3)
             
-            tile = x
-            # for pixel in 
-            self.update(x, y, 1, 1, color)
+            tile_pointer = tile_index * (8*8)
+            tile_raw = self.memory.read_memo(tile_pointer)
+            
+            attrt_table = self.get_nametable() * int('400', 16) + int('23c0', 16)
+
+            tile = tile_raw + self.memory.read_memo()
+
+
+            # self.screen_data[y*4:y*4+4][x*4:x*4+4]
+    
+            self.update()
