@@ -25,6 +25,9 @@ class Memory():
 
     def read_memo(self, position):
         return self.mem[position]
+    
+    def read_range_memo(self, position, p_range):
+        return self.mem[position:position+p_range]
 
     def pop_stack(self, stack_register):
         stack_register.value += 1

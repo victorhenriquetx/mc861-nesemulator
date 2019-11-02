@@ -5,10 +5,10 @@ import numpy as np
 class PPU():
     def __init__(self):
         
-        self.rom_memory = Memory(0, 8*1024)
-        self.memory = Memory(0, (15 - 8)*1024)
+        self.memory = Memory(0, 16 * 1024)
+        self.rom_memory = Memory(0, 8 * 1024)
 
-        chr_filename = ''
+        chr_filename = '../img/mario.chr'
         self.init_rom_memo(chr_filename)
 
         self.PPUCTRL_value = 0
@@ -16,8 +16,8 @@ class PPU():
         self.PPUADDR_first = True
         self.PPUADDR_value = 0
     
-        self.screen_width = 256*4
-        self.screen_height = 256*4
+        self.screen_width = 256*2
+        self.screen_height = 256*2
 
         self.screen_data = np.zeros((self.screen_width, self.screen_height, 3))
     
@@ -42,6 +42,9 @@ class PPU():
         self.memory.write_memo(self.PPUADDR_value, value)
         self.increment_PPUADDR()
 
+    def get_nametable(self):
+        return self.PPUCTRL_value & 3
+    
     def background_pattern_table(self):
         if self.PPUCTRL_value & (1 << 4):
             return int('1000', 16)
@@ -63,7 +66,7 @@ class PPU():
 
         # perfumaria
         pygame.display.set_caption("The Best NES ever")
-        icon = pygame.image.load('..\\img\\Controller-512.png')
+        icon = pygame.image.load('../img/Controller-512.png')
         pygame.display.set_icon(icon)
     
     def quit(self):
@@ -75,6 +78,9 @@ class PPU():
         s = np.zeros((self.screen_width, self.screen_height, 3))
         s[:] = (255, 0, 0)
         s[:40] = (255, 255, 0)
+
+
+        s[:64, :64, 0] = np.array(self.rom_memory.mem[:int('1000', 16)]).reshape(64, 64)
         while running:
             for i in pygame.event.get():
                 if i.type == pygame.QUIT:
@@ -100,3 +106,20 @@ class PPU():
             tile = x
             # for pixel in 
             self.update(x, y, 1, 1, color)
+
+    def refresh_background(self):
+        bg_tiles = self.background_pattern_table()
+        backgroud_figs = self.memory.read_range_memo(bg_tiles, int('1000', 16))
+        backgroud_figs = np.array(backgroud_figs, dtype=np.uint8).reshape(256, )
+
+        background_list_index = self.get_nametable()
+        backgroud_list_pos = background_list_index * int('400', 16) + int('2000', 16)
+
+        backgroud_list = []
+        for i in range(32):
+            for j in range(30):
+                backgroud_list.append(backgroud_list_pos + i * 30 + j)
+
+                self.screen_data[i*8:i*8 + 8, j*8:j*8 + 8] = 
+
+
