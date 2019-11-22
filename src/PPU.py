@@ -8,7 +8,7 @@ class PPU():
         self.memory = Memory(0, 16 * 1024)
         self.rom_memory = Memory(0, 8 * 1024)
 
-        chr_filename = '../img/mario.chr'
+        chr_filename = '/home/ABTLUS/gabriel.andrade/mc861-nesemulator/img/mario.chr'
         self.init_rom_memo(chr_filename)
 
         self.PPUCTRL_value = 0
@@ -16,8 +16,8 @@ class PPU():
         self.PPUADDR_first = True
         self.PPUADDR_value = 0
     
-        self.screen_width = 256*2
-        self.screen_height = 256*2
+        self.screen_width = 256
+        self.screen_height = 240
 
         self.screen_data = np.zeros((self.screen_width, self.screen_height, 3))
     
@@ -66,7 +66,7 @@ class PPU():
 
         # perfumaria
         pygame.display.set_caption("The Best NES ever")
-        icon = pygame.image.load('../img/Controller-512.png')
+        icon = pygame.image.load('/home/ABTLUS/gabriel.andrade/mc861-nesemulator/img/Controller-512.png')
         pygame.display.set_icon(icon)
     
     def quit(self):
@@ -87,7 +87,8 @@ class PPU():
                     running = False
             # self.screen.blit(surf, (0, 0))
 
-            pygame.surfarray.blit_array(self.screen, s)
+            # pygame.surfarray.blit_array(self.screen, s)
+            pygame.surfarray.blit_array(self.screen, self.screen_data)
 
             pygame.display.update()
 
@@ -109,17 +110,29 @@ class PPU():
 
     def refresh_background(self):
         bg_tiles = self.background_pattern_table()
-        backgroud_figs = self.memory.read_range_memo(bg_tiles, int('1000', 16))
-        backgroud_figs = np.array(backgroud_figs, dtype=np.uint8).reshape(256, )
+        backgroud_figs = self.rom_memory.read_range_memo(bg_tiles, int('1000', 16))
+        backgroud_figs = np.array(backgroud_figs, dtype=np.uint8).reshape(256 * 16, )
 
-        background_list_index = self.get_nametable()
-        backgroud_list_pos = background_list_index * int('400', 16) + int('2000', 16)
+        background_nametable_index = self.get_nametable()
+        backgroud_list_pos = background_nametable_index * int('400', 16) + int('2000', 16)
 
         backgroud_list = []
         for i in range(32):
             for j in range(30):
                 backgroud_list.append(backgroud_list_pos + i * 30 + j)
 
-                self.screen_data[i*8:i*8 + 8, j*8:j*8 + 8] = 
+                pattern_table_index = self.memory.read_memo(backgroud_list_pos + i * 30 + j)
 
+                pattern_table_entry = backgroud_figs[pattern_table_index:pattern_table_index + 17]
 
+                pattern_table = np.zeros(64)
+                
+                for k in range(64):
+                    pattern_table[k] = (pattern_table_entry[k // 4] & (3 << (k % 4) * 2)) / (1 << (k % 4) * 2)
+                
+                pattern_table = pattern_table.reshape(8, 8)
+                stacked_pattern_table = np.stack((pattern_table,)*3, axis=-1)
+                print(pattern_table.shape)
+                print(stacked_pattern_table.shape)
+
+                self.screen_data[i*8:i*8 + 8, j*8:j*8 + 8, :] = stacked_pattern_table * 80

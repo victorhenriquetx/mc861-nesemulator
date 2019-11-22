@@ -4,6 +4,7 @@ p = PPU()
 
 p.start()
 
+p.refresh_background()
 p.render()
 
 p.quit()
