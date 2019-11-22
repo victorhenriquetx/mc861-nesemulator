@@ -283,6 +283,7 @@ class PPU():
 
     def handle_input(self):
         # verifica se deve ler o input
+        # sugestão do professor foi ler 1 vez em cada 20 renderizações da tela
         self.input_handler_timeout += 1
         if self.input_handler_timeout < 20:
             self.controller.write(0) # seta strobe do controle para 0 - não deve ser lido
@@ -295,7 +296,7 @@ class PPU():
     def handle_player_input(self, buttons):
         nes_buttons = [False for _ in range(8)]
 
-        # atualizar estado de cada botão no controller
+        # atualizar estado de cada botão no Controller
         if (buttons[pygame.K_z]): # A
             nes_buttons[0] = True
         if (buttons[pygame.K_x]): # B
@@ -304,16 +305,16 @@ class PPU():
             nes_buttons[2] = True
         if (buttons[pygame.K_RIGHTBRACKET]): # START
             nes_buttons[3] = True
-        if (buttons[pygame.K_UP]):
+        if (buttons[pygame.K_UP]): # UP
             nes_buttons[4] = True
-        if (buttons[pygame.K_DOWN]):
+        if (buttons[pygame.K_DOWN]): # DOWN
             nes_buttons[5] = True
-        if (buttons[pygame.K_LEFT]):
+        if (buttons[pygame.K_LEFT]): # LEFT
             nes_buttons[6] = True
-        if (buttons[pygame.K_RIGHT]):
+        if (buttons[pygame.K_RIGHT]): # RIGHT
             nes_buttons[7] = True
 
-        self.controller.set_buttons(nes_buttons) # seta o estado dos botões
+        self.controller.set_buttons(nes_buttons) # seta o novo estado dos botões no Controller
         self.controller.write(1) # seta strobe do controle para 1
 
     
