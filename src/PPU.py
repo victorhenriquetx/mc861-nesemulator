@@ -6,9 +6,9 @@ class PPU():
     def __init__(self):
         
         self.memory = Memory(0, 16 * 1024)
-        self.rom_memory = Memory(0, 8 * 1024)
+        self.rom_memory = Memory(-8 * 1024, 8 * 1024)
 
-        chr_filename = '/home/ABTLUS/gabriel.andrade/mc861-nesemulator/img/mario.chr'
+        chr_filename = '/home/previato/Dropbox/Unicamp/MC861/mc861-nesemulator/img/smb.nes'
         self.init_rom_memo(chr_filename)
 
         self.PPUCTRL_value = 0
@@ -17,7 +17,7 @@ class PPU():
         self.PPUADDR_value = 0
     
         self.screen_width = 256
-        self.screen_height = 240
+        self.screen_height = 256
 
         self.screen_data = np.zeros((self.screen_width, self.screen_height, 3))
     
@@ -66,7 +66,7 @@ class PPU():
 
         # perfumaria
         pygame.display.set_caption("The Best NES ever")
-        icon = pygame.image.load('/home/ABTLUS/gabriel.andrade/mc861-nesemulator/img/Controller-512.png')
+        icon = pygame.image.load('/home/previato/Dropbox/Unicamp/MC861/mc861-nesemulator/img/Controller-512.png')
         pygame.display.set_icon(icon)
     
     def quit(self):
@@ -115,15 +115,17 @@ class PPU():
 
         background_nametable_index = self.get_nametable()
         backgroud_list_pos = background_nametable_index * int('400', 16) + int('2000', 16)
+        backgroud_attr_pos = backgroud_list_pos + int('3C0', 16)
 
         backgroud_list = []
         for i in range(32):
-            for j in range(30):
-                backgroud_list.append(backgroud_list_pos + i * 30 + j)
+            for j in range(32):
+                backgroud_list.append(backgroud_list_pos + i * 32 + j)
 
-                pattern_table_index = self.memory.read_memo(backgroud_list_pos + i * 30 + j)
+                pattern_table_index = self.memory.read_memo(backgroud_list_pos + i * 32 + j)
 
                 pattern_table_entry = backgroud_figs[pattern_table_index:pattern_table_index + 17]
+                attribute_table_entry = self.memory.read_range_memo(backgroud_attr_pos, 64)
 
                 pattern_table = np.zeros(64)
                 
@@ -135,4 +137,24 @@ class PPU():
                 print(pattern_table.shape)
                 print(stacked_pattern_table.shape)
 
-                self.screen_data[i*8:i*8 + 8, j*8:j*8 + 8, :] = stacked_pattern_table * 80
+                attr_byte = attribute_table_entry[(i // 8) * 8 + j // 8]
+                
+                attr_mask = 0
+                if i % 8 >= 4:
+                    attr_mask += 2
+                if j % 8 >= 4:
+                    attr_mask += 1
+
+                attr = (attr_byte & (3 << attr_mask)) / (1 << attr_mask)
+
+                self.screen_data[i*8:i*8 + 8, j*8:j*8 + 8, :] = stacked_pattern_table + attr
+
+if __name__ == "__main__":
+    p = PPU()
+
+    p.start()
+
+    p.refresh_background()
+    p.render()
+
+    p.quit()
