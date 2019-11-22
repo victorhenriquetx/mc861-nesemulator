@@ -2,6 +2,8 @@ from Memory import Memory
 import pygame
 import numpy as np
 
+from Register import Register8bit, Register16bit
+
 class PPU():
     def __init__(self):
         
@@ -13,8 +15,19 @@ class PPU():
 
         self.PPUCTRL_value = 0
 
-        self.PPUADDR_first = True
-        self.PPUADDR_value = 0
+        
+        self.PPUCTRL = int('2000', 16)
+        self.PPUMASK = int('2001', 16)
+        self.PPUSTATUS = int('2002', 16)
+        self.OAMADDR = int('2003', 16)
+        self.OAMDTA = int('2004', 16)
+        self.PPUSCROLL = int('2005', 16)
+        self.PPUADDR = int('2006', 16)
+        self.PPUDATA = int('2007', 16)
+        self.OAMDMA = int('4014', 16)
+
+        self._bit_pointer = 0
+        self.PPU_pointer = Register16bit()
     
         self.screen_width = 256
         self.screen_height = 256
@@ -24,23 +37,58 @@ class PPU():
     def init_rom_memo(self, chr_filename):
         self.rom_memory.read_file(chr_filename)
     
-    def PPUADDR_signal(self, value):
-        if self.PPUADDR_first:
-            self.PPUADDR_value = 256 * value
-        else:
-            self.PPUADDR_value += value
-        
-        self.PPUADDR_first = not self.PPUADDR_first
 
-    def increment_PPUADDR(self):
-        if self.PPUCTRL_value & (1 << 2):
-            self.PPUADDR_value -= 32
+    def set_PPUCTRL(self, value):
+        self.PPUCTRL = value
+        if self._bit_pointer % 2:
+            self.PPU_pointer.set_value(self.PPU_pointer.value + value)
         else:
-            self.PPUADDR_value += 1
+            self.PPU_pointer.set_value(value * 256)
+        self._bit_pointer += 1
+
+    def set_PPUMASK(self, value):
+        self.PPUMASK = value
+    def set_PPUSTATUS(self, value):
+        self.PPUSTATUS = value
+    def set_OAMADDR(self, value):
+        self.OAMADDR = value
+    def set_OAMDTA(self, value):
+        self.OAMDTA = value
+    def set_PPUSCROLL(self, value):
+        self.PPUSCROLL = value
+    def set_PPUADDR(self, value):
+        self.PPUADDR = value
+    def set_PPUDATA(self, value):
+        self.PPUDATA = value
+    def set_OAMDMA(self, value):
+        self.OAMDMA =  value
+
+    def get_PPUMASK(self, value, memory):
+        return memory.read_memo(self.PPUMASK)
+    def get_PPUSTATUS(self, value, memory):
+        return memory.read_memo(self.PPUSTATUS)
+    def get_OAMADDR(self, value, memory):
+        return memory.read_memo(self.OAMADDR)
+    def get_OAMDTA(self, value, memory):
+        return memory.read_memo(self.OAMDTA)
+    def get_PPUSCROLL(self, value, memory):
+        return memory.read_memo(self.PPUSCROLL)
+    def get_PPUADDR(self, value, memory):
+        return memory.read_memo(self.PPUADDR)
+    def get_PPUDATA(self, value, memory):
+        return memory.read_memo(self.PPUDATA)
+    def get_OAMDMA(self, value, memory):
+        return memory.read_memo(self.OAMDMA)
 
     def PPUDATA_signal(self, value):
-        self.memory.write_memo(self.PPUADDR_value, value)
+        self.memory.write_memo(self.PPU_pointer, value)
         self.increment_PPUADDR()
+    
+    def increment_PPUADDR(self):
+        if self.PPU_pointer & (1 << 2):
+            self.PPU_pointer -= 32
+        else:
+            self.PPU_pointer += 1
 
     def get_nametable(self):
         return self.PPUCTRL_value & 3
