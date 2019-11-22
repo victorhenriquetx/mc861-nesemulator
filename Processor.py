@@ -696,8 +696,19 @@ class Processor():
 
         elif bin_instruction == int('A5', 16): # LDA zero page
             absolute_position_lo = self.read_memo()
-            methods._lda(self, absolute_position_lo)
-            self.mem_print(absolute_position_lo, self.A.value)
+            # Quando o jogo faz um LDA $4016, ele quer ler o valor do botão (0 ou 1),
+            # portanto ao invés de pegarmos da memória, vamos ler o valor do Controller
+            # ... Lembrando que:
+            # O jogo lê os botões sequencialmente dentro da NMI. Ou seja, o primeiro
+            # self.controller.read() irá retornar o valor de 'A', depois de 'B', 'Select'
+            # e assim por diante. 
+            if absolute_position_lo == 4016:
+                button = self.controller.read()
+                self.memory.write_memo(absolute_position_lo, button)
+                self.mem_print(absolute_position_lo, button)
+            else:
+                methods._lda(self, absolute_position_lo)
+                self.mem_print(absolute_position_lo, self.A.value)
 
         elif bin_instruction == int('B5', 16): # LDA zero page, X
             absolute_position_lo = self.read_memo()
