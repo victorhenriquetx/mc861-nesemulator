@@ -275,20 +275,6 @@ class PPU():
                 attr = (attr_byte & (3 << attr_mask)) / (1 << attr_mask)
 
                 self.screen_data[i*8:i*8 + 8, j*8:j*8 + 8] = vec_map_palette(value=(pattern_table + attr), palette=backgroud_palette)
-    
-def map_palette(value, palette):
-    return palette[int(value)]
-
-if __name__ == "__main__":
-    p = PPU()
-
-    p.start()
-
-    p.refresh_background()
-    p.render()
-
-    p.quit()
-
 
     def handle_input(self):
         buttons = pygame.key.get_pressed()
@@ -316,3 +302,19 @@ if __name__ == "__main__":
 
 
         # setar que interrupção deve ser tratada
+
+
+    
+def map_palette(value, palette):
+    return palette[int(value)]
+
+if __name__ == "__main__":
+    p = PPU()
+
+    p.start()
+
+    p.refresh_background()
+    p.render()
+
+    p.quit()
+
