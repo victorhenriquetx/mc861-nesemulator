@@ -117,6 +117,10 @@ class PPU():
         backgroud_list_pos = background_nametable_index * int('400', 16) + int('2000', 16)
         backgroud_attr_pos = backgroud_list_pos + int('3C0', 16)
 
+        backgroud_palette = self.memory.read_range_memo(int('3F00', 16), 16)
+
+        vec_map_palette = np.vectorize(map_palette, excluded=['palette'])
+
         backgroud_list = []
         for i in range(32):
             for j in range(32):
@@ -147,7 +151,10 @@ class PPU():
 
                 attr = (attr_byte & (3 << attr_mask)) / (1 << attr_mask)
 
-                self.screen_data[i*8:i*8 + 8, j*8:j*8 + 8, :] = stacked_pattern_table + attr
+                self.screen_data[i*8:i*8 + 8, j*8:j*8 + 8, :] = vec_map_palette(value=(stacked_pattern_table + attr), palette=backgroud_palette)
+    
+def map_palette(value, palette):
+    return palette[int(value)]
 
 if __name__ == "__main__":
     p = PPU()
