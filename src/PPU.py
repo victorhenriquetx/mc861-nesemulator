@@ -7,6 +7,7 @@ from Register import Register8bit, Register16bit
 class PPU():
     def __init__(self, cpu_memory, controller):
         self.controller = controller
+        self.input_handler_timeout = 0
 
         self.memory = Memory(0, 16* 1024)
         self.rom_memory = Memory(-8 * 1024, 8 * 1024)
@@ -278,17 +279,16 @@ class PPU():
 
                 self.screen_data[i*8:i*8 + 8, j*8:j*8 + 8] = vec_map_palette(value=(pattern_table + attr), palette=backgroud_palette)
 
-    def handle_input(self, input_handler_timeout):
-        buttons = pygame.key.get_pressed()
-
+    def handle_input(self):
         # verifica se deve ler o input
-        if input_handler_timeout + 1 < 20:
+        self.input_handler_timeout += 1
+        if self.input_handler_timeout < 20:
             self.controller.write(0) # seta strobe do controle para 0 - não deve ser lido
-            return input_handler_timeout + 1
+            return
 
+        buttons = pygame.key.get_pressed()
         self.handle_player_input(buttons)
-
-        return 0
+        self.input_handler_timeout = 0
 
     def handle_player_input(self, buttons):
         nes_buttons = [False for _ in range(8)]
