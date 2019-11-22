@@ -5,8 +5,7 @@ import numpy as np
 class PPU():
     def __init__(self):
         
-        self.rom_memory = Memory(0, 8*1024)
-        self.memory = Memory(0, (15 - 8)*1024)
+        self.rom_memory = Memory(0, 16*1024)
 
         # chr_filename = ''
         # self.init_rom_memo(chr_filename)
