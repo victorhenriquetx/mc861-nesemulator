@@ -30,14 +30,12 @@ class Processor():
         self.PC = Register16bit(start_pc_addr_hi*256 + start_pc_addr_lo)
         self.fake_PC = Register16bit(self.PC.value)
 
-        self.controller = Controller()
-        self.ppu = PPU(self.memory, self.controller)
-
         self.print_mem = ''
 
         self.power_up_ppu_regs()
 
-        self.ppu = PPU(self.memory, filename)
+        self.controller = Controller()
+        self.ppu = PPU(self.memory, filename, self.controller)
         self.ppu.start()
 
     def emula(self, init_pos):
