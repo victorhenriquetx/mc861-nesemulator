@@ -2,6 +2,7 @@ import os
 import sys
 from src.Register import Register8bit, Register16bit, RegisterFlag
 from src.Memory import Memory
+from src.PPU import PPU
 import src.Methods as methods
 
 _DEBUG = True
@@ -27,6 +28,8 @@ class Processor():
         self.fake_PC = Register16bit(self.PC.value)
 
         self.print_mem = ''
+        self.PPU = PPU()
+        self.PPU.connect(self.memory)
 
     def emula(self, init_pos):
         # Emulation
