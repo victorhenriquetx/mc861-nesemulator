@@ -97,6 +97,8 @@ class Register16bit(Register):
     def increment(self):
         self.value += 1
 
+    def set_value(self, value):
+        self.value = value
 
 class RegistersList():
     def __init__(self):
