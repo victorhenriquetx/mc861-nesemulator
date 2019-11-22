@@ -5,9 +5,8 @@ import numpy as np
 from Register import Register8bit, Register16bit
 
 class PPU():
-    def __init__(self):
-        
-        self.memory = Memory(0, 16 * 1024)
+    def __init__(self, cpu_memory):
+        self.memory = Memory(0, 16* 1024)
         self.rom_memory = Memory(-8 * 1024, 8 * 1024)
 
         chr_filename = '/home/previato/Dropbox/Unicamp/MC861/mc861-nesemulator/img/smb.nes'
@@ -15,6 +14,7 @@ class PPU():
 
         self.PPUCTRL_value = 0
 
+        self.CPU_memory = cpu_memory
         
         self.PPUCTRL = int('2000', 16)
         self.PPUMASK = int('2001', 16)
@@ -63,22 +63,22 @@ class PPU():
     def set_OAMDMA(self, value):
         self.OAMDMA =  value
 
-    def get_PPUMASK(self, value, memory):
-        return memory.read_memo(self.PPUMASK)
-    def get_PPUSTATUS(self, value, memory):
-        return memory.read_memo(self.PPUSTATUS)
-    def get_OAMADDR(self, value, memory):
-        return memory.read_memo(self.OAMADDR)
-    def get_OAMDTA(self, value, memory):
-        return memory.read_memo(self.OAMDTA)
-    def get_PPUSCROLL(self, value, memory):
-        return memory.read_memo(self.PPUSCROLL)
-    def get_PPUADDR(self, value, memory):
-        return memory.read_memo(self.PPUADDR)
-    def get_PPUDATA(self, value, memory):
-        return memory.read_memo(self.PPUDATA)
-    def get_OAMDMA(self, value, memory):
-        return memory.read_memo(self.OAMDMA)
+    def get_PPUMASK(self, value):
+        return self.CPU_memory.read_memo(self.PPUMASK)
+    def get_PPUSTATUS(self, value):
+        return self.CPU_memory.read_memo(self.PPUSTATUS)
+    def get_OAMADDR(self, value):
+        return self.CPU_memory.read_memo(self.OAMADDR)
+    def get_OAMDTA(self, value):
+        return self.CPU_memory.read_memo(self.OAMDTA)
+    def get_PPUSCROLL(self, value):
+        return self.CPU_memory.read_memo(self.PPUSCROLL)
+    def get_PPUADDR(self, value):
+        return self.CPU_memory.read_memo(self.PPUADDR)
+    def get_PPUDATA(self, value):
+        return self.CPU_memory.read_memo(self.PPUDATA)
+    def get_OAMDMA(self, value):
+        return self.CPU_memory.read_memo(self.OAMDMA)
 
     def PPUDATA_signal(self, value):
         self.memory.write_memo(self.PPU_pointer, value)
