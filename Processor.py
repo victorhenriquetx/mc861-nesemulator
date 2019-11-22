@@ -5,6 +5,8 @@ from src.Memory import Memory
 from src.PPU import PPU
 from src.Controller import Controller
 import src.Methods as methods
+from src.PPU import PPU
+import pygame
 
 _DEBUG = True
 
@@ -33,13 +35,34 @@ class Processor():
 
         self.print_mem = ''
 
+        self.power_up_ppu_regs()
+
+        self.ppu = PPU(self.memory, filename)
+        self.ppu.start()
+
     def emula(self, init_pos):
         # Emulation
+        alt = 0
         while True:
             self.fake_PC.value = self.PC.value
-            instruction = self.read_memo()
-            decode = self.decode_instruction(instruction)
+            self.instruction = self.read_memo()
+            decode = self.decode_instruction(self.instruction)
             self.print_log()
+            alt += 1
+            if not alt % 1:
+                self.ppu.refresh_sprites()
+                self.ppu.render()
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        self.ppu.quit()
+                        return
+                    
+    def power_up_ppu_regs(self):
+        self.memory.write_memo(int('2000', 16), 0)
+        self.memory.write_memo(int('2001', 16), 0)
+        self.memory.write_memo(int('2002', 16), int('A0', 16))
+        # self.memory.write_memo(int('2000', 16), 0)
+        # self.memory.write_memo(int('2000', 16), 0)
 
     # TODO implementar funcoes auxiliares
     def read_memo(self):
@@ -220,35 +243,35 @@ class Processor():
         elif bin_instruction == int('10', 16):
             label_position = self.read_memo()
             methods._bpl(self, label_position)
-            self.mem_print(absolute_position, self.memory.read_memo(label_position))
+            self.mem_print(label_position, self.memory.read_memo(label_position))
         elif bin_instruction == int('30', 16):
             label_position = self.read_memo()
             methods._bmi(self, label_position)
-            self.mem_print(absolute_position, self.memory.read_memo(label_position))
+            self.mem_print(label_position, self.memory.read_memo(label_position))
         elif bin_instruction == int('50', 16):
             label_position = self.read_memo()
             methods._bvc(self, label_position)
-            self.mem_print(absolute_position, self.memory.read_memo(label_position))
+            self.mem_print(label_position, self.memory.read_memo(label_position))
         elif bin_instruction == int('70', 16):
             label_position = self.read_memo()
             methods._bvs(self, label_position)
-            self.mem_print(absolute_position, self.memory.read_memo(label_position))
+            self.mem_print(label_position, self.memory.read_memo(label_position))
         elif bin_instruction == int('90', 16):
             label_position = self.read_memo()
             methods._bcc(self, label_position)
-            self.mem_print(absolute_position, self.memory.read_memo(label_position))
+            self.mem_print(label_position, self.memory.read_memo(label_position))
         elif bin_instruction == int('B0', 16):
             label_position = self.read_memo()
             methods._bcs(self, label_position)
-            self.mem_print(absolute_position, self.memory.read_memo(label_position))
+            self.mem_print(label_position, self.memory.read_memo(label_position))
         elif bin_instruction == int('D0', 16):
             label_position = self.read_memo()
             methods._bne(self, label_position)
-            self.mem_print(absolute_position, self.memory.read_memo(label_position))
+            self.mem_print(label_position, self.memory.read_memo(label_position))
         elif bin_instruction == int('F0', 16):
             label_position = self.read_memo()
             methods._beq(self, label_position)
-            self.mem_print(absolute_position, self.memory.read_memo(label_position))
+            self.mem_print(label_position, self.memory.read_memo(label_position))
 
         elif bin_instruction == int('60', 16): # RTS
             absolute_position_lo = self.memory.pop_stack(self.STACK)
@@ -664,7 +687,8 @@ class Processor():
             absolute_position_lo = self.read_memo()
             absolute_position_hi = self.read_memo()
 
-            address = absolute_position_hi * 256 + absolute_position_lo + self.X.value
+            address = absolute_position_hi * 256 + absolute_position_lo
+            # address = absolute_position_hi * 256 + absolute_position_lo + self.X.value
             next_instruction =  self.PC.value
             methods._jsr(self, address, next_instruction)
 
@@ -987,7 +1011,7 @@ class Processor():
         self.print_mem = ' MEM['+str(hex(memory_position))+'] = ' + str(hex(value)) + ' |'
 
     def print_log(self):
-        print('| pc = ' + hex(self.fake_PC.value) + ' | a = ' + hex(self.A.value) + ' | x = ' + hex(self.X.value) + ' | y = ' + hex(self.Y.value) + ' | sp = ' + hex(self.STACK.value) +' | p[NV-BDIZC] = ' + str(self.FLAGS.is_N()) + str(self.FLAGS.is_V()) + '1' + str(self.FLAGS.is_B()) + str(self.FLAGS.is_D()) + str(self.FLAGS.is_I()) + str(self.FLAGS.is_Z()) + str(self.FLAGS.is_C()) + ' |' + self.print_mem)
+        print('inst =' + hex(self.instruction) + '| pc = ' + hex(self.fake_PC.value) + ' | a = ' + hex(self.A.value) + ' | x = ' + hex(self.X.value) + ' | y = ' + hex(self.Y.value) + ' | sp = ' + hex(self.STACK.value) +' | p[NV-BDIZC] = ' + str(self.FLAGS.is_N()) + str(self.FLAGS.is_V()) + '1' + str(self.FLAGS.is_B()) + str(self.FLAGS.is_D()) + str(self.FLAGS.is_I()) + str(self.FLAGS.is_Z()) + str(self.FLAGS.is_C()) + ' |' + self.print_mem)
         self.print_mem = ''
 
 def main():

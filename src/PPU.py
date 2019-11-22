@@ -1,18 +1,20 @@
-from Memory import Memory
+from src.Memory import Memory
 import pygame
 import numpy as np
 
-from Register import Register8bit, Register16bit
+from src.Register import Register8bit, Register16bit
 
 class PPU():
-    def __init__(self, cpu_memory, controller):
+    def __init__(self, cpu_memory, chr_filename, controller):
         self.controller = controller
         self.input_handler_timeout = 0
 
         self.memory = Memory(0, 16* 1024)
         self.rom_memory = Memory(-8 * 1024, 8 * 1024)
+        
 
-        chr_filename = '/home/previato/Dropbox/Unicamp/MC861/mc861-nesemulator/img/smb.nes'
+        # chr_filename = '/home/previato/Dropbox/Unicamp/MC861/mc861-nesemulator/img/smb.nes'
+        # chr_filename = '.\\img\\smb.nes'
         self.init_rom_memo(chr_filename)
 
         self.PPUCTRL_value = 0
@@ -48,14 +50,16 @@ class PPU():
         self.rom_memory.read_file(chr_filename)
     
 
-    def set_PPUCTRL(self, value):
-        self.PPUCTRL = value
+    def set_PPUADDR(self, value):
+        self.PPUADDR = value
         if self._bit_pointer % 2:
             self.PPU_pointer.set_value(self.PPU_pointer.value + value)
         else:
             self.PPU_pointer.set_value(value * 256)
         self._bit_pointer += 1
 
+    def set_PPUCTRL(self, value):
+        self.PPUCTRL = value
     def set_PPUMASK(self, value):
         self.PPUMASK = value
     def set_PPUSTATUS(self, value):
@@ -66,51 +70,51 @@ class PPU():
         self.OAMDTA = value
     def set_PPUSCROLL(self, value):
         self.PPUSCROLL = value
-    def set_PPUADDR(self, value):
-        self.PPUADDR = value
     def set_PPUDATA(self, value):
         self.PPUDATA = value
     def set_OAMDMA(self, value):
         self.OAMDMA =  value
 
-    def get_PPUMASK(self, value):
+    def get_PPUCTRL(self):
+        return self.CPU_memory.read_memo(self.PPUCTRL)
+    def get_PPUMASK(self):
         return self.CPU_memory.read_memo(self.PPUMASK)
-    def get_PPUSTATUS(self, value):
+    def get_PPUSTATUS(self):
         return self.CPU_memory.read_memo(self.PPUSTATUS)
-    def get_OAMADDR(self, value):
+    def get_OAMADDR(self):
         return self.CPU_memory.read_memo(self.OAMADDR)
-    def get_OAMDTA(self, value):
+    def get_OAMDTA(self):
         return self.CPU_memory.read_memo(self.OAMDTA)
-    def get_PPUSCROLL(self, value):
+    def get_PPUSCROLL(self):
         return self.CPU_memory.read_memo(self.PPUSCROLL)
-    def get_PPUADDR(self, value):
+    def get_PPUADDR(self):
         return self.CPU_memory.read_memo(self.PPUADDR)
-    def get_PPUDATA(self, value):
+    def get_PPUDATA(self):
         return self.CPU_memory.read_memo(self.PPUDATA)
-    def get_OAMDMA(self, value):
+    def get_OAMDMA(self):
         return self.CPU_memory.read_memo(self.OAMDMA)
 
     def PPUDATA_signal(self, value):
-        self.memory.write_memo(self.PPU_pointer, value)
+        self.memory.write_memo(self.PPU_pointer.value, value)
         self.increment_PPUADDR()
     
     def increment_PPUADDR(self):
-        if self.PPU_pointer & (1 << 2):
-            self.PPU_pointer -= 32
+        if self.PPU_pointer.value & (1 << 2):
+            self.PPU_pointer.value -= 32
         else:
-            self.PPU_pointer += 1
+            self.PPU_pointer.value += 1
 
     def get_nametable(self):
-        return self.PPUCTRL_value & 3
+        return self.get_PPUCTRL() & 3
     
     def background_pattern_table(self):
-        if self.PPUCTRL_value & (1 << 4):
+        if self.get_PPUCTRL() & (1 << 4):
             return int('1000', 16)
         else:
             return 0
 
     def sprite_pattern_table(self):
-        if self.PPUCTRL_value & (1 << 3):
+        if self.get_PPUCTRL() & (1 << 3):
             return int('1000', 16)
         else:
             return 0
@@ -124,9 +128,10 @@ class PPU():
 
         # perfumaria
         pygame.display.set_caption("The Best NES ever")
-        icon = pygame.image.load('/home/previato/Dropbox/Unicamp/MC861/mc861-nesemulator/img/Controller-512.png')
-        pygame.display.set_icon(icon)
+        # icon = pygame.image.load('/home/previato/Dropbox/Unicamp/MC861/mc861-nesemulator/img/Controller-512.png')
+        # pygame.display.set_icon(icon)
     
+
     def quit(self):
         pygame.quit()
 
@@ -142,23 +147,21 @@ class PPU():
         # vectorized_nes_pallete_to_rgb = np.vectorize(self.nes_pallete_to_rgb)
         vec_map_palette = np.vectorize(map_palette, excluded=['palette'])
 
-        print(self.screen_data.shape)
-        print(self.nes_palette[16])
         self.screen_data_rgb[:, :] = self.nes_palette[16]
         # vec_map_palette(value=self.screen_data, palette=self.nes_palette)
         for i in range(256):
             for j in range(256):
                 self.screen_data_rgb[i, j] = map_palette(value=self.screen_data[i, j], palette=self.nes_palette)
-        while running:
-            for i in pygame.event.get():
-                if i.type == pygame.QUIT:
-                    running = False
+        
+        
+        # if i.type == pygame.QUIT:
+        #     running = False
             # self.screen.blit(surf, (0, 0))
 
             # pygame.surfarray.blit_array(self.screen, s)
-            pygame.surfarray.blit_array(self.screen, self.screen_data_rgb)
+        pygame.surfarray.blit_array(self.screen, self.screen_data_rgb)
 
-            pygame.display.update()
+        pygame.display.update()
 
 
     def update(self, x, y, width, height, color=(0,0,0)):
@@ -184,8 +187,9 @@ class PPU():
         sprites_figs = np.array(sprites_figs, dtype=np.uint8).reshape(256 * 16)
 
         sprites_palette = self.memory.read_range_memo(int('3F10', 16), 16)
-
-        sprites = np.array(self.sprites_memory.mem, dtype=np.uint8)
+        
+        m = self.CPU_memory.mem[int('0200',16):int('02ff',16)+1]
+        sprites = np.array(m, dtype=np.uint8)
 
         for i in range(64):
             attr = sprites[i*4 + 2]
@@ -202,11 +206,10 @@ class PPU():
                     pattern_table[k] = (sprite_tile[k // 4] & (3 << (k % 4) * 2)) / (1 << (k % 4) * 2)
                 
                 pattern_table = pattern_table.reshape(8, 8)
-                print(pattern_table.shape)
 
                 # Color Palette of sprite.  Choose which set of 4 from the 16 colors to use
                 color_palette = attr & 3
-                self.screen_data[y*8:y*8 + 8, x*8:x*8 + 8] = vec_map_palette(value=(pattern_table), palette=sprites_palette[color_palette*4:color_palette*4 + 4])
+                self.screen_data[y:y + 8, x:x + 8] = vec_map_palette(value=(pattern_table), palette=sprites_palette[color_palette*4:color_palette*4 + 4])
             else:
                 continue
 
@@ -227,11 +230,11 @@ class PPU():
                     pattern_table[k] = (sprite_tile[k // 4] & (3 << (k % 4) * 2)) / (1 << (k % 4) * 2)
                 
                 pattern_table = pattern_table.reshape(8, 8)
-                print(pattern_table.shape)
+                
 
                 # Color Palette of sprite.  Choose which set of 4 from the 16 colors to use
                 color_palette = attr & 3
-                self.screen_data[y*8:y*8 + 8, x*8:x*8 + 8] = vec_map_palette(value=(pattern_table), palette=sprites_palette[color_palette*4:color_palette*4 + 4])
+                self.screen_data[y:y + 8, x:x + 8] = vec_map_palette(value=(pattern_table), palette=sprites_palette[color_palette*4:color_palette*4 + 4])
             else:
                 continue
 
@@ -265,7 +268,6 @@ class PPU():
                     pattern_table[k] = (pattern_table_entry[k // 4] & (3 << (k % 4) * 2)) / (1 << (k % 4) * 2)
                 
                 pattern_table = pattern_table.reshape(8, 8)
-                print(pattern_table.shape)
 
                 attr_byte = attribute_table_entry[(i // 8) * 8 + j // 8]
                 
@@ -318,13 +320,13 @@ class PPU():
 def map_palette(value, palette):
     return palette[int(value)]
 
-if __name__ == "__main__":
-    p = PPU()
+# if __name__ == "__main__":
+#     p = PPU()
 
-    p.start()
+#     p.start()
 
-    p.refresh_background()
-    p.render()
+#     p.refresh_background()
+#     p.render()
 
-    p.quit()
+#     p.quit()
 

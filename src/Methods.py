@@ -82,28 +82,28 @@ def _bit(processor, value):
 
 def _bcc(processor, memory_position):
     if(processor.FLAGS.is_C() == 0):
-        processor.PC = memory_position
+        processor.PC.value += memory_position
 def _bcs(processor, memory_position):
     if(processor.FLAGS.is_C()):
-        processor.PC = memory_position
+        processor.PC.value += memory_position
 def _beq(processor, memory_position):
     if(processor.FLAGS.is_Z()):
-        processor.PC = memory_position
+        processor.PC.value += memory_position
 def _bmi(processor, memory_position):
     if(processor.FLAGS.is_N()):
-        processor.PC = memory_position
+        processor.PC.value += memory_position
 def _bne(processor, memory_position):
     if(processor.FLAGS.is_Z() == 0):
-        processor.PC = memory_position
+        processor.PC.value += memory_position
 def _bpl(processor, memory_position):
     if(processor.FLAGS.is_N() == 0):
-        processor.PC = memory_position
+        processor.PC.value += memory_position
 def _bvc(processor, memory_position):
     if(processor.FLAGS.is_V() == 0):
-        processor.PC = memory_position
+        processor.PC.value += memory_position
 def _bvs(processor, memory_position):
     if(processor.FLAGS.is_V()):
-        processor.PC = memory_position
+        processor.PC.value += memory_position
 
 def _lda(processor, value, immediate=False):
     if not immediate:
@@ -411,12 +411,24 @@ def _sei(processor):
 
 def _sta(processor, memory_position):
     processor.memory.write_memo(memory_position, processor.A.value)
+    if memory_position == int('2006', 16):
+        processor.ppu.set_PPUADDR(processor.A.value)
+    elif memory_position == int('2007', 16):
+        processor.ppu.PPUDATA_signal(processor.A.value)
 
 def _stx(processor, memory_position):
     processor.memory.write_memo(memory_position, processor.X.value)
+    if memory_position == int('2006', 16):
+        processor.ppu.set_PPUADDR(processor.X.value)
+    elif memory_position == int('2007', 16):
+        processor.ppu.PPUDATA_signal(processor.X.value)
 
 def _sty(processor, memory_position):
     processor.memory.write_memo(memory_position, processor.Y.value)
+    if memory_position == int('2006', 16):
+        processor.ppu.set_PPUADDR(processor.Y.value)
+    elif memory_position == int('2007', 16):
+        processor.ppu.PPUDATA_signal(processor.Y.value)
 
 def _tax(processor):
     processor.X.value = processor.A.value
