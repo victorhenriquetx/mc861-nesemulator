@@ -297,21 +297,21 @@ class PPU():
         nes_buttons = [False for _ in range(8)]
 
         # atualizar estado de cada botão no Controller
-        if (buttons[pygame.K_z]): # A
+        if (buttons[pygame.K_z]): # A - tecla z
             nes_buttons[0] = True
-        if (buttons[pygame.K_x]): # B
+        if (buttons[pygame.K_x]): # B - tecla x
             nes_buttons[1] = True
-        if (buttons[pygame.K_LEFTBRACKET]): # SELECT
+        if (buttons[pygame.K_LEFTBRACKET]): # SELECT - tecla [
             nes_buttons[2] = True
-        if (buttons[pygame.K_RIGHTBRACKET]): # START
+        if (buttons[pygame.K_RIGHTBRACKET]): # START - tecla ]
             nes_buttons[3] = True
-        if (buttons[pygame.K_UP]): # UP
+        if (buttons[pygame.K_UP]): # UP - tecla arrow up
             nes_buttons[4] = True
-        if (buttons[pygame.K_DOWN]): # DOWN
+        if (buttons[pygame.K_DOWN]): # DOWN - tecla arrow down
             nes_buttons[5] = True
-        if (buttons[pygame.K_LEFT]): # LEFT
+        if (buttons[pygame.K_LEFT]): # LEFT - tecla arrow left
             nes_buttons[6] = True
-        if (buttons[pygame.K_RIGHT]): # RIGHT
+        if (buttons[pygame.K_RIGHT]): # RIGHT - tecla arrow right
             nes_buttons[7] = True
 
         self.controller.set_buttons(nes_buttons) # seta o novo estado dos botões no Controller
