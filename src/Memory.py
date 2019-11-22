@@ -9,7 +9,10 @@ class Memory():
         with open(filename, 'rb') as file:
             byte_str = file.read()
         if self.size != -1:
-            self.mem = list(byte_str)[self.initial:self.size]
+            if self.initial + self.size == 0:
+                self.mem = list(byte_str)[self.initial:]
+            else:
+                self.mem = list(byte_str)[self.initial:self.initial + self.size]
         else:
             
             # a = list(byte_str)[self.initial:]
@@ -25,6 +28,9 @@ class Memory():
 
     def read_memo(self, position):
         return self.mem[position]
+    
+    def read_range_memo(self, position, p_range):
+        return self.mem[position:position+p_range]
 
     def pop_stack(self, stack_register):
         stack_register.value += 1
