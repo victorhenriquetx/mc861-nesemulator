@@ -80,30 +80,30 @@ def _bit(processor, value):
     if testValue == 0:
         processor.FLAGS.set_Z()
 
-def _bcc(processor, branch_increment):
+def _bcc(processor, memory_position):
     if(processor.FLAGS.is_C() == 0):
-        processor.PC += branch_increment
-def _bcs(processor, branch_increment):
+        processor.PC = memory_position
+def _bcs(processor, memory_position):
     if(processor.FLAGS.is_C()):
-        processor.PC += branch_increment
-def _beq(processor, branch_increment):
+        processor.PC = memory_position
+def _beq(processor, memory_position):
     if(processor.FLAGS.is_Z()):
-        processor.PC += branch_increment
-def _bmi(processor, branch_increment):
+        processor.PC = memory_position
+def _bmi(processor, memory_position):
     if(processor.FLAGS.is_N()):
-        processor.PC += branch_increment
-def _bne(processor, branch_increment):
+        processor.PC = memory_position
+def _bne(processor, memory_position):
     if(processor.FLAGS.is_Z() == 0):
-        processor.PC += branch_increment
-def _bpl(processor, branch_increment):
+        processor.PC = memory_position
+def _bpl(processor, memory_position):
     if(processor.FLAGS.is_N() == 0):
-        processor.PC += branch_increment
-def _bvc(processor, branch_increment):
+        processor.PC = memory_position
+def _bvc(processor, memory_position):
     if(processor.FLAGS.is_V() == 0):
-        processor.PC += branch_increment
-def _bvs(processor, branch_increment):
+        processor.PC = memory_position
+def _bvs(processor, memory_position):
     if(processor.FLAGS.is_V()):
-        processor.PC += branch_increment
+        processor.PC = memory_position
 
 def _lda(processor, value, immediate=False):
     if not immediate:
