@@ -5,7 +5,9 @@ import numpy as np
 from Register import Register8bit, Register16bit
 
 class PPU():
-    def __init__(self, cpu_memory):
+    def __init__(self, cpu_memory, controller):
+        self.controller = controller
+
         self.memory = Memory(0, 16* 1024)
         self.rom_memory = Memory(-8 * 1024, 8 * 1024)
 
@@ -276,33 +278,41 @@ class PPU():
 
                 self.screen_data[i*8:i*8 + 8, j*8:j*8 + 8] = vec_map_palette(value=(pattern_table + attr), palette=backgroud_palette)
 
-    def handle_input(self):
+    def handle_input(self, input_handler_timeout):
         buttons = pygame.key.get_pressed()
-        nes_buttons = 0
+
+        # verifica se deve ler o input
+        if input_handler_timeout + 1 < 20:
+            self.controller.write(0) # seta strobe do controle para 0 - não deve ser lido
+            return input_handler_timeout + 1
+
+        self.handle_player_input(buttons)
+
+        return 0
+
+    def handle_player_input(self, buttons):
+        nes_buttons = [False for _ in range(8)]
 
         # atualizar estado de cada botão no controller
         if (buttons[pygame.K_z]): # A
-            nes_buttons += 1
+            nes_buttons[0] = True
         if (buttons[pygame.K_x]): # B
-            nes_buttons += 2
+            nes_buttons[1] = True
         if (buttons[pygame.K_LEFTBRACKET]): # SELECT
-            nes_buttons += 4
+            nes_buttons[2] = True
         if (buttons[pygame.K_RIGHTBRACKET]): # START
-            nes_buttons += 8
+            nes_buttons[3] = True
         if (buttons[pygame.K_UP]):
-            nes_buttons += 16
+            nes_buttons[4] = True
         if (buttons[pygame.K_DOWN]):
-            nes_buttons += 32
+            nes_buttons[5] = True
         if (buttons[pygame.K_LEFT]):
-            nes_buttons += 64
+            nes_buttons[6] = True
         if (buttons[pygame.K_RIGHT]):
-            nes_buttons += 128
+            nes_buttons[7] = True
 
-        # escreve na memória o estado dos botões
-
-
-        # setar que interrupção deve ser tratada
-
+        self.controller.set_buttons(nes_buttons) # seta o estado dos botões
+        self.controller.write(1) # seta strobe do controle para 1
 
     
 def map_palette(value, palette):

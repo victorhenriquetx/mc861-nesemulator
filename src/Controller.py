@@ -6,10 +6,10 @@ class Controller:
         self.index = 0 
         self.strobe = 0 
 
-    def SetButtons(self, buttons):
+    def set_buttons(self, buttons):
         self.buttons = buttons
 
-    def Read(self):
+    def read(self):
         value = 0
         if self.index < 8 and self.buttons[self.index]:
             value = 1
@@ -18,7 +18,7 @@ class Controller:
             self.index = 0
         return value
 
-    def Write(self, value):
+    def write(self, value):
         self.strobe = value
         if self.strobe & 1 == 1:
             self.index = 0

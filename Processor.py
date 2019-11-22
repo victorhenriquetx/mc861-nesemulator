@@ -2,6 +2,8 @@ import os
 import sys
 from src.Register import Register8bit, Register16bit, RegisterFlag
 from src.Memory import Memory
+from src.PPU import PPU
+from src.Controller import Controller
 import src.Methods as methods
 
 _DEBUG = True
@@ -25,6 +27,9 @@ class Processor():
         start_pc_addr_hi = self.memory.read_memo(int('fffd', 16))
         self.PC = Register16bit(start_pc_addr_hi*256 + start_pc_addr_lo)
         self.fake_PC = Register16bit(self.PC.value)
+
+        self.controller = Controller()
+        self.ppu = PPU(self.memory, self.controller)
 
         self.print_mem = ''
 
