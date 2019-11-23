@@ -286,7 +286,6 @@ class PPU():
         # sugestão do professor foi ler 1 vez em cada 20 renderizações da tela
         self.input_handler_timeout += 1
         if self.input_handler_timeout < 20:
-            self.controller.write(0) # seta strobe do controle para 0 - não deve ser lido
             return
 
         buttons = pygame.key.get_pressed()
@@ -315,7 +314,6 @@ class PPU():
             nes_buttons[7] = True
 
         self.controller.set_buttons(nes_buttons) # seta o novo estado dos botões no Controller
-        self.controller.write(1) # seta strobe do controle para 1
 
     
 def map_palette(value, palette):

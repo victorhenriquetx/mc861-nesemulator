@@ -343,6 +343,11 @@ class Processor():
             memory_position = self.read_memo()
             methods._sta(self, memory_position)
             self.mem_print(memory_position, self.A.value)
+
+            # Quando um jogo faz um STA $4016 (de qualquer valor), ele quer começar a
+            # ler os controles, assim precisamos resetar o index do nosso Controller:
+            if memory_position == 4016:
+                self.controller.write(1)
             
         elif bin_instruction == int('18', 16): # CLC
             methods._clc(self, None)
