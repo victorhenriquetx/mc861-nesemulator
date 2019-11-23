@@ -344,10 +344,15 @@ class Processor():
             methods._sta(self, memory_position)
             self.mem_print(memory_position, self.A.value)
 
-            # Quando um jogo faz um STA $4016 (de qualquer valor), ele quer começar a
-            # ler os controles, assim precisamos resetar o index do nosso Controller:
+            # Quando um jogo faz um STA $4016 (com valor 1), ele quer começar a ler os controles,
+            # assim precisamos resetar o index do nosso Controller para o primeiro botão a
+            # ser lido (botão A). Para fazer isso precisamos setar o strobe do Controller para 1.
+            # Note que enquanto o strobe for 1, ele sempre irá ler o primeiro botão (A).
+            # Assim, quando o valor setado com o STA $4016 for 0, precisamos resetar o strobe do
+            # nosso controller para 0, e assim ele continuará lendo os botões em sequência (primeiro
+            # 'A', depois 'B', 'Select' e assim por diante).
             if memory_position == 4016:
-                self.controller.write(1)
+                self.controller.write(self.A.value)
             
         elif bin_instruction == int('18', 16): # CLC
             methods._clc(self, None)
