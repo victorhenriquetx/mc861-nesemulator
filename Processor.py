@@ -48,6 +48,7 @@ class Processor():
             self.print_log()
             alt += 1
             if not alt % 1:
+                self.handle_input()
                 self.ppu.refresh_sprites()
                 self.ppu.render()
                 for event in pygame.event.get():
