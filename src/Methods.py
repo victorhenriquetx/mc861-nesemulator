@@ -424,8 +424,12 @@ def _ror(processor, memory_position):
 
 def _rti(processor):
     processor.FLAGS.value = processor.memory.pop_stack(processor.STACK)
-    processor.PC.value = processor.memory.pop_stack(processor.STACK)
+    lo = processor.memory.pop_stack(processor.STACK)
+    hi = processor.memory.pop_stack(processor.STACK)
     
+    processor.PC.value = hi *256 + lo
+    processor.int_flag = 0
+
 def _rts(processor, memory_position):
     processor.PC.value = memory_position
 

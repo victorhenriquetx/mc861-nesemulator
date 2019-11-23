@@ -96,7 +96,7 @@ class PPU():
         return self.CPU_memory.read_memo(self.OAMDMA)
 
     def PPUDATA_signal(self, value):
-        print('\tPPUDATA_signal, value:', value, ', ppu_mem:', hex(self.PPU_pointer.value))
+        # print('\tPPUDATA_signal, value:', value, ', ppu_mem:', hex(self.PPU_pointer.value))
         self.memory.write_memo(self.PPU_pointer.value, value)
         self.increment_PPUADDR()
     
@@ -193,7 +193,7 @@ class PPU():
         
         m = self.CPU_memory.mem[int('0200',16):int('02ff',16)+1]
         sprites = np.array(m, dtype=np.uint8)
-        print(sprites[:20])
+        # print(sprites[:20])
 
         # for i in range(64):
         #     attr = sprites[i*4 + 2]

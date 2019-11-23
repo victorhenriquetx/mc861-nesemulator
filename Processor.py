@@ -43,6 +43,8 @@ class Processor():
         self.ppu = PPU(self.memory, filename, self.controller)
         self.ppu.start()
 
+        self.int_flag = 0
+
     def emula(self, init_pos):
         # Emulation
         alt = 0
@@ -50,10 +52,32 @@ class Processor():
             self.fake_PC.value = self.PC.value
             self.instruction = self.read_memo()
             self.decode_instruction(self.instruction)
-            self.print_log()
+            # self.print_log()
+            self.ppu.handle_input()
             alt += 1
-            if not alt % 1:
-                self.ppu.handle_input()
+            
+            if not alt % 32:
+                lo = self.PC.value % 256
+                hi = self.PC.value // 256
+
+                if self.int_flag == 0:
+                    self.memory.push_stack(self.STACK, hi)
+                    self.memory.push_stack(self.STACK, lo)
+                    self.memory.push_stack(self.STACK, self.FLAGS.value)
+
+                    nmi_lo = self.memory.read_memo(int("fffa", 16))
+                    nmi_hi = self.memory.read_memo(int("fffb", 16))
+
+                    self.PC.value = nmi_hi*256 + nmi_lo
+                    print(self.PC.value)
+                    self.int_flag = 1
+                
+                # self.memory.pop_stack(processor.STACK, lo)
+                # self.memory.pop_stack(processor.STACK, hi)
+
+                # self.PC.value 
+
+
                 self.ppu.refresh_sprites()
                 self.ppu.render()
                 for event in pygame.event.get():
@@ -717,14 +741,9 @@ class Processor():
             # ... Lembrando que:
             # O jogo lê os botões sequencialmente dentro da NMI. Ou seja, o primeiro
             # self.controller.read() irá retornar o valor de 'A', depois de 'B', 'Select'
-            # e assim por diante. 
-            if absolute_position_lo == 4016:
-                button = self.controller.read()
-                self.memory.write_memo(absolute_position_lo, button)
-                self.mem_print(absolute_position_lo, button)
-            else:
-                methods._lda(self, absolute_position_lo)
-                self.mem_print(absolute_position_lo, self.A.value)
+            # e assim por diante.             
+            methods._lda(self, absolute_position_lo)
+            self.mem_print(absolute_position_lo, self.A.value)
 
         elif bin_instruction == int('B5', 16): # LDA zero page, X
             absolute_position_lo = self.read_memo()
@@ -736,8 +755,16 @@ class Processor():
             absolute_position_lo = self.read_memo()
             absolute_position_hi = self.read_memo()
             memory_position = absolute_position_hi * 256 + absolute_position_lo
-            methods._lda(self, memory_position)
-            self.mem_print(memory_position, self.A.value)
+            
+            if memory_position == int('4016', 16):
+                
+                button = self.controller.read()
+                print(button)
+                self.memory.write_memo(memory_position, button)
+                self.mem_print(memory_position, button)
+            else:
+                methods._lda(self, memory_position)
+                self.mem_print(memory_position, self.A.value)
             
 
         elif bin_instruction == int('BD', 16): # LDA Absolute,X
