@@ -80,30 +80,67 @@ def _bit(processor, value):
     if testValue == 0:
         processor.FLAGS.set_Z()
 
-def _bcc(processor, branch_increment):
+def _bcc(processor, memory_position):
+    if memory_position > 127:
+        memory_position -= 256
+
+
     if(processor.FLAGS.is_C() == 0):
-        processor.PC += branch_increment
-def _bcs(processor, branch_increment):
+        processor.PC.value += memory_position
+
+def _bcs(processor, memory_position):
+    if memory_position > 127:
+        memory_position -= 256
+
+
     if(processor.FLAGS.is_C()):
-        processor.PC += branch_increment
-def _beq(processor, branch_increment):
+        processor.PC.value += memory_position
+
+def _beq(processor, memory_position):
+    if memory_position > 127:
+        memory_position -= 256
+
+
     if(processor.FLAGS.is_Z()):
-        processor.PC += branch_increment
-def _bmi(processor, branch_increment):
+        processor.PC.value += memory_position
+
+def _bmi(processor, memory_position):
+    if memory_position > 127:
+        memory_position -= 256
+
     if(processor.FLAGS.is_N()):
-        processor.PC += branch_increment
-def _bne(processor, branch_increment):
+        processor.PC.value += memory_position
+
+def _bne(processor, memory_position):
+    if memory_position > 127:
+        memory_position -= 256
+
     if(processor.FLAGS.is_Z() == 0):
-        processor.PC += branch_increment
-def _bpl(processor, branch_increment):
+        processor.PC.value += memory_position
+
+def _bpl(processor, memory_position):
+    if memory_position > 127:
+        memory_position -= 256
+
+
     if(processor.FLAGS.is_N() == 0):
-        processor.PC += branch_increment
-def _bvc(processor, branch_increment):
+        processor.PC.value += memory_position
+
+def _bvc(processor, memory_position):
+    if memory_position > 127:
+        memory_position -= 256
+
+
     if(processor.FLAGS.is_V() == 0):
-        processor.PC += branch_increment
-def _bvs(processor, branch_increment):
-    if(processor.FLAGS.is_V()):
-        processor.PC += branch_increment
+        processor.PC.value += memory_position
+
+def _bvs(processor, memory_position):
+    if memory_position > 127:
+        memory_position -= 256
+
+
+    if(processor.FLAGS.is_V() != 0):
+        processor.PC.value += memory_position
 
 def _lda(processor, value, immediate=False):
     if not immediate:
@@ -172,10 +209,16 @@ def _cmp(processor, instruction_param, is_immediate=False):
     # Set comparissons flag
     if processor.A.value >= value:
         processor.FLAGS.set_C()
+    else:
+        processor.FLAGS.clear_C()
     if processor.A.value == value:
         processor.FLAGS.set_Z()
+    else:
+        processor.FLAGS.clear_Z()
     if result >= int('80', 16):
         processor.FLAGS.set_N()
+    else:
+        processor.FLAGS.clear_N()
 
 def _cpx(processor, instruction_param, is_immediate=False):
     # Load value to be compared from memory if not using an immediate
@@ -188,10 +231,18 @@ def _cpx(processor, instruction_param, is_immediate=False):
     # Set comparissons flag
     if processor.X.value >= value:
         processor.FLAGS.set_C()
+    else:
+        processor.FLAGS.clear_C()
+    
     if processor.X.value == value:
         processor.FLAGS.set_Z()
+    else:
+        processor.FLAGS.clear_Z()
+
     if result >= int('80', 16):
         processor.FLAGS.set_N()
+    else:
+        processor.FLAGS.clear_N()
 
 def _cpy(processor, instruction_param, is_immediate=False):
     # Load value to be compared from memory if not using an immediate
@@ -204,10 +255,16 @@ def _cpy(processor, instruction_param, is_immediate=False):
     # Set comparissons flag
     if processor.Y.value >= value:
         processor.FLAGS.set_C()
+    else:
+        processor.FLAGS.clear_C()
     if processor.Y.value == value:
         processor.FLAGS.set_Z()
+    else:
+        processor.FLAGS.clear_Z()
     if result >= int('80', 16):
         processor.FLAGS.set_N()
+    else:
+        processor.FLAGS.clear_N()
 
 def _dec(processor, instruction_param):
     value = processor.memory.read_memo(instruction_param)
@@ -411,12 +468,24 @@ def _sei(processor):
 
 def _sta(processor, memory_position):
     processor.memory.write_memo(memory_position, processor.A.value)
+    if memory_position == int('2006', 16):
+        processor.ppu.set_PPUADDR(processor.A.value)
+    elif memory_position == int('2007', 16):
+        processor.ppu.PPUDATA_signal(processor.A.value)
 
 def _stx(processor, memory_position):
     processor.memory.write_memo(memory_position, processor.X.value)
+    if memory_position == int('2006', 16):
+        processor.ppu.set_PPUADDR(processor.X.value)
+    elif memory_position == int('2007', 16):
+        processor.ppu.PPUDATA_signal(processor.X.value)
 
 def _sty(processor, memory_position):
     processor.memory.write_memo(memory_position, processor.Y.value)
+    if memory_position == int('2006', 16):
+        processor.ppu.set_PPUADDR(processor.Y.value)
+    elif memory_position == int('2007', 16):
+        processor.ppu.PPUDATA_signal(processor.Y.value)
 
 def _tax(processor):
     processor.X.value = processor.A.value
