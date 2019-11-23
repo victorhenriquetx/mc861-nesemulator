@@ -2,6 +2,8 @@ import os
 import sys
 from src.Register import Register8bit, Register16bit, RegisterFlag
 from src.Memory import Memory
+from src.PPU import PPU
+from src.Controller import Controller
 import src.Methods as methods
 from src.PPU import PPU
 import pygame
@@ -37,7 +39,8 @@ class Processor():
 
         self.power_up_ppu_regs()
 
-        self.ppu = PPU(self.memory, filename)
+        self.controller = Controller()
+        self.ppu = PPU(self.memory, filename, self.controller)
         self.ppu.start()
 
     def emula(self, init_pos):
@@ -46,10 +49,11 @@ class Processor():
         while True:
             self.fake_PC.value = self.PC.value
             self.instruction = self.read_memo()
-            decode = self.decode_instruction(self.instruction)
+            self.decode_instruction(self.instruction)
             self.print_log()
             alt += 1
-            if not alt % 32:
+            if not alt % 1:
+                self.ppu.handle_input()
                 self.ppu.refresh_sprites()
                 self.ppu.render()
                 for event in pygame.event.get():
@@ -345,6 +349,16 @@ class Processor():
             memory_position = self.read_memo()
             methods._sta(self, memory_position)
             self.mem_print(memory_position, self.A.value)
+
+            # Quando um jogo faz um STA $4016 (com valor 1), ele quer começar a ler os controles,
+            # assim precisamos resetar o index do nosso Controller para o primeiro botão a
+            # ser lido (botão A). Para fazer isso precisamos setar o strobe do Controller para 1.
+            # Note que enquanto o strobe for 1, ele sempre irá ler o primeiro botão (A).
+            # Assim, quando o valor setado com o STA $4016 for 0, precisamos resetar o strobe do
+            # nosso controller para 0, e assim ele continuará lendo os botões em sequência (primeiro
+            # 'A', depois 'B', 'Select' e assim por diante).
+            if memory_position == 4016:
+                self.controller.write(self.A.value)
             
         elif bin_instruction == int('18', 16): # CLC
             methods._clc(self, None)
@@ -698,8 +712,19 @@ class Processor():
 
         elif bin_instruction == int('A5', 16): # LDA zero page
             absolute_position_lo = self.read_memo()
-            methods._lda(self, absolute_position_lo)
-            self.mem_print(absolute_position_lo, self.A.value)
+            # Quando o jogo faz um LDA $4016, ele quer ler o valor do botão (0 ou 1),
+            # portanto ao invés de pegarmos da memória, vamos ler o valor do Controller
+            # ... Lembrando que:
+            # O jogo lê os botões sequencialmente dentro da NMI. Ou seja, o primeiro
+            # self.controller.read() irá retornar o valor de 'A', depois de 'B', 'Select'
+            # e assim por diante. 
+            if absolute_position_lo == 4016:
+                button = self.controller.read()
+                self.memory.write_memo(absolute_position_lo, button)
+                self.mem_print(absolute_position_lo, button)
+            else:
+                methods._lda(self, absolute_position_lo)
+                self.mem_print(absolute_position_lo, self.A.value)
 
         elif bin_instruction == int('B5', 16): # LDA zero page, X
             absolute_position_lo = self.read_memo()

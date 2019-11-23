@@ -5,7 +5,10 @@ import numpy as np
 from src.Register import Register8bit, Register16bit
 
 class PPU():
-    def __init__(self, cpu_memory, chr_filename):
+    def __init__(self, cpu_memory, chr_filename, controller):
+        self.controller = controller
+        self.input_handler_timeout = 0
+
         self.memory = Memory(0, 16* 1024)
         self.rom_memory = Memory(16 + cpu_memory.prg_size, 8 * 1024)
         
@@ -282,6 +285,41 @@ class PPU():
                 attr = (attr_byte & (3 << attr_mask)) / (1 << attr_mask)
 
                 self.screen_data[i*8:i*8 + 8, j*8:j*8 + 8] = vec_map_palette(value=(pattern_table + attr), palette=backgroud_palette)
+
+    def handle_input(self):
+        # verifica se deve ler o input
+        # sugestão do professor foi ler 1 vez em cada 20 renderizações da tela
+        self.input_handler_timeout += 1
+        if self.input_handler_timeout < 20:
+            return
+
+        buttons = pygame.key.get_pressed()
+        self.handle_player_input(buttons)
+        self.input_handler_timeout = 0
+
+    def handle_player_input(self, buttons):
+        nes_buttons = [False for _ in range(8)]
+
+        # atualizar estado de cada botão no Controller
+        if (buttons[pygame.K_z]): # A - tecla z
+            nes_buttons[0] = True
+        if (buttons[pygame.K_x]): # B - tecla x
+            nes_buttons[1] = True
+        if (buttons[pygame.K_LEFTBRACKET]): # SELECT - tecla [
+            nes_buttons[2] = True
+        if (buttons[pygame.K_RIGHTBRACKET]): # START - tecla ]
+            nes_buttons[3] = True
+        if (buttons[pygame.K_UP]): # UP - tecla arrow up
+            nes_buttons[4] = True
+        if (buttons[pygame.K_DOWN]): # DOWN - tecla arrow down
+            nes_buttons[5] = True
+        if (buttons[pygame.K_LEFT]): # LEFT - tecla arrow left
+            nes_buttons[6] = True
+        if (buttons[pygame.K_RIGHT]): # RIGHT - tecla arrow right
+            nes_buttons[7] = True
+
+        self.controller.set_buttons(nes_buttons) # seta o novo estado dos botões no Controller
+
     
 def map_palette(value, palette):
     return palette[int(value)]
