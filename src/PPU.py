@@ -7,7 +7,7 @@ from src.Register import Register8bit, Register16bit
 class PPU():
     def __init__(self, cpu_memory, chr_filename):
         self.memory = Memory(0, 16* 1024)
-        self.rom_memory = Memory(-8 * 1024, 8 * 1024)
+        self.rom_memory = Memory(16 + cpu_memory.prg_size, 8 * 1024)
         
 
         # chr_filename = '/home/previato/Dropbox/Unicamp/MC861/mc861-nesemulator/img/smb.nes'
@@ -31,6 +31,7 @@ class PPU():
         self._bit_pointer = 0
         self.PPU_pointer = Register16bit()
     
+        self._offset = 2
         self.screen_width = 256
         self.screen_height = 256
 
@@ -45,12 +46,12 @@ class PPU():
     
     def init_rom_memo(self, chr_filename):
         self.rom_memory.read_file(chr_filename)
-    
 
     def set_PPUADDR(self, value):
         self.PPUADDR = value
         if self._bit_pointer % 2:
             self.PPU_pointer.set_value(self.PPU_pointer.value + value)
+            self._bit_pointer = 0
         else:
             self.PPU_pointer.set_value(value * 256)
         self._bit_pointer += 1
@@ -92,12 +93,13 @@ class PPU():
         return self.CPU_memory.read_memo(self.OAMDMA)
 
     def PPUDATA_signal(self, value):
+        print('\tPPUDATA_signal, value:', value, ', ppu_mem:', hex(self.PPU_pointer.value))
         self.memory.write_memo(self.PPU_pointer.value, value)
         self.increment_PPUADDR()
     
     def increment_PPUADDR(self):
-        if self.PPU_pointer.value & (1 << 2):
-            self.PPU_pointer.value -= 32
+        if self.get_PPUCTRL() & (1 << 2):
+            self.PPU_pointer.value += 32
         else:
             self.PPU_pointer.value += 1
 
@@ -184,33 +186,35 @@ class PPU():
         sprites_figs = np.array(sprites_figs, dtype=np.uint8).reshape(256 * 16)
 
         sprites_palette = self.memory.read_range_memo(int('3F10', 16), 16)
+        # print(sprites_palette)
         
         m = self.CPU_memory.mem[int('0200',16):int('02ff',16)+1]
         sprites = np.array(m, dtype=np.uint8)
+        print(sprites[:20])
 
-        for i in range(64):
-            attr = sprites[i*4 + 2]
-            # Priority (0: in front of background; 1: behind background)
-            if attr & (1 << 5) == 1:
-                y = sprites[i*4]
-                tile_number = sprites[i*4 + 1]
-                x = sprites[i*4 + 3]
+        # for i in range(64):
+        #     attr = sprites[i*4 + 2]
+        #     # Priority (0: in front of background; 1: behind background)
+        #     if attr & (1 << 5) == 1:
+        #         y = sprites[i*4]
+        #         tile_number = sprites[i*4 + 1]
+        #         x = sprites[i*4 + 3]
 
-                sprite_tile = sprites_figs[tile_number*16:tile_number*16 + 16]
-                pattern_table = np.zeros(64)
+        #         sprite_tile = sprites_figs[tile_number*16:tile_number*16 + 16]
+        #         pattern_table = np.zeros(64)
                 
-                for k in range(64):
-                    pattern_table[k] = (sprite_tile[k // 4] & (3 << (k % 4) * 2)) / (1 << (k % 4) * 2)
+        #         for k in range(64):
+        #             pattern_table[k] = (sprite_tile[k // 4] & (3 << (k % 4) * 2)) / (1 << (k % 4) * 2)
                 
-                pattern_table = pattern_table.reshape(8, 8)
+        #         pattern_table = pattern_table.reshape(8, 8)
 
-                # Color Palette of sprite.  Choose which set of 4 from the 16 colors to use
-                color_palette = attr & 3
-                self.screen_data[y:y + 8, x:x + 8] = vec_map_palette(value=(pattern_table), palette=sprites_palette[color_palette*4:color_palette*4 + 4])
-            else:
-                continue
+        #         # Color Palette of sprite.  Choose which set of 4 from the 16 colors to use
+        #         color_palette = attr & 3
+        #         self.screen_data[y:y + 8, x:x + 8] = vec_map_palette(value=(pattern_table), palette=sprites_palette[color_palette*4:color_palette*4 + 4])
+        #     else:
+        #         continue
 
-        self.refresh_background()
+        # self.refresh_background()
             
         for i in range(64):
             attr = sprites[i*4 + 2]
@@ -248,6 +252,7 @@ class PPU():
         backgroud_attr_pos = backgroud_list_pos + int('3C0', 16)
 
         backgroud_palette = self.memory.read_range_memo(int('3F00', 16), 16)
+        # print('back:', backgroud_palette)
 
         backgroud_list = []
         for i in range(32):

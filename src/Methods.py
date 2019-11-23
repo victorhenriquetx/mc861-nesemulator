@@ -81,28 +81,65 @@ def _bit(processor, value):
         processor.FLAGS.set_Z()
 
 def _bcc(processor, memory_position):
+    if memory_position > 127:
+        memory_position -= 256
+
+
     if(processor.FLAGS.is_C() == 0):
         processor.PC.value += memory_position
+
 def _bcs(processor, memory_position):
+    if memory_position > 127:
+        memory_position -= 256
+
+
     if(processor.FLAGS.is_C()):
         processor.PC.value += memory_position
+
 def _beq(processor, memory_position):
+    if memory_position > 127:
+        memory_position -= 256
+
+
     if(processor.FLAGS.is_Z()):
         processor.PC.value += memory_position
+
 def _bmi(processor, memory_position):
+    if memory_position > 127:
+        memory_position -= 256
+
     if(processor.FLAGS.is_N()):
         processor.PC.value += memory_position
+
 def _bne(processor, memory_position):
+    if memory_position > 127:
+        memory_position -= 256
+
     if(processor.FLAGS.is_Z() == 0):
         processor.PC.value += memory_position
+
 def _bpl(processor, memory_position):
+    if memory_position > 127:
+        memory_position -= 256
+
+
     if(processor.FLAGS.is_N() == 0):
         processor.PC.value += memory_position
+
 def _bvc(processor, memory_position):
+    if memory_position > 127:
+        memory_position -= 256
+
+
     if(processor.FLAGS.is_V() == 0):
         processor.PC.value += memory_position
+
 def _bvs(processor, memory_position):
-    if(processor.FLAGS.is_V()):
+    if memory_position > 127:
+        memory_position -= 256
+
+
+    if(processor.FLAGS.is_V() != 0):
         processor.PC.value += memory_position
 
 def _lda(processor, value, immediate=False):
@@ -172,10 +209,16 @@ def _cmp(processor, instruction_param, is_immediate=False):
     # Set comparissons flag
     if processor.A.value >= value:
         processor.FLAGS.set_C()
+    else:
+        processor.FLAGS.clear_C()
     if processor.A.value == value:
         processor.FLAGS.set_Z()
+    else:
+        processor.FLAGS.clear_Z()
     if result >= int('80', 16):
         processor.FLAGS.set_N()
+    else:
+        processor.FLAGS.clear_N()
 
 def _cpx(processor, instruction_param, is_immediate=False):
     # Load value to be compared from memory if not using an immediate
@@ -188,10 +231,18 @@ def _cpx(processor, instruction_param, is_immediate=False):
     # Set comparissons flag
     if processor.X.value >= value:
         processor.FLAGS.set_C()
+    else:
+        processor.FLAGS.clear_C()
+    
     if processor.X.value == value:
         processor.FLAGS.set_Z()
+    else:
+        processor.FLAGS.clear_Z()
+
     if result >= int('80', 16):
         processor.FLAGS.set_N()
+    else:
+        processor.FLAGS.clear_N()
 
 def _cpy(processor, instruction_param, is_immediate=False):
     # Load value to be compared from memory if not using an immediate
@@ -204,10 +255,16 @@ def _cpy(processor, instruction_param, is_immediate=False):
     # Set comparissons flag
     if processor.Y.value >= value:
         processor.FLAGS.set_C()
+    else:
+        processor.FLAGS.clear_C()
     if processor.Y.value == value:
         processor.FLAGS.set_Z()
+    else:
+        processor.FLAGS.clear_Z()
     if result >= int('80', 16):
         processor.FLAGS.set_N()
+    else:
+        processor.FLAGS.clear_N()
 
 def _dec(processor, instruction_param):
     value = processor.memory.read_memo(instruction_param)

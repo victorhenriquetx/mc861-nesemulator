@@ -19,8 +19,13 @@ class Processor():
         self.FLAGS = RegisterFlag()
         
         self.header = Memory(0,16)
-        self.memory = Memory(16,-1)
         self.header.read_file(self.filename)
+
+        prg_rom_size = self.header.read_memo(4)
+    
+        self.memory = Memory(16, -1)
+        self.memory.set_prg_size(16 * 1024 * prg_rom_size)
+      
         self.memory.read_file(self.filename)
 
         start_pc_addr_lo = self.memory.read_memo(int('fffc', 16))
@@ -44,7 +49,7 @@ class Processor():
             decode = self.decode_instruction(self.instruction)
             self.print_log()
             alt += 1
-            if not alt % 1:
+            if not alt % 32:
                 self.ppu.refresh_sprites()
                 self.ppu.render()
                 for event in pygame.event.get():
